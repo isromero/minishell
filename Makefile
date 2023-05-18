@@ -12,7 +12,7 @@
 
 NAME		=	minishell
 CC			=	gcc
-SRCS		=	pruebas.c
+SRCS		=	minishell.c
 
 LIBFT		=	libft/libft.a
 

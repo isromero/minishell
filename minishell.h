@@ -54,4 +54,21 @@ typedef struct cmd
 	char *prompt;
 } t_cmd;
 
+typedef enum {
+	INPUT_REDIRECT = '<',
+	HEREDOC_REDIRECT = '<' << 8,
+	HEREDOC_QUOTE = ('<' << 8) + 'Q',
+	PIPE = '|',
+	OUTPUT_REDIRECT = '>',
+	APPEND_REDIRECT = ('>' << 8) + '>',
+	COMMAND = 'C',
+	ARGUMENT = '-',
+	DOUBLE_QUOTE = '"',
+	SINGLE_QUOTE = '\'',
+	BUILTIN = ('b' << 16) + ('u' << 8) + 'i',
+	VARIABLE = '$'
+} token_type;
+
+
+
 #endif

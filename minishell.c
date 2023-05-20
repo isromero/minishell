@@ -12,16 +12,154 @@
 
 #include "minishell.h"
 
-void	parse_args(t_cmd *cmd)
+int	is_special(char c)
+{
+	return(c == INPUT_REDIRECT || c == PIPE || c == OUTPUT_REDIRECT \
+	|| c == VARIABLE);
+}
+
+int	is_special2(char c)
+{
+	return(c == INPUT_REDIRECT || c == PIPE || c == OUTPUT_REDIRECT);
+}
+
+int	is_variable(t_cmd *cmd)
 {
 	int	i;
 
 	i = 0;
-	//Se necesitan más funcionalidades, a parte de dividir en tokens
-	cmd->token = ft_split(cmd->line, ' ');
-	while(cmd->token[i])
+	while(cmd->line[i] != ft_isspace(cmd->line[i]) && cmd->line[i] != is_special(cmd->line[i]))
 		i++;
-	cmd->n_tokens = i;
+	return (i);
+}
+
+int is_double_quote(t_cmd *cmd)
+{
+	int i;
+
+	i = 0;
+	if(!ft_strchr(cmd->line, DOUBLE_QUOTE))
+		return (-1);
+	while(cmd->line[i] != '\0' && cmd->line[i] != DOUBLE_QUOTE)
+		i++;
+	i++;
+	return (i);
+}
+
+int is_single_quote(t_cmd *cmd)
+{
+	int	i;
+
+	i = 0;
+	if(!ft_strchr(cmd->line, SINGLE_QUOTE))
+		return (-1);
+	while(cmd->line[i] != '\0' && cmd->line[i] != SINGLE_QUOTE)
+		i++;
+	i++;
+	return (i);
+}
+
+void error_special()
+{
+	printf("syntax error near unexpected token\n");
+}
+
+int check_len_special(t_cmd *cmd)
+{
+	int i;
+
+	i = 0;
+	while(!ft_isspace(cmd->line[i]) && is_special(cmd->line[i]))
+		i++;
+	// Gestión de errores
+	if(i > 2)
+		error_special();
+	else if(i == 1)
+		return(1);
+	else if (i == 2)
+		return(2);
+	return (-1);
+}
+
+int token_len(char *cmd, int i)
+{
+	while(!ft_isspace(cmd[i]) && !is_special((cmd[i])))
+		i++;
+	return (i);
+}
+
+int	check_len_token(t_cmd *cmd)
+{
+	int i;
+
+	i = 0;
+	while(cmd->line[i] != '\0')
+	{
+		while(cmd->line[i] != '\0' && !ft_isspace(cmd->line[i]))
+			i++;
+		if(cmd->line[i] == VARIABLE)
+			return(is_variable(cmd));
+		else if(cmd->line[i] == SINGLE_QUOTE)
+			return(is_single_quote(cmd));
+		else if(cmd->line[i] == DOUBLE_QUOTE)
+			return(is_double_quote(cmd));
+		else if(is_special2(cmd->line[i])) // < > | 
+			return(check_len_special(cmd)); // << < > >> |
+		else if(cmd->line[i] != '\0')
+			return(token_len(cmd->line, i));
+	}
+	return (i);
+}
+
+void **save_token(t_cmd *cmd, int len)
+{
+	int	i;
+	int j;
+
+	i = 0;
+	j = 0;
+	size_t total_size = (cmd->n_tokens + 1) * sizeof(char *) + len * sizeof(char);
+	cmd->token = (char **)malloc(total_size);
+	cmd->token[cmd->n_tokens] = (char *)(cmd->token + cmd->n_tokens + 1);
+	if (cmd->token == NULL) 
+	{
+		// Manejo del error, por ejemplo, imprimir un mensaje de error y salir de la función
+		printf("Error: No se pudo asignar memoria para cmd->token\n");
+		return (0);
+	}
+	while(i < len)
+	{
+		cmd->token[cmd->n_tokens][i] = cmd->line[i];
+		i++;
+	}
+	cmd->n_tokens++;
+	return(0);
+}
+
+void	parse_args(t_cmd *cmd)
+{
+	int len;
+	int	i;
+
+	i = 0;
+	cmd->n_tokens = 0;
+	cmd->token = NULL;
+	
+	//existe token?
+	//si? SI! me lo jalas al string
+	while(cmd->line)
+	{
+		len = check_len_token(cmd);
+		if(len)
+		{
+			save_token(cmd, len);
+			printf("%s\n", cmd->token[0]);
+		}
+		else
+			printf("introducir error\n");
+
+	}
+	//no? NO! Gestión de errores y free pa casa
 }
 
 char *get_prompt(t_cmd *custom_prompt)
@@ -66,21 +204,20 @@ void	print_minishell()
 	printf("\n");
 }
 
-int	main()
+int	main(int argc, char **argv, char **env)
 {
 	t_cmd	cmd;
+	int		i;
+	
+	i = 0;
 	//print_minishell();
 	while(1)
 	{
-		
 		cmd.prompt = get_prompt(&cmd);
 		cmd.line = readline(cmd.prompt);
 		if(ft_strncmp(cmd.line, "", 1) > 0) 
 			add_history(cmd.line);
-		//parse_args(&cmd);
-		rl_on_new_line();
-
-		// parse_args(&cmd);
+		parse_args(&cmd);
 		free(cmd.line);
 		free(cmd.prompt);
 	}

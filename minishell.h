@@ -21,7 +21,6 @@
 #include <readline/history.h>
 #include "libft/libft.h"
 
-
 #define STYLE_BOLD "\033[1m"
 #define STYLE_UNDERLINE "\033[4m"
 #define STYLE_BLINK "\033[5m"
@@ -48,10 +47,10 @@
 
 typedef struct cmd
 {
-	char *line;
-	char **token;
-	int n_tokens;
-	char *prompt;
+	char	*line;
+	char	**token;
+	int		n_tokens;
+	char 	*prompt;
 } t_cmd;
 
 typedef enum {
@@ -68,7 +67,5 @@ typedef enum {
 	BUILTIN = ('b' << 16) + ('u' << 8) + 'i',
 	VARIABLE = '$'
 } token_type;
-
-
 
 #endif

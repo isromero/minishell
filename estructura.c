@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minishell.c                                        :+:      :+:    :+:   */
+/*   estructura.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/18 17:20:04 by isromero          #+#    #+#             */
-/*   Updated: 2023/05/18 17:20:04 by isromero         ###   ########.fr       */
+/*   Created: 2023/05/21 17:23:46 by isromero          #+#    #+#             */
+/*   Updated: 2023/05/21 17:23:46 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,40 +23,31 @@ int	is_special2(char c)
 	return(c == INPUT_REDIRECT || c == PIPE || c == OUTPUT_REDIRECT);
 }
 
-int	is_variable(t_cmd *cmd, int len)
+int	is_variable(t_cmd *cmd)
 {
-	int	i;
-
-	i = 0;
-	while(cmd->line[i + len] != ' ' && cmd->line[i + len] != '\0' && !is_special2(cmd->line[i + len]))
-		i++;
-	return (i);
+	while(cmd->line[cmd->n_line] != ft_isspace(cmd->line[cmd->n_line]) && cmd->line[cmd->n_line] != is_special(cmd->line[cmd->n_line]))
+		cmd->n_line++;
+	return (cmd->n_line);
 }
 
-int is_double_quote(t_cmd *cmd, int len)
+int is_double_quote(t_cmd *cmd)
 {
-	int i;
-
-	i = 1;
-	if(!ft_strchr(&cmd->line[1], DOUBLE_QUOTE))
-			return (-1);
-	while(cmd->line[i + len] != '\0' && cmd->line[i + len] != DOUBLE_QUOTE)
-		i++;
-	i++;
-	return (i);
-}
-
-int is_single_quote(t_cmd *cmd, int len)
-{
-	int	i;
-
-	i = 1;
-	if(!ft_strchr(&cmd->line[1], SINGLE_QUOTE))
+	if(!ft_strchr(cmd->line, DOUBLE_QUOTE))
 		return (-1);
-	while(cmd->line[i + len] != '\0' && cmd->line[i + len] != SINGLE_QUOTE)
-		i++;
-	i++;
-	return (i);
+	while(cmd->line[cmd->n_line] != '\0' && cmd->line[cmd->n_line] != DOUBLE_QUOTE)
+		cmd->n_line++;
+	cmd->n_line++;
+	return (cmd->n_line);
+}
+
+int is_single_quote(t_cmd *cmd)
+{
+	if(!ft_strchr(cmd->line, SINGLE_QUOTE))
+		return (-1);
+	while(cmd->line[cmd->n_line] != '\0' && cmd->line[cmd->n_line] != SINGLE_QUOTE)
+		cmd->n_line++;
+	cmd->n_line++;
+	return (cmd->n_line);
 }
 
 void error_special()
@@ -64,126 +55,109 @@ void error_special()
 	printf("syntax error near unexpected token\n");
 }
 
-int check_len_special(t_cmd *cmd, int len)
+int check_len_special(t_cmd *cmd)
 {
-	int i;
-
-	i = 0;
-	while(cmd->line[i + len] != ' ' && is_special(cmd->line[i + len]))
-		i++;
-	// Gestión de errores
-	printf("len especial:%d\n", i);
-	if(i > 2)
-		error_special();
-	else if(i == 1)
-		return(1);
-	else if (i == 2)
-		return(2);
+	while(!ft_isspace(cmd->line[cmd->n_line]) && is_special(cmd->line[cmd->n_line]))
+		cmd->n_line++;
+	//Gestión de errores
+	// if(cmd->n_line > 2)
+	// 	error_special();
+	// else if(cmd->n_line == 1)
+	// 	return(1);
+	// else if (cmd->n_line == 2)
+	// 	return(2); 
+	// Arreglar esto, hay que guardar la len antigua, no el total
 	return (-1);
 }
 
-int is_token(t_cmd *cmd, int len)
+int token_len(t_cmd *cmd)
 {
-    int i = 0;
-    while (cmd->line[i + len] != '\0' && cmd->line[i + len] != ' ' && !is_special2(cmd->line[i + len]))
-        i++;
-    return i;
+	while(!ft_isspace(cmd->line[cmd->n_line]) && !is_special((cmd->line[cmd->n_line])))
+		cmd->n_line++;
+	return (cmd->n_line);
 }
 
-
-int	check_len_token(t_cmd *cmd, int len)
+int	check_len_token(t_cmd *cmd)
 {
-	int i = 0;
-	while(cmd->line[len] != '\0')
+	while(cmd->line[cmd->n_line] != '\0')
 	{
-		while(cmd->line[i + len] != '\0' && cmd->line[i + len] != ' ')
-			i++;
-		if(cmd->line[len] == VARIABLE)
-			return(is_variable(cmd, len));
-		else if(cmd->line[len] == SINGLE_QUOTE)
-			return(is_single_quote(cmd, len));
-		else if(cmd->line[len] == DOUBLE_QUOTE)
-		{
-			return(is_double_quote(cmd, len));
-		}
-		else if(is_special2(cmd->line[len] )) // < > | 
-			return(check_len_special(cmd, len)); // << < > >> |
-		else if(cmd->line[len] != '\0')
-			return(is_token(cmd, len));
+		while(cmd->line[cmd->n_line] != '\0' && !ft_isspace(cmd->line[cmd->n_line]))
+			cmd->n_line++;
+		if(cmd->line[cmd->n_line] == VARIABLE)
+			return(is_variable(cmd));
+		else if(cmd->line[cmd->n_line] == SINGLE_QUOTE)
+			return(is_single_quote(cmd));
+		else if(cmd->line[cmd->n_line] == DOUBLE_QUOTE)
+			return(is_double_quote(cmd));
+		else if(is_special2(cmd->line[cmd->n_line])) // < > | 
+			return(check_len_special(cmd)); // << < > >> |
+		else if(cmd->line[cmd->n_line] != '\0')
+			return(token_len(cmd));
 	}
-	return i;
+	return (cmd->n_line);
 }
 
-void save_token(t_cmd *cmd, char *token)
+void **save_token(t_cmd *cmd, int len)
 {
-    size_t total_size = (cmd->n_tokens + 1) * sizeof(char *);
-    cmd->token = (char **)realloc(cmd->token, total_size);
-    if (cmd->token == NULL)
-    {
-        printf("Error: No se pudo asignar memoria para cmd->token\n");
-        return;
-    }
-    cmd->token[cmd->n_tokens] = token;
-    cmd->n_tokens++;
-}
+	int	i;
+	int j;
 
-void clean_tokens(t_cmd *cmd)
-{
-    for (int i = 0; i < cmd->n_tokens; i++)
-    {
-        free(cmd->token[i]);
-    }
-    free(cmd->token);
-    cmd->token = NULL;
-    cmd->n_tokens = 0;
+	i = 0;
+	j = 0;
+	size_t total_size = (cmd->n_tokens + 1) * sizeof(char *) + len * sizeof(char);
+	cmd->token = (char **)malloc(total_size);
+	cmd->token[cmd->n_tokens] = (char *)(cmd->token + cmd->n_tokens + 1);
+	if (cmd->token == NULL) 
+	{
+		// Manejo del error, por ejemplo, imprimir un mensaje de error y salir de la función
+		printf("Error: No se pudo asignar memoria para cmd->token\n");
+		return (0);
+	}
+	while(i < len)
+	{
+		cmd->token[cmd->n_tokens][i] = cmd->line[i];
+		i++;
+	}
+	cmd->n_tokens++;
+	return(0);
 }
 
 void print_tokens(t_cmd *cmd)
 {
     int i;
     
-    for (i = 0; i < cmd->n_tokens; i++)
-    {
+    for (i = 0; i < cmd->n_tokens; i++) {
         printf("Token %d: %s\n", i, cmd->token[i]);
     }
 }
 
-void parse_args(t_cmd *cmd)
+void	parse_args(t_cmd *cmd)
 {
-    int len;
-    int i = 0;
-    cmd->n_tokens = 0;
-    cmd->token = NULL;
+	int len;
+	int	i;
 
-    while (cmd->line[i] != '\0')
-    {
-        while (cmd->line[i] == ' ')
-            i++;
-        len = check_len_token(cmd, i);
-        if (len > 0)
-        {
-            char *token = (char *)malloc((len + 1) * sizeof(char));
-            if (token == NULL)
-            {
-                printf("Error: No se pudo asignar memoria para el token\n");
-                clean_tokens(cmd);
-                return;
-            }
-            strncpy(token, cmd->line + i, len);
-            token[len] = '\0';
-            save_token(cmd, token);
-            i += len;
-        }
-        else
-        {
-            printf("Error: introducir token válido\n");
-            break;
-        }
-    }
-    print_tokens(cmd);
-    clean_tokens(cmd);
+	i = 0;
+	cmd->n_tokens = 0;
+	cmd->token = NULL;
+	cmd->n_line = 0;
+	
+	//existe token?
+	//si? SI! me lo jalas al string
+	while(cmd->line)
+	{
+		len = check_len_token(cmd);
+		if(len)
+		{
+			save_token(cmd, len);
+			print_tokens(cmd);
+			// printf("%s\n", cmd->token[0]);
+		}
+		else
+			printf("introducir error\n");
+
+	}
+	//no? NO! Gestión de errores y free pa casa
 }
-
 
 char *get_prompt(t_cmd *custom_prompt)
 {

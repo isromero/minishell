@@ -11,6 +11,23 @@
 /* ************************************************************************** */
 
 #include "minishell.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void parse_path(t_cmd *cmd, char **env)
+{
+	char path[] = getenv("PATH");
+
+    // Buscar la última aparición del carácter de barra diagonal
+    char *filename = strrchr(path, '/');
+    if (filename != NULL) {
+        // Avanzar un carácter para obtener el nombre del archivo
+        filename++; 
+        printf("Nombre del archivo: %s\n", filename);
+    }
+
+}
 
 int	is_special(char c)
 {
@@ -33,6 +50,8 @@ int	is_variable(t_cmd *cmd, int len)
 	return (i);
 }
 
+
+// ARREGLAR COMILLAS AL FINAL SOLO, NO DETECTA
 int is_double_quote(t_cmd *cmd, int len)
 {
 	int i;
@@ -89,7 +108,6 @@ int is_token(t_cmd *cmd, int len)
         i++;
     return i;
 }
-
 
 int	check_len_token(t_cmd *cmd, int len)
 {
@@ -181,7 +199,6 @@ void parse_args(t_cmd *cmd)
         }
     }
     print_tokens(cmd);
-    clean_tokens(cmd);
 }
 
 
@@ -230,9 +247,8 @@ void	print_minishell()
 int	main(int argc, char **argv, char **env)
 {
 	t_cmd	cmd;
-	int		i;
-	
-	i = 0;
+	(void)argc;
+	(void)argv;
 	//print_minishell();
 	while(1)
 	{
@@ -241,6 +257,7 @@ int	main(int argc, char **argv, char **env)
 		if(ft_strncmp(cmd.line, "", 1) > 0) 
 			add_history(cmd.line);
 		parse_args(&cmd);
+        // execve("/bin/ls", cmd.token, NULL);
 		free(cmd.line);
 		free(cmd.prompt);
 	}

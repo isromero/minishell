@@ -408,7 +408,6 @@ void execute(t_cmd *cmd) {
     }
 }
 
-
 int	main(int argc, char **argv, char **env)
 {
 	t_cmd	cmd;

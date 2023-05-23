@@ -15,6 +15,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/wait.h>
 #include <stdio.h>
 #include <readline/readline.h>
@@ -51,6 +52,7 @@ typedef struct cmd
 	char	**token;
 	int		n_tokens;
 	char 	*prompt;
+	char	**env;
 } t_cmd;
 
 typedef enum {

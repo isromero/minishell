@@ -205,8 +205,8 @@ char *get_prompt(t_cmd *custom_prompt)
     char cwd[1024]; 
     getcwd(cwd, sizeof(cwd)); // Obtener la ubicación actual de la terminal
     
-    size_t prompt_length = ft_strlen(username) + ft_strlen(cwd) + 13 + ft_strlen(COLOR_GREEN) \
-	+ ft_strlen(COLOR_MAGENTA) + ft_strlen(COLOR_YELLOW) + ft_strlen(COLOR_CYAN) + ft_strlen(COLOR_WHITE); // Longitud total del prompt personalizado
+    size_t prompt_length = ft_strlen(username) + ft_strlen(cwd) + ft_strlen(COLOR_GREEN) \
+	+ ft_strlen(COLOR_MAGENTA) + ft_strlen(COLOR_YELLOW) + ft_strlen(COLOR_CYAN) + ft_strlen(COLOR_WHITE) + 16; // Longitud total del prompt personalizado
     custom_prompt->prompt = (char *)malloc(prompt_length * sizeof(char));
 
 	strcpy(custom_prompt->prompt, COLOR_GREEN);
@@ -219,7 +219,7 @@ char *get_prompt(t_cmd *custom_prompt)
     strcat(custom_prompt->prompt, cwd);
     strcat(custom_prompt->prompt, COLOR_WHITE);
     strcat(custom_prompt->prompt, "$ ");
-    
+
     return (custom_prompt->prompt);
 }
 
@@ -243,62 +243,46 @@ void	print_minishell()
 
 char *ft_strtok(char *str, const char *delim)
 {
-    static char *save;
-    char *token;
-    int i;
-    int j;
+    static char *save = NULL;
 
     if (str != NULL)
         save = str;
     if (save == NULL || *save == '\0')
         return NULL;
-    // Salta los delimitadores iniciales
-    i = 0;
-    while (save[i] && strchr(delim, save[i]) != NULL)
-        i++;
     // Encuentra el inicio del token
-    j = i;
-    while (save[j] && strchr(delim, save[j]) == NULL)
-        j++;
-    // Asigna memoria para el token y copia los caracteres
-    token = (char *)malloc(sizeof(char) * (j - i + 1));
-    if (token == NULL)
-        return NULL;
-    memcpy(token, save + i, sizeof(char) * (j - i));
-    token[j - i] = '\0';
-    // Actualiza el puntero save para el siguiente llamado
-    save += j;
-    if (save[j] == '\0')
-        save = NULL;
-    else
+    while (*save && strchr(delim, *save) != NULL)
         save++;
+    if (*save == '\0')
+        return NULL;
+    char *token = save;
+    // Encuentra el final del token
+    while (*save && strchr(delim, *save) == NULL)
+        save++;
+    if (*save != '\0')
+        *save++ = '\0';
     return token;
 }
 
-char  *is_command_exists(t_cmd *cmd, char *command) 
+char  *command_dir(t_cmd *cmd, char *command) 
 {
     char 	*path;
     char 	*dir;
 	size_t	dir_len;
-	size_t	command_len;
-	char	*aux;
 	
 	path = ft_getenv("PATH", cmd->env);
 	dir = ft_strtok(path, ":");
-	aux = NULL;
     while (dir != NULL) 
 	{
         // Construye la ruta completa al archivo ejecutable
         char executable_path[PATH_MAX];
         dir_len = ft_strlen(dir);
-        command_len = ft_strlen(command);
 
 		strcpy(executable_path, dir);
         executable_path[dir_len] = '/';
         strcpy(executable_path + dir_len + 1, command);
 		
         // Verifica si el archivo ejecutable existe y es ejecutable
-        if (access(executable_path, X_OK) == 0) 
+        if (access(executable_path, F_OK) == 0) 
 		{
 			// El archivo ejecutable existe
 			strcat(dir, "/");
@@ -310,6 +294,34 @@ char  *is_command_exists(t_cmd *cmd, char *command)
     // El archivo ejecutable no existe en ningún directorio del PATH
     return (0);
 }
+
+int is_command_exists(t_cmd *cmd, char *command) 
+{
+    char 	*path;
+    char 	*dir;
+	size_t	dir_len;
+	
+	path = ft_getenv("PATH", cmd->env);
+	dir = ft_strtok(path, ":");
+    while (dir != NULL) 
+	{
+        // Construye la ruta completa al archivo ejecutable
+        char executable_path[PATH_MAX];
+        dir_len = ft_strlen(dir);
+
+		strcpy(executable_path, dir);
+        executable_path[dir_len] = '/';
+        strcpy(executable_path + dir_len + 1, command);
+		
+        // Verifica si el archivo ejecutable existe y es ejecutable
+        if (access(executable_path, F_OK) == 0) 
+            return (1);
+        dir = ft_strtok(NULL, ":");
+    }
+    // El archivo ejecutable no existe en ningún directorio del PATH
+    return (0);
+}
+
 
 int	find_variables(char **token)
 {
@@ -366,7 +378,6 @@ char **sustitute_token(t_cmd *cmd, int selected)
 
 void print_vars(t_cmd *cmd)
 {
-
 	int	i;
 	char *path;
 	char *aux;
@@ -391,21 +402,38 @@ void print_vars(t_cmd *cmd)
 	}
 }
 
-void execute(t_cmd *cmd) {
+void execute(t_cmd *cmd)
+{
     pid_t pid;
+	char *com;
+	int i;
 
-    pid = fork();
-    if (pid == -1) {
-        perror("fork");
-        exit(1);
-    } else if (pid == 0) {
-		//printf("%s\n", cmd->token[0]);
-        execve(is_command_exists(cmd, cmd->token[0]), cmd->token, NULL);
-        perror("execve");  // En caso de error en execve
-        exit(1);
-    } else {
-        wait(NULL);
-    }
+	i = 0;
+	
+	while(i < cmd->n_tokens )
+	{
+		pid = fork();
+		
+		if (pid == -1)
+		{
+			perror("fork");
+			return ;
+		} 
+		else if (pid == 0)
+		{
+			com = command_dir(cmd, cmd->token[i]);
+			if(com != NULL)
+			{
+				printf("iscommand:%s\n", com);
+				execve(com, cmd->token, NULL);
+				perror("execve");  // En caso de error en execve
+				exit(1);
+			}
+    	}
+		else 
+       		wait(NULL);
+		i++;
+	}
 }
 
 int	main(int argc, char **argv, char **env)
@@ -422,7 +450,8 @@ int	main(int argc, char **argv, char **env)
 		if(ft_strncmp(cmd.line, "", 1) > 0) 
 			add_history(cmd.line);
 		parse_args(&cmd);
-		execute(&cmd);
+			execute(&cmd);
+		clean_tokens(&cmd);
 		free(cmd.line);
 		free(cmd.prompt);
 	}

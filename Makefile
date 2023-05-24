@@ -16,7 +16,7 @@ SRCS		=	minishell.c
 
 LIBFT		=	libft/libft.a
 
-CFLAGS		=	-Wall  -Wextra -lreadline
+CFLAGS		=	-Wall  -Wextra -lreadline -g -fsanitize=address,undefined
 RM			=	rm -f
 OBJS		=	$(SRCS:%.c=%.o)
 

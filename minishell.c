@@ -202,7 +202,7 @@ void parse_args(t_cmd *cmd)
 char *get_prompt(t_cmd *custom_prompt)
 {
     char *username = getenv("USER"); // Obtener el nombre de usuario desde la variable de entorno USER
-    char cwd[1024]; 
+    char cwd[1024];
     getcwd(cwd, sizeof(cwd)); // Obtener la ubicación actual de la terminal
     
     size_t prompt_length = ft_strlen(username) + ft_strlen(cwd) + ft_strlen(COLOR_GREEN) \
@@ -402,37 +402,167 @@ void print_vars(t_cmd *cmd)
 	}
 }
 
+// int ft_setenv(const char *name, const char *value, int overwrite) 
+// {
+//     size_t name_len = strlen(name);
+//     size_t value_len = strlen(value);
+// 	int	i;
+
+// 	i = 0;
+//     while (cmd->env[i] != NULL) 
+// 	{
+//         if (strncmp(cmd->env[i], name, name_len) == 0 && cmd->env[i][name_len] == '=') 
+// 		{
+//             if (overwrite == 0)
+//                 return 0;
+//             char *new_env = malloc(name_len + value_len + 2);
+//             if (new_env == NULL)
+//                 return -1;
+
+//             strcpy(new_env, name);
+//             strcat(new_env, "=");
+//             strcat(new_env, value);
+
+//             cmd->env[i] = new_env;
+//             return 0;
+//         }
+// 		i++;
+//     }
+//     size_t env_len = 0;
+//     while (cmd->env[env_len] != NULL)
+//         env_len++;
+//     char **new_environ = realloc(environ, (env_len + 2) * sizeof(char *));
+//     if (new_environ == NULL)
+//         return -1;
+//     char *new_env = malloc(name_len + value_len + 2);
+//     if (new_env == NULL)
+//         return -1;
+//     strcpy(new_env, name);
+//     strcat(new_env, "=");
+//     strcat(new_env, value);
+//     new_environ[env_len] = new_env;
+//     new_environ[env_len + 1] = NULL;
+//     environ = new_environ;
+//     return 0;
+// }
+
+int	is_builtin(t_cmd *cmd, int n_token)
+{
+	if (ft_strcmp(cmd->token[n_token], "echo") == 0)
+		return(1);
+	else if (ft_strcmp(cmd->token[n_token], "cd") == 0)
+		return(1);
+	else if (ft_strcmp(cmd->token[n_token], "pwd") == 0)
+		return(1);
+	else if (ft_strcmp(cmd->token[n_token], "export") == 0)
+		return(1);
+	else if (ft_strcmp(cmd->token[n_token], "unset") == 0)
+		return(1);
+	else if (ft_strcmp(cmd->token[n_token], "env") == 0)
+		return(1);
+	else if (ft_strcmp(cmd->token[n_token], "exit") == 0)
+		return(1);
+	return (0);
+}
+
+void	cd_builtin(t_cmd *cmd, int cd_token)
+{
+	char	*path;
+	char	cwd[1024];
+	char	*oldpwd;
+
+	path = cmd->token[cd_token + 1];
+	oldpwd = ft_getenv("PWD", cmd->env);
+
+	//chdir falla al cambiar al directorio especificado, no devuelve 0 
+	if (chdir(path) != 0)
+		perror("");
+	getcwd(cwd, sizeof(cwd));
+	setenv(oldpwd, cwd, 1);
+}
+
+int ft_env(t_cmd *cmd)
+{
+    int status = 0;
+    int i;
+    int size;
+
+    i = 0;
+    status = 0;
+    if (!cmd->env || !cmd->env[0])
+        return -1;
+
+    if (cmd->n_tokens > 1)
+    {
+		printf("%d\n", cmd->n_tokens);
+        printf("minishell: env: Demasiados argumentos\n");
+        return 127;
+    }
+    while (cmd->env[i] != NULL)
+    {
+        size = ft_strlen(cmd->env[i]);
+        if (strcmp(cmd->env[i] + size - 2, "''") != 0)
+        {
+            printf("%s\n", cmd->env[i]);
+        }
+        i++;
+    }
+	//comprobacion de si hay pipes despues
+	
+    return status;
+}
+
 void execute(t_cmd *cmd)
 {
     int i;
 
 	i = 0;
+	if (cmd->n_tokens > 0 && strcmp(cmd->token[i], "env") == 0)
+    {
+        // int status = 
+		ft_env(cmd);
+        // Manejar el status del comando env según sea necesario
+        return;
+    }
+	
    	while (i < cmd->n_tokens)
     {
-        pid_t pid = fork();
-        if (pid == -1)
-        {
-            perror("fork");
-            return;
-        }
-        else if (pid == 0)
-        {
-            char *com = command_dir(cmd, cmd->token[i]);
-            if (com != NULL)
-            {
-                printf("iscommand: %s\n", com);
-                execve(com, cmd->token, NULL);
-                perror("execve");  // En caso de error en execve
-                exit(1);
-            }
-			if (!com)
+		if(is_builtin(cmd, i) == 0)
+		{
+			pid_t pid = fork();
+			if (pid == -1)
 			{
-				perror("command not found");
-				exit(1);
-			}  
-        }
-        else
-            wait(NULL);
+				perror("fork");
+				return;
+			}
+			else if (pid == 0)
+			{
+				char *com = command_dir(cmd, cmd->token[i]);
+				if (com != NULL)
+				{
+					printf("iscommand: %s\n", com);
+					execve(com, cmd->token, cmd->env);
+					perror("execve");  // En caso de error en execve
+					exit(1);
+				}
+				if (!com)
+				{
+					perror("command not found");
+					exit(1);
+				}  
+			}
+			else
+				wait(NULL);
+		}
+		if(is_builtin(cmd, i) == 1)
+		{
+			if (ft_strcmp(cmd->token[i], "cd") == 0)
+			{
+				cd_builtin(cmd, i);
+				// Avanzamos ya que el primer argumento es cd pero el segundo la ruta, así que tenemos que saltarla
+				i++;
+			}
+		}
 		i++;
     }
 }

@@ -314,7 +314,7 @@ int is_command_exists(t_cmd *cmd, char *command)
         strcpy(executable_path + dir_len + 1, command);
 		
         // Verifica si el archivo ejecutable existe y es ejecutable
-        if (access(executable_path, F_OK) == 0) 
+        if (access(executable_path, F_OK) == 0)
             return (1);
         dir = ft_strtok(NULL, ":");
     }
@@ -404,37 +404,39 @@ void print_vars(t_cmd *cmd)
 
 void execute(t_cmd *cmd)
 {
-    pid_t pid;
-	char *com;
-	int i;
+    int i;
 
 	i = 0;
-	
-	while(i < cmd->n_tokens )
-	{
-		pid = fork();
-		
-		if (pid == -1)
-		{
-			perror("fork");
-			return ;
-		} 
-		else if (pid == 0)
-		{
-			com = command_dir(cmd, cmd->token[i]);
-			if(com != NULL)
+   	while (i < cmd->n_tokens)
+    {
+        pid_t pid = fork();
+        if (pid == -1)
+        {
+            perror("fork");
+            return;
+        }
+        else if (pid == 0)
+        {
+            char *com = command_dir(cmd, cmd->token[i]);
+            if (com != NULL)
+            {
+                printf("iscommand: %s\n", com);
+                execve(com, cmd->token, NULL);
+                perror("execve");  // En caso de error en execve
+                exit(1);
+            }
+			if (!com)
 			{
-				printf("iscommand:%s\n", com);
-				execve(com, cmd->token, NULL);
-				perror("execve");  // En caso de error en execve
+				perror("command not found");
 				exit(1);
-			}
-    	}
-		else 
-       		wait(NULL);
+			}  
+        }
+        else
+            wait(NULL);
 		i++;
-	}
+    }
 }
+
 
 int	main(int argc, char **argv, char **env)
 {
@@ -450,7 +452,7 @@ int	main(int argc, char **argv, char **env)
 		if(ft_strncmp(cmd.line, "", 1) > 0) 
 			add_history(cmd.line);
 		parse_args(&cmd);
-			execute(&cmd);
+		execute(&cmd);
 		clean_tokens(&cmd);
 		free(cmd.line);
 		free(cmd.prompt);

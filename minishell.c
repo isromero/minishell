@@ -12,6 +12,16 @@
 
 #include "minishell.h"
 
+int	ft_strcmp(char *s1, char *s2)
+{
+	int i;
+
+	i = 0;
+	while (s1[i] == s2[i] && s1[i] != '\0' && s2[i] != '\0')
+		i++;
+	return (s1[i] - s2[i]);
+}
+
 char *ft_getenv(const char *name, char **env) 
 {
     size_t name_len = ft_strlen(name);
@@ -512,6 +522,28 @@ int ft_env(t_cmd *cmd)
     return status;
 }
 
+int	ft_pwd(t_cmd *cmd)
+{
+	char	dir[1024];
+	int		s;
+	char	*pwd;
+
+	s = 1;
+	pwd = ft_getenv("$PWD", cmd->env);
+	if (getcwd(dir, sizeof(dir)) != NULL)
+	{
+		printf("%s\n", dir);
+		s = 0;
+	}
+	else if (pwd)
+		printf("%s\n", pwd);
+	else
+		printf("minishell: pwd\n");
+	free (pwd);
+	//comprobacion pipe
+	return (s);
+}
+
 void execute(t_cmd *cmd)
 {
     int i;
@@ -560,6 +592,11 @@ void execute(t_cmd *cmd)
 			{
 				cd_builtin(cmd, i);
 				// Avanzamos ya que el primer argumento es cd pero el segundo la ruta, así que tenemos que saltarla
+				i++;
+			}
+			if (ft_strcmp(cmd->token[i], "pwd") == 0)
+			{
+				ft_pwd(cmd);
 				i++;
 			}
 		}

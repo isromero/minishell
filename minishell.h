@@ -21,6 +21,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "libft/libft.h"
+#include <stdbool.h>
 
 #define STYLE_BOLD "\033[1m"
 #define STYLE_UNDERLINE "\033[4m"

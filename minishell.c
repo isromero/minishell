@@ -12,16 +12,6 @@
 
 #include "minishell.h"
 
-int	ft_strcmp(char *s1, char *s2)
-{
-	int i;
-
-	i = 0;
-	while (s1[i] == s2[i] && s1[i] != '\0' && s2[i] != '\0')
-		i++;
-	return (s1[i] - s2[i]);
-}
-
 char *ft_getenv(const char *name, char **env) 
 {
     size_t name_len = ft_strlen(name);
@@ -44,6 +34,11 @@ int	is_special(char c)
 {
 	return(c == INPUT_REDIRECT || c == PIPE || c == OUTPUT_REDIRECT \
 	|| c == VARIABLE);
+}
+
+int	is_argument(char c)
+{
+	return(c == ARGUMENT);
 }
 
 int	is_special2(char c)
@@ -475,7 +470,7 @@ int	is_builtin(t_cmd *cmd, int n_token)
 	return (0);
 }
 
-void	cd_builtin(t_cmd *cmd, int cd_token)
+void	ft_cd(t_cmd *cmd, int cd_token)
 {
 	char	*path;
 	char	cwd[1024];
@@ -518,8 +513,7 @@ int ft_env(t_cmd *cmd)
         i++;
     }
 	//comprobacion de si hay pipes despues
-	
-    return status;
+    return (status);
 }
 
 int	ft_pwd(t_cmd *cmd)
@@ -538,10 +532,111 @@ int	ft_pwd(t_cmd *cmd)
 	else if (pwd)
 		printf("%s\n", pwd);
 	else
-		printf("minishell: pwd\n");
+		perror("");
 	free (pwd);
 	//comprobacion pipe
 	return (s);
+}
+
+void ft_export(t_cmd *cmd, int export_token) // CHECKEAR SI HAY UN '=' PARA EXPORT
+{
+	int i = 0, len_of_env = 0, len_of_export = 0;
+	char **new_env = NULL;
+	int j;
+
+	// Calcular la longitud del entorno existente
+	while (cmd->env[len_of_env] != NULL)
+		len_of_env++;
+	// Calcular la longitud del nuevo export
+	while (cmd->token[export_token + 1][len_of_export] != '\0')
+	{
+		// Aquí puedes realizar cualquier validación o modificación adicional
+		len_of_export++;
+	}
+	// Asignar memoria para el nuevo entorno
+	new_env = (char **)malloc(sizeof(char *) * (len_of_env + 2));
+	if (new_env == NULL)
+	{
+		// Error de asignación de memoria
+		return;
+	}
+	// Copiar el entorno existente al nuevo entorno
+	i = 0;
+	while (cmd->env[i] != NULL)
+	{
+		new_env[i] = ft_strdup(cmd->env[i]);
+		if (new_env[i] == NULL)
+		{
+			// Error de asignación de memoria
+			j = 0;
+			while (j < i)
+			{
+				free(new_env[j]);
+				j++;
+			}
+			free(new_env);
+			return;
+		}
+		i++;
+	}
+	// Añadir la nueva variable al nuevo entorno
+	new_env[len_of_env] = ft_strdup(cmd->token[export_token + 1]);
+	if (new_env[len_of_env] == NULL)
+	{
+		// Error de asignación de memoria
+		j = 0;
+		while (j < len_of_env)
+		{
+			free(new_env[j]);
+			j++;
+		}
+		free(new_env);
+		return;
+	}
+	// Establecer el último elemento del nuevo entorno como NULL
+	new_env[len_of_env + 1] = NULL;
+	// Liberar el entorno anterior y asignar el nuevo entorno
+	cmd->env = new_env;
+}
+
+bool compareVariableName(const char* variable, const char* name)
+{
+    int i = 0;
+
+    while (variable[i] != '=' && name[i] != '\0')
+    {
+        if (variable[i] != name[i])
+            return false;
+        i++;
+    }
+    // Verificar si el nombre de la variable tiene la misma longitud
+    // que el nombre en el token
+    return (variable[i] == '=' && name[i] == '\0');
+}
+
+void ft_unset(t_cmd *cmd, int unset_token)
+{
+    int i = 0, j = 0;
+    int len_of_env = 0;
+    char **new_env = NULL;
+
+    while (cmd->env[len_of_env] != NULL)
+        len_of_env++;
+
+    new_env = (char **)malloc(sizeof(char *) * (len_of_env + 1));
+	if(new_env == NULL)
+		return ;
+    while (cmd->env[i] != NULL)
+    {
+        if (!compareVariableName(cmd->env[i], cmd->token[unset_token + 1]))
+        {
+            new_env[j] = ft_strdup(cmd->env[i]);
+            j++;
+        }
+        i++;
+    }
+    new_env[j] = NULL;
+    cmd->env = new_env;
 }
 
 void execute(t_cmd *cmd)
@@ -549,13 +644,6 @@ void execute(t_cmd *cmd)
     int i;
 
 	i = 0;
-	if (cmd->n_tokens > 0 && strcmp(cmd->token[i], "env") == 0)
-    {
-        // int status = 
-		ft_env(cmd);
-        // Manejar el status del comando env según sea necesario
-        return;
-    }
 	
    	while (i < cmd->n_tokens)
     {
@@ -577,11 +665,13 @@ void execute(t_cmd *cmd)
 					perror("execve");  // En caso de error en execve
 					exit(1);
 				}
-				if (!com)
+				if (!com && !is_argument(cmd->token[i][0]))
 				{
 					perror("command not found");
 					exit(1);
-				}  
+				}
+				else
+					exit(1);
 			}
 			else
 				wait(NULL);
@@ -590,20 +680,28 @@ void execute(t_cmd *cmd)
 		{
 			if (ft_strcmp(cmd->token[i], "cd") == 0)
 			{
-				cd_builtin(cmd, i);
+				ft_cd(cmd, i);
 				// Avanzamos ya que el primer argumento es cd pero el segundo la ruta, así que tenemos que saltarla
 				i++;
 			}
 			if (ft_strcmp(cmd->token[i], "pwd") == 0)
-			{
 				ft_pwd(cmd);
-				i++;
-			}
+			if (ft_strcmp(cmd->token[i], "env") == 0)
+				ft_env(cmd);
+			if (ft_strcmp(cmd->token[i], "export") == 0  && ft_strchr(cmd->token[i], '='))
+    		{
+				ft_export(cmd, i);
+        		i++;
+    		} // REVISAR EL = de export
+			if (ft_strcmp(cmd->token[i], "unset") == 0)
+    		{
+				ft_unset(cmd, i);
+        		i++;
+    		}
 		}
 		i++;
     }
 }
-
 
 int	main(int argc, char **argv, char **env)
 {

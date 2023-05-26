@@ -500,7 +500,7 @@ int ft_env(t_cmd *cmd)
     if (cmd->n_tokens > 1)
     {
 		printf("%d\n", cmd->n_tokens);
-        printf("minishell: env: Demasiados argumentos\n");
+        printf("minishell: env: Demasiados argumentos\n"); // Cambiar error
         return 127;
     }
     while (cmd->env[i] != NULL)
@@ -638,70 +638,89 @@ void ft_unset(t_cmd *cmd, int unset_token)
     new_env[j] = NULL;
     cmd->env = new_env;
 }
-
 void execute(t_cmd *cmd)
 {
     int i;
-
-	i = 0;
+	int	j;
 	
-   	while (i < cmd->n_tokens)
+	i = 0;
+	j = 0;
+    while (i < cmd->n_tokens)
     {
-		if(is_builtin(cmd, i) == 0)
-		{
-			pid_t pid = fork();
-			if (pid == -1)
-			{
-				perror("fork");
-				return;
-			}
-			else if (pid == 0)
-			{
-				char *com = command_dir(cmd, cmd->token[i]);
-				if (com != NULL)
-				{
-					printf("iscommand: %s\n", com);
-					execve(com, cmd->token, cmd->env);
-					perror("execve");  // En caso de error en execve
-					exit(1);
-				}
-				if (!com && !is_argument(cmd->token[i][0]))
-				{
-					perror("command not found");
-					exit(1);
-				}
-				else
-					exit(1);
-			}
-			else
-				wait(NULL);
-		}
-		if(is_builtin(cmd, i) == 1)
-		{
-			if (ft_strcmp(cmd->token[i], "cd") == 0)
-			{
-				ft_cd(cmd, i);
-				// Avanzamos ya que el primer argumento es cd pero el segundo la ruta, así que tenemos que saltarla
-				i++;
-			}
-			if (ft_strcmp(cmd->token[i], "pwd") == 0)
-				ft_pwd(cmd);
-			if (ft_strcmp(cmd->token[i], "env") == 0)
-				ft_env(cmd);
-			if (ft_strcmp(cmd->token[i], "export") == 0 && ft_strchr(cmd->token[i + 1], '='))
-    		{
-				ft_export(cmd, i);
-        		i++;
-    		} // REVISAR EL = de export
-			if (ft_strcmp(cmd->token[i], "unset") == 0)
-    		{
-				ft_unset(cmd, i);
-        		i++;
-    		}
-			else
-				return ;
-		}
-		i++;
+        if (is_builtin(cmd, i) == 0)
+        {
+            pid_t pid = fork();
+            if (pid == -1)
+            {
+                perror("fork");
+                return;
+            }
+            else if (pid == 0)
+            {
+                char *com = command_dir(cmd, cmd->token[i]);
+				/* Si se obtuvo una ruta válida (com != NULL), se crea un nuevo arreglo exec_args para almacenar los argumentos que se pasarán a execve. */
+                if (com != NULL)
+                {
+                    printf("iscommand: %s\n", com);
+					/* Se asigna memoria dinámicamente para exec_args con un tamaño igual al número de tokens 
+					restantes en cmd desde la posición i, más 1 para el elemento NULL que se agrega al final del arreglo. */
+                    char **exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
+                    if (!exec_args)
+                        return ;
+					j = i; // Así guardamos la distancia ya recorrida
+                   	while(j < cmd->n_tokens)
+					{
+						/* Ejemplo del por qué se = así:
+						En la primera iteración del bucle, j tomará el valor de i, que es 2. Si simplemente usamos j como índice para 
+						exec_args, se copiarían los tokens a partir del índice 2, pero queremos que se copien desde el índice 0 en exec_args.
+						Entonces, para compensar el j = i, restamos i a j, obteniendo j - i que es 0 en este caso. */
+						exec_args[j - i] = cmd->token[j];
+						j++;
+					}
+                    exec_args[cmd->n_tokens - i] = NULL; // Agrega el NULL al final del arreglo, es igual que exec_args[j - i]
+
+                    execve(com, exec_args, cmd->env);
+                    perror("execve");
+                    exit(1);
+                }
+                if (!com && !is_argument(cmd->token[i][0])) // No solo vale con checkear si es argumento '-', sino también textos acompañados de echos, cat..(mirar más
+															//comandos que puedan tener textos, y sino buscar una solución global para esto)
+                {
+                    perror("command not found");
+                    exit(1);
+                }
+                else
+                    exit(1);
+            }
+            else
+                wait(NULL);
+        }
+        if (is_builtin(cmd, i) == 1)
+        {
+            if (ft_strcmp(cmd->token[i], "cd") == 0)
+            {
+                ft_cd(cmd, i);
+                // Avanzamos ya que el primer argumento es cd pero el segundo la ruta, así que tenemos que saltarla
+                i++;
+            }
+            if (ft_strcmp(cmd->token[i], "pwd") == 0)
+                ft_pwd(cmd);
+            if (ft_strcmp(cmd->token[i], "env") == 0)
+                ft_env(cmd);
+            if (ft_strcmp(cmd->token[i], "export") == 0 && ft_strchr(cmd->token[i + 1], '='))
+            {
+                ft_export(cmd, i);
+                i++;
+            }
+            if (ft_strcmp(cmd->token[i], "unset") == 0)
+            {
+                ft_unset(cmd, i);
+                i++;
+            }
+            else
+                return;
+        }
+        i++;
     }
 }
 

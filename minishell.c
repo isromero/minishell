@@ -688,7 +688,7 @@ void execute(t_cmd *cmd)
 				ft_pwd(cmd);
 			if (ft_strcmp(cmd->token[i], "env") == 0)
 				ft_env(cmd);
-			if (ft_strcmp(cmd->token[i], "export") == 0  && ft_strchr(cmd->token[i], '='))
+			if (ft_strcmp(cmd->token[i], "export") == 0 && ft_strchr(cmd->token[i + 1], '='))
     		{
 				ft_export(cmd, i);
         		i++;
@@ -698,6 +698,8 @@ void execute(t_cmd *cmd)
 				ft_unset(cmd, i);
         		i++;
     		}
+			else
+				return ;
 		}
 		i++;
     }

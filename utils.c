@@ -33,3 +33,17 @@ char *ft_strtok(char *str, const char *delim)
         *save++ = '\0';
     return token;
 }
+
+int is_number(const char *str)
+{
+    if (str == NULL || *str == '\0')
+        return 0;
+
+    while (*str != '\0')
+    {
+        if (!ft_isdigit(*str))
+            return 0;
+		str++;
+    }
+    return 1;
+}

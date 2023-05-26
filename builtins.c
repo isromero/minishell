@@ -213,3 +213,35 @@ void ft_unset(t_cmd *cmd, int unset_token)
     new_env[j] = NULL;
     cmd->env = new_env;
 }
+
+void execute_builtin_exit(t_cmd *cmd, int exit_code)
+{
+    // Realiza cualquier limpieza necesaria antes de salir
+	// Esto vale?????????????????????????????
+	clean_tokens(cmd);
+	free(cmd->line);
+	free(cmd->env);
+	free(cmd->prompt); 
+	
+    // Salir del programa con el código de salida especificado
+    exit(exit_code);
+}
+
+void	ft_exit(t_cmd *cmd, int exit_token)
+{
+	int	exit_code;
+
+	if(is_number(cmd->token[exit_token + 1]) && ft_atoi(cmd->token[exit_token + 1]) >= INT_MIN && ft_atoi(cmd->token[exit_token + 1]) <= INT_MAX) // Si es un número cualquiera entonces es que hay un argumento número y:
+	{
+		exit_code = ft_atoi(cmd->token[exit_token + 1]);
+		if(exit_code >= 0 && exit_code <= 255) // Habría que checkear si le pasas exit "numero random" debe devolver ese numero random o 1 predeterminado PENDIENTE
+			execute_builtin_exit(cmd, exit_code);
+		else if(exit_code < 0 || exit_code > 255) // Esto significa que está fuera de los límites del exit, y bash hace el % del valor pasado para hacer que esté en el rango válido
+		{
+			exit_code = (exit_code % 256);
+			execute_builtin_exit(cmd, exit_code);
+		}
+	}
+	else
+		execute_builtin_exit(cmd, 1); // En el caso de que no sea ningun número ni nada devolvemos un error predeterminado, el 1
+}

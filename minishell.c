@@ -32,5 +32,6 @@ int	main(int argc, char **argv, char **env)
 		free(cmd.prompt);
 	}
 	rl_clear_history();
+	free(cmd.env);
     return (0);
 }

@@ -14,6 +14,7 @@
 # define MINISHELL_H
 
 #include <stdlib.h>
+#include <limits.h>
 #include <unistd.h>
 #include <string.h>
 #include <sys/wait.h>
@@ -79,6 +80,8 @@ int		ft_pwd(t_cmd *cmd);
 void 	ft_export(t_cmd *cmd, int export_token);
 bool 	compareVariableName(const char* variable, const char* name);
 void 	ft_unset(t_cmd *cmd, int unset_token);
+void 	execute_builtin_exit(t_cmd *cmd, int exit_code);
+void	ft_exit(t_cmd *cmd, int exit_token);
 
 /* env.c */
 char	*ft_getenv(const char *name, char **env);
@@ -118,4 +121,5 @@ int		find_variables(char **token);
 
 /* utils.c */
 char	*ft_strtok(char *str, const char *delim);
+int 	is_number(const char *str);
 #endif

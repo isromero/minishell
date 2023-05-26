@@ -93,6 +93,9 @@ void execute(t_cmd *cmd)
             else if (ft_strcmp(cmd->token[i], "echo") == 0)
             // Se iguala ya que echo recorre todo los tokens y devuelve la longitud de i recorrida, no hace falta sumar i++ después
                 i = ft_echo(cmd, i);
+            else if (ft_strcmp(cmd->token[i], "exit") == 0)
+                ft_exit(cmd, i);
+                // se va a salir del programa, hace falta que le sume i si hay numero? Creo que no... PENDIENTE
             else
                 return;
         }

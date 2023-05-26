@@ -103,10 +103,72 @@ void execute(t_cmd *cmd)
     }
 }
 
-void	execute_builtin(t_cmd *cmd, int n_token)
+// Haciendo la lógica de los pipes:
+void    pipes()
 {
-	
+    int fd1[2]; // Esto solo crea para 1 pipe y luego para otro
+    int fd2[2]; // así que habrá que crear en un futuro tantos como sean necesarios  -->>>>>>>>>>>> // Creo que hay que hacer un algoritmo que sepa cuántos pipes hay
+                                                                                                    // el primer elemento que su siguiente es pipe y el último que su
+                                                                                                    // anterior es pipe habrá que gestionarlos de x manera, los demás todos igual
+                                                                                                    // (hablo de procesos)
+    int status; // Estado de los childs
+    int pid; // Identifica el proceso de los childs
+
+    pipe(fd1);
+
+    pid = fork();
+    if(pid == 0) /* child 1 */
+    {
+        close(fd1[READ_END]); /* cerrar extremo que no vamos a utilizar ya que el primer comando solo hace write */
+
+        dup2(fd1[WRITE_END], STDOUT_FILENO); /* esto hace que la salida estándar también escriba en el pipe 
+        STDOUT se duplica de fd1[1(write_end)] y como no lo necesitamos ya, lo cerramos:*/
+        close(fd1[WRITE_END]);
+        // execve(com, exec_args, cmd->env) // POSIBLE SOLUCION: pasarlo como argumentos al programa e incorporarlo directamente en el execute(posible idea)
+    }
+    else /* parent */
+    {
+        close(fd1[WRITE_END]); /* extremo que ya no es necesario */
+
+        pipe(fd2);
+        pid = fork();
+
+        if(pid == 0) /* child 2 */
+        {
+            close(fd2[READ_END]);
+
+            dup2(fd1[READ_END], STDIN_FILENO);
+            close(fd1[READ_END]);
+
+            dup2(fd2[WRITE_END], STDOUT_FILENO);
+            close(fd2[WRITE_END]);
+
+        }
+        else /* parent */
+        {
+            close(fd1[READ_END]);
+            close(fd2[WRITE_END]);
+
+            pid = fork();
+
+            if(pid == 0) /* child 3 */
+            {
+                dup2(fd2[READ_END], STDIN_FILENO);
+                close(fd2[READ_END]);
+            }
+        }
+    }
+    close(fd2[READ_END]);
+
+    wait(&status);
+    wait(&status);
+    wait(&status);
 }
+
+/* void	execute_builtin(t_cmd *cmd, int n_token)
+{
+	// Rellenar con los builtins de arriba
+} */
 
 char  *command_dir(t_cmd *cmd, char *command) 
 {

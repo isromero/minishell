@@ -18,11 +18,16 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <sys/types.h>
 #include <stdio.h>
+#include <stdbool.h>
+#include <errno.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "libft/libft.h"
-#include <stdbool.h>
+
+#define READ_END 0
+#define WRITE_END 1
 
 #define STYLE_BOLD "\033[1m"
 #define STYLE_UNDERLINE "\033[4m"

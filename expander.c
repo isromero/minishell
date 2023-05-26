@@ -1,36 +1,39 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   minishell.c                                        :+:      :+:    :+:   */
+/*   expander.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/18 17:20:04 by isromero          #+#    #+#             */
-/*   Updated: 2023/05/18 17:20:04 by isromero         ###   ########.fr       */
+/*   Created: 2023/05/26 17:51:23 by isromero          #+#    #+#             */
+/*   Updated: 2023/05/26 17:51:23 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	main(int argc, char **argv, char **env)
+void print_vars(t_cmd *cmd)
 {
-	t_cmd	cmd;
-	(void)argc;
-	(void)argv;
-	//print_minishell();
-	cmd.env = env;
-	while(1)
+	int	i;
+	char *path;
+	char *aux;
+	char *var;
+
+	i = 0;
+	aux = NULL;
+	while(cmd->token[i])
 	{
-		cmd.prompt = get_prompt(&cmd);
-		cmd.line = readline(cmd.prompt);
-		if(ft_strncmp(cmd.line, "", 1) > 0) 
-			add_history(cmd.line);
-		parse_args(&cmd);
-		execute(&cmd);
-		clean_tokens(&cmd);
-		free(cmd.line);
-		free(cmd.prompt);
+		if(cmd->token[i][0] == VARIABLE)
+		{
+			aux = cmd->token[i];
+			var = &aux[1];
+
+			// Quedarse solo con la lógica(está mal seguro)
+			path = ft_getenv(var, cmd->env);
+			if(path == NULL)
+				return ;
+			printf("minishell: %s\n", path);
+		}
+		i++;
 	}
-	rl_clear_history();
-    return (0);
 }

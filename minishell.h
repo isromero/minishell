@@ -56,19 +56,66 @@ typedef struct cmd
 	char	**env;
 } t_cmd;
 
-typedef enum {
-	INPUT_REDIRECT = '<',
-	HEREDOC_REDIRECT = '<' << 8,
-	HEREDOC_QUOTE = ('<' << 8) + 'Q',
-	PIPE = '|',
-	OUTPUT_REDIRECT = '>',
-	APPEND_REDIRECT = ('>' << 8) + '>',
-	COMMAND = 'C',
-	ARGUMENT = '-',
-	DOUBLE_QUOTE = '"',
-	SINGLE_QUOTE = '\'',
-	BUILTIN = ('b' << 16) + ('u' << 8) + 'i',
-	VARIABLE = '$'
-} token_type;
+#define INPUT_REDIRECT '<'
+#define HEREDOC_REDIRECT '<<'
+#define HEREDOC_QUOTE '<<Q'
+#define INPUT_REDIRECT '<'
+#define INPUT_REDIRECT '<'
+#define PIPE '|'
+#define OUTPUT_REDIRECT '>'
+#define APPEND_REDIRECT '>>'
+#define ARGUMENT '-'
+#define DOUBLE_QUOTE '"'
+#define ARGUMENT '-'
+#define SINGLE_QUOTE '\''
+#define VARIABLE '$'
 
+/* builtins.c */
+int		is_builtin(t_cmd *cmd, int n_token);
+int 	ft_echo(t_cmd *cmd, int echo_token);
+void	ft_cd(t_cmd *cmd, int cd_token);
+int		ft_env(t_cmd *cmd);
+int		ft_pwd(t_cmd *cmd);
+void 	ft_export(t_cmd *cmd, int export_token);
+bool 	compareVariableName(const char* variable, const char* name);
+void 	ft_unset(t_cmd *cmd, int unset_token);
+
+/* env.c */
+char	*ft_getenv(const char *name, char **env);
+// int 	ft_setenv(const char *name, const char *value, int overwrite);
+
+/* execute.c */
+void	execute(t_cmd *cmd);
+void	execute_builtin(t_cmd *cmd, int n_token);
+char	*command_dir(t_cmd *cmd, char *command);
+int 	is_command_exists(t_cmd *cmd, char *command);
+
+/* expander.c */
+void	print_vars(t_cmd *cmd);
+
+/* parser.c */
+void	parse_args(t_cmd *cmd);
+
+/* prompt.c */
+char	*get_prompt(t_cmd *custom_prompt);
+void	print_minishell();
+
+/* token_utils.c */
+void 	clean_tokens(t_cmd *cmd);
+void 	print_tokens(t_cmd *cmd);
+void 	save_token(t_cmd *cmd, char *token);
+int		is_special(char c);
+int		is_argument(char c);
+int		is_special2(char c);
+int		is_variable(t_cmd *cmd, int len);
+int 	is_double_quote(t_cmd *cmd, int len);
+int 	is_single_quote(t_cmd *cmd, int len);
+void 	error_special(); // Meter perror mejor?
+int 	check_len_special(t_cmd *cmd, int len);
+int 	is_token(t_cmd *cmd, int len);
+int		check_len_token(t_cmd *cmd, int len);
+int		find_variables(char **token);
+
+/* utils.c */
+char	*ft_strtok(char *str, const char *delim);
 #endif

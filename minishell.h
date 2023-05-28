@@ -60,6 +60,7 @@ typedef struct cmd
 	int		n_tokens;
 	char 	*prompt;
 	char	**env;
+	int		n_pipes;
 } t_cmd;
 
 #define INPUT_REDIRECT '<'
@@ -95,6 +96,7 @@ char	*ft_getenv(const char *name, char **env);
 /* execute.c */
 void	execute(t_cmd *cmd);
 void	execute_builtin(t_cmd *cmd, int n_token);
+void	execute_pipes(t_cmd *cmd);
 char	*command_dir(t_cmd *cmd, char *command);
 int 	is_command_exists(t_cmd *cmd, char *command);
 
@@ -114,6 +116,7 @@ void 	print_tokens(t_cmd *cmd);
 void 	save_token(t_cmd *cmd, char *token);
 int		is_special(char c);
 int		is_argument(char c);
+int		is_pipe(char c);
 int		is_special2(char c);
 int		is_variable(t_cmd *cmd, int len);
 int 	is_double_quote(t_cmd *cmd, int len);
@@ -123,6 +126,8 @@ int 	check_len_special(t_cmd *cmd, int len);
 int 	is_token(t_cmd *cmd, int len);
 int		check_len_token(t_cmd *cmd, int len);
 int		find_variables(char **token);
+void 	count_pipes(t_cmd *cmd);
+
 
 /* utils.c */
 char	*ft_strtok(char *str, const char *delim);

@@ -32,19 +32,49 @@ void print_tokens(t_cmd *cmd)
 
 void save_token(t_cmd *cmd, char *token)
 {
-    size_t total_size = (cmd->n_tokens + 1) * sizeof(char *);
-    char **new_token = (char **)malloc(total_size);
+    cmd->n_tokens++;
+    char **new_token = (char **)malloc(cmd->n_tokens * sizeof(char *));
     if (new_token == NULL)
     {
         printf("Error: No se pudo asignar memoria para cmd->token\n");
         return;
     }
-    ft_memcpy(new_token, cmd->token, cmd->n_tokens * sizeof(char *));
-    new_token[cmd->n_tokens] = token;
-    free(cmd->token);
+    if (cmd->token != NULL)
+    {
+        for (int i = 0; i < cmd->n_tokens - 1; i++)
+        {
+            new_token[i] = cmd->token[i];
+        }
+        free(cmd->token);
+    }
+    new_token[cmd->n_tokens - 1] = token;
     cmd->token = new_token;
-    cmd->n_tokens++;
 }
+
+/* int	string_is_pipe(char *c)
+{
+	while (c[i] != '\0')
+	{
+		if (is_pipe(c[i]))
+			count++;
+		i++;
+	}
+	return(count);
+} */
+
+void count_pipes(t_cmd *cmd)
+{
+    int i = 0;
+	cmd->n_pipes = 0;
+    while (cmd->token[i] != NULL)
+	{
+		if(cmd->token[i][0] == '|')
+			cmd->n_pipes++;
+		i++;
+	}
+	printf("n_pipes;%d\n", cmd->n_pipes);
+}
+
 
 int	is_special(char c)
 {
@@ -56,6 +86,12 @@ int	is_argument(char c)
 {
 	return(c == ARGUMENT);
 }
+
+int	is_pipe(char c)
+{
+	return(c == PIPE);
+}
+
 
 int	is_special2(char c)
 {
@@ -112,7 +148,6 @@ int check_len_special(t_cmd *cmd, int len)
 	while(cmd->line[i + len] != ' ' && is_special(cmd->line[i + len]))
 		i++;
 	// Gestión de errores
-	printf("len especial:%d\n", i);
 	if(i > 2)
 		error_special();
 	else if(i == 1)

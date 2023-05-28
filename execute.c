@@ -54,7 +54,7 @@ void execute(t_cmd *cmd)
                     exec_args[cmd->n_tokens - i] = NULL; // Agrega el NULL al final del arreglo, es igual que exec_args[j - i]
                     execve(com, exec_args, cmd->env);
                     perror("execve");
-                    exit(1);
+                    exit(0);
                 }
                 if (!com && !is_argument(cmd->token[i][0])) // No solo vale con checkear si es argumento '-', sino también textos acompañados de echos, cat..(mirar más
 															//comandos que puedan tener textos, y sino buscar una solución global para esto)
@@ -63,7 +63,7 @@ void execute(t_cmd *cmd)
                     exit(1);
                 }
                 else
-                    exit(1);
+                    exit(0);
             }
             else
                 wait(NULL);
@@ -102,6 +102,87 @@ void execute(t_cmd *cmd)
         i++;
     }
 }
+
+void execute_pipes(t_cmd *cmd) /* TRATAR DE PRIMERO PROBAR CON POCOS FD Y LUEGO TRASLADARLO A NUESTRO CÓDIGO */
+{
+    int fd[cmd->n_pipes][2]; // Arreglo de descriptores de archivo para las pipes
+    int status; // Estado de los hijos
+    int pid; // Identificador de proceso
+    int i = 0;
+
+    // Crear las pipes necesarias
+    while (i < cmd->n_pipes)
+    {
+        if (pipe(fd[i]) == -1)
+        {
+            perror("pipe");
+            exit(1);
+        }
+        i++;
+    }
+  
+    // Crear los procesos hijos
+    i = 0;
+    int j;
+    j = 0;
+    while (i < cmd->n_pipes)
+    {
+        char *com = command_dir(cmd, cmd->token[i]);
+        pid = fork();
+        if (pid == -1)
+        {
+            perror("fork");
+            exit(1);
+        }
+        else if (pid == 0)
+        {
+            close(fd[i][0]);
+            dup2(fd[i][1], STDOUT_FILENO);
+            close(fd[i][1]);
+            char **exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
+                    if (!exec_args)
+                        return ;
+					j = i; // Así guardamos la distancia ya recorrida
+                   	while(j < cmd->n_tokens)
+					{
+                        if (cmd->token[j][0] == '|')
+                            j++;
+						exec_args[j - i] = cmd->token[j];
+						j++;
+					}
+                    exec_args[cmd->n_tokens - i] = NULL; // Agrega el NULL al final del arreglo, es igual que exec_args[j - i]
+                    execve(com, exec_args, cmd->env);
+                    perror("execve");
+            exit(1);
+        }
+        else
+        {
+            close(fd[i][1]);
+            dup2(fd[i][0], STDIN_FILENO);
+            close(fd[i][0]);
+            char **exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
+                    if (!exec_args)
+                        return ;
+					j = i; // Así guardamos la distancia ya recorrida
+                   	while(j < cmd->n_tokens)
+					{
+                        if (cmd->token[j][0] == '|')
+                            j++;
+						exec_args[j - i] = cmd->token[j];
+						j++;
+					}
+                    exec_args[cmd->n_tokens - i] = NULL; // Agrega el NULL al final del arreglo, es igual que exec_args[j - i]
+                    execve(com, exec_args, cmd->env);
+                exit(1);
+                  
+        }
+        wait(&status);
+        i++;
+    }
+}
+
+
+
 
 // Haciendo la lógica de los pipes:
 void    pipes()

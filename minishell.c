@@ -19,7 +19,6 @@ int	main(int argc, char **argv, char **env)
 	(void)argv;
 	//print_minishell();
 	cmd.env = env;
-	cmd.n_pipes = 0;
 	while(1)
 	{
 		cmd.prompt = get_prompt(&cmd);
@@ -27,8 +26,9 @@ int	main(int argc, char **argv, char **env)
 		if(ft_strncmp(cmd.line, "", 1) > 0) 
 			add_history(cmd.line);
 		parse_args(&cmd);
-		//execute(&cmd);
+		/* execute(&cmd); */
 	 	count_pipes(&cmd);
+		count_processes(&cmd);
 		execute_pipes(&cmd);
 		clean_tokens(&cmd);
 		free(cmd.line);

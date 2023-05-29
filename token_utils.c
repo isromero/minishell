@@ -51,16 +51,19 @@ void save_token(t_cmd *cmd, char *token)
     cmd->token = new_token;
 }
 
-/* int	string_is_pipe(char *c)
+void	count_processes(t_cmd *cmd)
 {
-	while (c[i] != '\0')
-	{
-		if (is_pipe(c[i]))
-			count++;
-		i++;
-	}
-	return(count);
-} */
+    int i;
+
+    i = 0;
+	cmd->n_processes = 0;
+    while(cmd->token[i] != NULL)
+    {
+        if(!is_pipe(cmd->token[i][0]))
+            cmd->n_processes++;
+        i++;
+    }
+}
 
 void count_pipes(t_cmd *cmd)
 {

@@ -103,15 +103,13 @@ void execute(t_cmd *cmd)
     }
 }
 
-void execute_pipes(t_cmd *cmd) /* TRATAR DE PRIMERO PROBAR CON POCOS FD Y LUEGO TRASLADARLO A NUESTRO CÓDIGO */
+void execute_pipes(t_cmd *cmd) /* MIRAR COMO METER EXEC_ARGS(MEMORIA) */
 {
-    int fd[cmd->n_pipes][2]; // Arreglo de descriptores de archivo para las pipes
-    int status; // Estado de los hijos
-    int pid; // Identificador de proceso
-    int i = 0;
+    int fd[cmd->n_pipes][2];
+    int i;
 
-    // Crear las pipes necesarias
-    while (i < cmd->n_pipes)
+    i = 0;
+    while(i <= cmd->n_pipes)
     {
         if (pipe(fd[i]) == -1)
         {
@@ -120,69 +118,119 @@ void execute_pipes(t_cmd *cmd) /* TRATAR DE PRIMERO PROBAR CON POCOS FD Y LUEGO 
         }
         i++;
     }
-  
-    // Crear los procesos hijos
-    i = 0;
-    int j;
-    j = 0;
-    while (i < cmd->n_pipes)
+    pid_t pid[cmd->n_processes];
+    i = 1;
+    while(i <= cmd->n_processes)
     {
-        char *com = command_dir(cmd, cmd->token[i]);
-        pid = fork();
-        if (pid == -1)
+        if(i == 1)
         {
-            perror("fork");
-            exit(1);
+            printf("hola\n");
+            char *com = command_dir(cmd, cmd->token[0]);
+            printf("comando: %s\n", com);
+            pid[0] = fork();
+            if(pid[0] == 0)
+            {
+                dup2(fd[0][WRITE_END], STDOUT_FILENO);
+                close(fd[0][WRITE_END]);
+                close(fd[0][READ_END]);
+                execve(com, cmd->token, NULL);
+                perror("");
+                exit(0);
+            }
         }
-        else if (pid == 0)
+        if(i == cmd->n_processes)
         {
-            close(fd[i][0]);
-            dup2(fd[i][1], STDOUT_FILENO);
-            close(fd[i][1]);
-            char **exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
-                    if (!exec_args)
-                        return ;
-					j = i; // Así guardamos la distancia ya recorrida
-                   	while(j < cmd->n_tokens)
-					{
-                        if (cmd->token[j][0] == '|')
-                            j++;
-						exec_args[j - i] = cmd->token[j];
-						j++;
-					}
-                    exec_args[cmd->n_tokens - i] = NULL; // Agrega el NULL al final del arreglo, es igual que exec_args[j - i]
-                    execve(com, exec_args, cmd->env);
-                    perror("execve");
-            exit(1);
+            printf("hola\n");
+            char *coms = command_dir(cmd, cmd->token[1]);
+            printf("comando: %s\n", coms);
+            pid[1] = fork();
+            if(pid[1] == 0)
+            {
+                dup2(fd[0][READ_END], STDIN_FILENO);
+                close(fd[0][READ_END]);
+                close(fd[0][WRITE_END]);
+                execve(coms, cmd->token, NULL);
+                perror("");
+                exit(0);
+            }
         }
-        else
-        {
-            close(fd[i][1]);
-            dup2(fd[i][0], STDIN_FILENO);
-            close(fd[i][0]);
-            char **exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
-                    if (!exec_args)
-                        return ;
-					j = i; // Así guardamos la distancia ya recorrida
-                   	while(j < cmd->n_tokens)
-					{
-                        if (cmd->token[j][0] == '|')
-                            j++;
-						exec_args[j - i] = cmd->token[j];
-						j++;
-					}
-                    exec_args[cmd->n_tokens - i] = NULL; // Agrega el NULL al final del arreglo, es igual que exec_args[j - i]
-                    execve(com, exec_args, cmd->env);
-                exit(1);
-                  
-        }
-        wait(&status);
         i++;
     }
+    // for (i = 0; i < cmd->n_pipes; i++) {
+    //     close(fd[i][0]);
+    //     close(fd[i][1]);
+    // }
+
+    // // Esperar a que todos los procesos hijos terminen
+    // for (i = 0; i <= cmd->n_pipes; i++) {
+    //     wait(&status);
+    close(fd[0][WRITE_END]);
+    close(fd[0][READ_END]);
+    waitpid(pid[0], NULL, 0);
+    waitpid(pid[1], NULL, 0);
 }
 
+ // Los builtin con pipes hay que hacerlos en hijos, no es parents
+/* void execute_pipes(t_cmd *cmd)
+{
+    int fd[cmd->n_pipes][2]; // Arreglo de descriptores de archivo para las pipes
+    int i;
+    pid_t pid[cmd->n_processes];
 
-
+    i = 0;
+    printf("%d\n", cmd->n_processes);
+    printf("%d\n", cmd->n_pipes);
+    while(i < cmd->n_pipes)
+    {
+        if (pipe(fd[i]) == -1)
+            return ;
+        i++;
+    }
+    i = 1;
+    while(i <= cmd->n_processes)
+    {
+        if(i != 1 && i != cmd->n_processes)
+            pid[i] = fork();
+        pid[i] = fork();
+        if(i == 1)
+        {
+            if(pid[i] == 0)
+            {
+                dup2(fd[0][WRITE_END], STDOUT_FILENO);
+                close(fd[0][WRITE_END]);
+                close(fd[0][READ_END]);
+                char *com = command_dir(cmd, cmd->token[0]);
+                execve(com, cmd->token, cmd->env);
+                perror("execve");
+            }
+            else
+            {
+                close(fd[0][WRITE_END]);
+                close(fd[0][READ_END]);
+                wait(NULL);
+            }
+        }
+        if(i == cmd->n_processes)
+        {
+            if(pid[i] == 0)
+            {
+                dup2(fd[0][READ_END], STDIN_FILENO);
+                close(fd[0][READ_END]);
+                close(fd[0][WRITE_END]);
+                char *com = command_dir(cmd, cmd->token[2]);
+                execve(com, cmd->token, cmd->env);
+                perror("");
+            }
+            else
+            {
+                close(fd[0][WRITE_END]);
+                close(fd[0][READ_END]);
+                wait(NULL);
+            }
+        }
+        i++;
+    }
+} */
 
 // Haciendo la lógica de los pipes:
 void    pipes()
@@ -265,16 +313,16 @@ char  *command_dir(t_cmd *cmd, char *command)
         char executable_path[PATH_MAX];
         dir_len = ft_strlen(dir);
 
-		strcpy(executable_path, dir);
+		ft_strcpy(executable_path, dir);
         executable_path[dir_len] = '/';
-        strcpy(executable_path + dir_len + 1, command);
+        ft_strcpy(executable_path + dir_len + 1, command);
 		
         // Verifica si el archivo ejecutable existe y es ejecutable
         if (access(executable_path, F_OK) == 0) 
 		{
 			// El archivo ejecutable existe
-			strcat(dir, "/");
-			strcat(dir, command);
+			ft_strcat(dir, "/");
+			ft_strcat(dir, command);
             return (dir);
         }
         dir = ft_strtok(NULL, ":");
@@ -310,42 +358,4 @@ int is_command_exists(t_cmd *cmd, char *command)
     return (0);
 }
 
-///En principio esto ya no nos va a servir, pero por si acaso:
-////////////////////////////////////////////////////////////////////////////////////////////////
-
-// Esto servirá para el executor, donde queremos decirle que checkee si hay una variable, y si la variable que se le pasa está en env, la ejecutamos
-// Ejecutar = printear el valor de la variable (lo sustituido en token)
-/* char	*resizeString(const char* str, size_t new_size, int i) 
-{
-    char	*new_str;
-
-	// Quedarse solo con la lógica(está mal seguro)
-	new_str = malloc(new_size);  // Asigna nueva memoria
-    strcpy(new_str, str);  // Copia el contenido del string original
-	free(str[i]); 
-    return (new_str);
-}
-
-char **sustitute_token(t_cmd *cmd, int selected)
-{
-	int	i;
-	int j;
-	char *path;
-
-	i = 0;
-	j = 0;
-	while(cmd->token[i][0] != '\0')
-	{
-		if(cmd->token[i][0] == VARIABLE)
-		{
-			// Quedarse solo con la lógica(está mal seguro)
-			path = getenv(cmd->token[i]);
-			path[g] = path[g + 1];
-			cmd->token[i] = resizeString(cmd->token[i], ft_strlen(path));
-			cmd->token[i] = path;
-		}
-		i++;
-	}
-}
- */
-////////////////////////////////////////////////////////////////////////////////////////////////
+// METER UN TRY_ACCESS PARA EJECUTAR COSAS DENTRO DE NUESTRA MINISHELL

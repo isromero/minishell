@@ -129,6 +129,7 @@ int		check_len_token(t_cmd *cmd, int len);
 int		find_variables(char **token);
 void 	count_pipes(t_cmd *cmd);
 void	count_processes(t_cmd *cmd);
+int 	find_len_last_command(t_cmd *cmd);
 
 
 /* utils.c */

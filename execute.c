@@ -21,7 +21,7 @@ void execute(t_cmd *cmd)
 	j = 0;
     while (i < cmd->n_tokens)
     {
-        if (is_builtin(cmd, i) == 0)
+        if (is_builtin(cmd, i) == 0) // Checkear si es pipe, y demás
         {
             pid_t pid = fork();
             if (pid == -1)
@@ -103,10 +103,11 @@ void execute(t_cmd *cmd)
     }
 }
 
-void execute_pipes(t_cmd *cmd) /* MIRAR COMO METER EXEC_ARGS(MEMORIA) */
+void execute_pipes(t_cmd *cmd)
 {
     int fd[cmd->n_pipes][2];
     int i;
+    int j;
 
     i = 0;
     while(i <= cmd->n_pipes)
@@ -119,55 +120,95 @@ void execute_pipes(t_cmd *cmd) /* MIRAR COMO METER EXEC_ARGS(MEMORIA) */
         i++;
     }
     pid_t pid[cmd->n_processes];
-    i = 1;
-    while(i <= cmd->n_processes)
+    i = 0;
+    j = 0;
+    printf("logogogofdog: %d\n", find_len_last_command(cmd));
+    while(i < cmd->n_tokens - 1)
     {
-        if(i == 1)
-        {
-            printf("hola\n");
-            char *com = command_dir(cmd, cmd->token[0]);
-            printf("comando: %s\n", com);
-            pid[0] = fork();
-            if(pid[0] == 0)
+        
+            if(i == 0)
             {
-                dup2(fd[0][WRITE_END], STDOUT_FILENO);
-                close(fd[0][WRITE_END]);
-                close(fd[0][READ_END]);
-                execve(com, cmd->token, NULL);
-                perror("");
-                exit(0);
+                pid[0] = fork();
+                if(pid[0] == 0)
+                {
+                    char *com = command_dir(cmd, cmd->token[i]);
+                    if (com != NULL)
+                    {
+                        char **exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
+                        j = i;
+                        while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|')
+                        {
+                            exec_args[j - i] = cmd->token[j];
+                            j++;
+                        }
+                        exec_args[cmd->n_tokens - i] = NULL;
+                        int k = 0;
+                        while(exec_args[k])
+                        {
+                            printf("%s\n", exec_args[k]);
+                            k++;
+                        }
+                        close(fd[0][READ_END]);
+                        dup2(fd[0][WRITE_END], STDOUT_FILENO);
+                        close(fd[0][WRITE_END]);
+                        execve(com, exec_args, NULL);
+                        perror("");
+                        exit(0);
+                    }
+                    if (!com && !is_argument(cmd->token[i][0])) 
+                    {
+                        perror("command not found");
+                        exit(1);
+                    }
+                     //tal vez else de exit
+                }
             }
-        }
-        if(i == cmd->n_processes)
-        {
-            printf("hola\n");
-            char *coms = command_dir(cmd, cmd->token[1]);
-            printf("comando: %s\n", coms);
-            pid[1] = fork();
-            if(pid[1] == 0)
+            if(i == find_len_last_command(cmd)) // checkear el ultimo comando independientemente de argumentos posteriores
             {
-                dup2(fd[0][READ_END], STDIN_FILENO);
-                close(fd[0][READ_END]);
-                close(fd[0][WRITE_END]);
-                execve(coms, cmd->token, NULL);
-                perror("");
-                exit(0);
+                pid[1] = fork();
+                if(pid[1] == 0)
+                {
+                    char *coms = command_dir(cmd, cmd->token[i]);
+                    if(coms != NULL)
+                    {
+                        char **exec_args2 = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
+                        j = i;
+                        while((j < cmd->n_tokens - 1 && cmd->token[j][0] != '|') || cmd->token[j] == NULL)
+                        {
+                            exec_args2[j - i] = cmd->token[j];
+                            j++;
+                        }
+                        int h = 0;
+                        while(exec_args2[h])
+                        {
+                            printf("%s\n", exec_args2[h]);
+                            h++;
+                        }
+                        exec_args2[cmd->n_tokens - i] = NULL;
+                        close(fd[0][WRITE_END]);
+                        dup2(fd[0][READ_END], STDIN_FILENO);
+                        close(fd[0][READ_END]);
+                        execve(coms, exec_args2, NULL);
+                        perror("");
+                        exit(0);
+                    }
+                    if (!coms && !is_argument(cmd->token[i][0])) 
+                    {
+                        perror("command not found");
+                        exit(1);
+                    }
+                    //tal vez else de exit
+                }
             }
-        }
+            // Para los demás que no sean ni el primero ni el último comando...
+            // Hay que hacer contadores (posible solución) con ifs que sumen cuando es un comando para los pids y para los fds que cuente los pipes recorridos
+            // probar sin sanitizer
         i++;
     }
-    // for (i = 0; i < cmd->n_pipes; i++) {
-    //     close(fd[i][0]);
-    //     close(fd[i][1]);
-    // }
-
-    // // Esperar a que todos los procesos hijos terminen
-    // for (i = 0; i <= cmd->n_pipes; i++) {
-    //     wait(&status);
     close(fd[0][WRITE_END]);
     close(fd[0][READ_END]);
-    waitpid(pid[0], NULL, 0);
-    waitpid(pid[1], NULL, 0);
+    wait(NULL);
+    wait(NULL);
 }
 
  // Los builtin con pipes hay que hacerlos en hijos, no es parents

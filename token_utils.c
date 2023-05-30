@@ -75,7 +75,20 @@ void count_pipes(t_cmd *cmd)
 			cmd->n_pipes++;
 		i++;
 	}
-	printf("n_pipes;%d\n", cmd->n_pipes);
+}
+
+int find_len_last_command(t_cmd *cmd)
+{
+    int i;
+
+    i = cmd->n_tokens - 2; // 5
+    while(i >= 0)
+    {
+        if(cmd->token[i][0] == '|')
+            return (i + 1); // La posición del token después del último pipe
+        i--;
+    }
+    return (0);
 }
 
 

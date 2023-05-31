@@ -109,6 +109,7 @@ void execute_pipes(t_cmd *cmd)
     int i;
     int j;
     char **exec_args;
+    char *com;
     i = 0;
     while(i <= cmd->n_pipes - 1)
     {
@@ -137,7 +138,7 @@ void execute_pipes(t_cmd *cmd)
             pid[count_pids] = fork();
             if(pid[count_pids] == 0)
             {
-                char *com = command_dir(cmd, cmd->token[i]);
+                com = command_dir(cmd, cmd->token[i]);
                 if (com != NULL)
                 {
                     
@@ -164,43 +165,16 @@ void execute_pipes(t_cmd *cmd)
                 count_pids++;
             }
         }
-        if(i == find_len_last_command(cmd)) // checkear el ultimo comando independientemente de argumentos posteriores
-        {
-            pid[count_pids] = fork();
-            if(pid[count_pids] == 0)
-            {
-                char *coms = command_dir(cmd, cmd->token[i]);
-                if(coms != NULL)
-                {
-                    j = i;
-                    while(j < cmd->n_tokens - 1 && (cmd->token[j][0] != '|' || cmd->token[j] == NULL))
-                    {
-                        exec_args[j - i] = cmd->token[j];
-                        j++;
-                    }
-                    exec_args[j - i] = NULL;
-                    close(fd[count_pipes][WRITE_END]);
-                    dup2(fd[count_pipes][READ_END], STDIN_FILENO);
-                    close(fd[count_pipes][READ_END]);
-                    execve(coms, exec_args, NULL);
-                    perror("");
-                    exit(0);
-                }
-                if (!coms && !is_argument(cmd->token[i][0])) 
-                {
-                    perror("command not found");
-                    exit(1);
-                }
-                //tal vez else de exit
-            }
-        }
+        printf("la iteración: %d\n", i);
+        printf("esto devuelve el comando %d\n", is_command_exists(cmd, cmd->token[i]));
         if(is_command_exists(cmd, cmd->token[i]) && i != 0 && i != find_len_last_command(cmd))
         {
+            printf("hola\n");
             pid[count_pids] = fork();
             if(pid[count_pids] == 0)
             {
-                char *coms = command_dir(cmd, cmd->token[i]);
-                if(coms != NULL)
+                com = command_dir(cmd, cmd->token[i]);
+                if(com != NULL)
                 {
                     j = i;
                     while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|')
@@ -213,11 +187,11 @@ void execute_pipes(t_cmd *cmd)
                     close(fd[count_pipes][READ_END]);
                     dup2(fd[count_pipes][WRITE_END], STDIN_FILENO);
                     close(fd[count_pipes][WRITE_END]);
-                    execve(coms, exec_args, NULL);
+                    execve(com, exec_args, NULL);
                     perror("");
                     exit(0);
                 }
-                if (!coms && !is_argument(cmd->token[i][0])) 
+                if (!com && !is_argument(cmd->token[i][0])) 
                 {
                     perror("command not found");
                     exit(1);
@@ -225,6 +199,37 @@ void execute_pipes(t_cmd *cmd)
                 //tal vez else de exit
             }
             count_pids++;
+        }
+        if(i == find_len_last_command(cmd)) // checkear el ultimo comando independientemente de argumentos posteriores
+        {
+            pid[count_pids] = fork();
+            if(pid[count_pids] == 0)
+            {
+                com = command_dir(cmd, cmd->token[i]);
+                printf("este es el comando mas cachondo que existe %s\n", cmd->token[i]);
+                if(com != NULL)
+                {
+                    j = i;
+                    while(j < cmd->n_tokens - 1 && (cmd->token[j][0] != '|' || cmd->token[j] == NULL))
+                    {
+                        exec_args[j - i] = cmd->token[j];
+                        j++;
+                    }
+                    exec_args[j - i] = NULL;
+                    close(fd[count_pipes][WRITE_END]);
+                    dup2(fd[count_pipes][READ_END], STDIN_FILENO);
+                    close(fd[count_pipes][READ_END]);
+                    execve(com, exec_args, NULL);
+                    perror("");
+                    exit(0);
+                }
+                if (!com && !is_argument(cmd->token[i][0])) 
+                {
+                    perror("command not found");
+                    exit(1);
+                }
+                //tal vez else de exit
+            }
         }
         i++;
     }

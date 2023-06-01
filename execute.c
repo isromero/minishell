@@ -12,6 +12,23 @@
 
 #include "minishell.h"
 
+void executor(t_cmd *cmd)
+{
+    int i;
+
+    i = 0;
+    while(cmd->token[i])
+    {
+        if(strchr(cmd->token[i], '|'))
+        {
+            execute_pipes(cmd);
+            return ;
+        }
+        i++;
+    }
+    execute(cmd);
+}
+
 void execute(t_cmd *cmd)
 {
     int i;
@@ -21,7 +38,7 @@ void execute(t_cmd *cmd)
 	j = 0;
     while (i < cmd->n_tokens)
     {
-        if (is_builtin(cmd, i) == 0) // Checkear si es pipe, y demás
+        if (!is_builtin(cmd, i)) // Checkear si es pipe, y demás
         {
             pid_t pid = fork();
             if (pid == -1)
@@ -68,46 +85,44 @@ void execute(t_cmd *cmd)
             else
                 wait(NULL);
         }
-        if (is_builtin(cmd, i) == 1)
-        {
-            if (ft_strcmp(cmd->token[i], "cd") == 0)
-            {
-                ft_cd(cmd, i);
-                // Avanzamos ya que el primer argumento es cd pero el segundo la ruta, así que tenemos que saltarla
-                i++;
-            }
-            else if (ft_strcmp(cmd->token[i], "pwd") == 0)
-                ft_pwd(cmd);
-            else if (ft_strcmp(cmd->token[i], "env") == 0)
-                ft_env(cmd);
-            else if (ft_strcmp(cmd->token[i], "export") == 0 && ft_strchr(cmd->token[i + 1], '='))
-            {
-                ft_export(cmd, i);
-                i++;
-            }
-            else if (ft_strcmp(cmd->token[i], "unset") == 0)
-            {
-                ft_unset(cmd, i);
-                i++;
-            }
-            else if (ft_strcmp(cmd->token[i], "echo") == 0)
-            // Se iguala ya que echo recorre todo los tokens y devuelve la longitud de i recorrida, no hace falta sumar i++ después
-                i = ft_echo(cmd, i);
-            else if (ft_strcmp(cmd->token[i], "exit") == 0)
-                ft_exit(cmd, i);
-                // se va a salir del programa, hace falta que le sume i si hay numero? Creo que no... PENDIENTE
-            else
-                return;
-        }
+        if (is_builtin(cmd, i))
+            execute_builtin(cmd, i); // En principio funciona, aunque tal vez necesita pruebas(antes estaba metido todo directo el execute, con su i correspondiente)
         i++;
     }
 }
 
-/* void	execute_builtin(t_cmd *cmd, int n_token)
+void	execute_builtin(t_cmd *cmd, int n_token)
 {
 	// Rellenar con los builtins de arriba
-
-} */
+    if (ft_strcmp(cmd->token[n_token], "cd") == 0)
+    {
+        ft_cd(cmd, n_token);
+        // Avanzamos ya que el primer argumento es cd pero el segundo la ruta, así que tenemos que saltarla
+        n_token++;
+    }
+    else if (ft_strcmp(cmd->token[n_token], "pwd") == 0)
+        ft_pwd(cmd);
+    else if (ft_strcmp(cmd->token[n_token], "env") == 0)
+        ft_env(cmd);
+    else if (ft_strcmp(cmd->token[n_token], "export") == 0 && ft_strchr(cmd->token[n_token + 1], '='))
+    {
+        ft_export(cmd, n_token);
+        n_token++;
+    }
+    else if (ft_strcmp(cmd->token[n_token], "unset") == 0)
+    {
+        ft_unset(cmd, n_token);
+        n_token++;
+    }
+    else if (ft_strcmp(cmd->token[n_token], "echo") == 0)
+    // Se iguala ya que echo recorre todo los tokens y devuelve la longitud de i recorrida, no hace falta sumar i++ después
+        n_token = ft_echo(cmd, n_token);
+    else if (ft_strcmp(cmd->token[n_token], "exit") == 0)
+        ft_exit(cmd, n_token);
+        // se va a salir del programa, hace falta que le sume i si hay numero? Creo que no... PENDIENTE
+    else
+        return;
+}
 
 void execute_pipes(t_cmd *cmd)
 {
@@ -148,28 +163,33 @@ void    execute_first_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, 
     pid[count_pids] = fork();
     if(pid[count_pids] == 0)
     {
-        com = command_dir(cmd, cmd->token[i]);
-        if (com != NULL)
+        if(is_builtin(cmd, i))
+            execute_builtin(cmd, i);
+        else
         {
-            exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
-            j = i;
-            while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|')
+            com = command_dir(cmd, cmd->token[i]);
+            if (com != NULL)
             {
-                exec_args[j - i] = cmd->token[j];
-                j++;
+                exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
+                j = i;
+                while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|')
+                {
+                    exec_args[j - i] = cmd->token[j];
+                    j++;
+                }
+                exec_args[j - i] = NULL;
+                close(fd[count_pipes][READ_END]);
+                dup2(fd[count_pipes][WRITE_END], STDOUT_FILENO);
+                close(fd[count_pipes][WRITE_END]);
+                execve(com, exec_args, NULL);
+                perror("");
+                exit(0);
             }
-            exec_args[j - i] = NULL;
-            close(fd[count_pipes][READ_END]);
-            dup2(fd[count_pipes][WRITE_END], STDOUT_FILENO);
-            close(fd[count_pipes][WRITE_END]);
-            execve(com, exec_args, NULL);
-            perror("");
-            exit(0);
-        }
-        if (!com && !is_argument(cmd->token[i][0])) 
-        {
-            perror("command not found");
-            exit(1);
+            if (!com && !is_argument(cmd->token[i][0])) 
+            {
+                perror("command not found");
+                exit(1);
+            }
         }
         count_pids++;
     }
@@ -189,28 +209,33 @@ void    execute_middle_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids,
     pid[count_pids] = fork();
     if(pid[count_pids] == 0)
     {
-        com = command_dir(cmd, cmd->token[i]);
-        if(com != NULL)
+        if(is_builtin(cmd, i))
+            execute_builtin(cmd, i);
+        else
         {
-            exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
-            j = i;
-            while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|')
+            com = command_dir(cmd, cmd->token[i]);
+            if(com != NULL)
             {
-                exec_args[j - i] = cmd->token[j];
-                j++;
+                exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
+                j = i;
+                while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|')
+                {
+                    exec_args[j - i] = cmd->token[j];
+                    j++;
+                }
+                exec_args[j - i] = NULL;
+                close(fd[count_pipes][WRITE_END]);
+                dup2(fd[count_pipes][READ_END], STDIN_FILENO);
+                close(fd[count_pipes][READ_END]);
+                execve(com, exec_args, NULL);
+                perror("");
+                exit(0);
             }
-            exec_args[j - i] = NULL;
-            close(fd[count_pipes][WRITE_END]);
-            dup2(fd[count_pipes][READ_END], STDIN_FILENO);
-            close(fd[count_pipes][READ_END]);
-            execve(com, exec_args, NULL);
-            perror("");
-            exit(0);
-        }
-        if (!com && !is_argument(cmd->token[i][0])) 
-        {
-            perror("command not found");
-            exit(1);
+            if (!com && !is_argument(cmd->token[i][0])) 
+            {
+                perror("command not found");
+                exit(1);
+            }
         }
         count_pids++;
     }
@@ -231,28 +256,33 @@ void    execute_last_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, i
     pid[count_pids] = fork();
     if(pid[count_pids] == 0)
     {
-        com = command_dir(cmd, cmd->token[i]);
-        if(com != NULL)
+        if(is_builtin(cmd, i))
+            execute_builtin(cmd, i);
+        else
         {
-            exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
-            j = i;
-            while(j < cmd->n_tokens - 1 && (cmd->token[j][0] != '|' || cmd->token[j] == NULL))
+            com = command_dir(cmd, cmd->token[i]);
+            if(com != NULL)
             {
-                exec_args[j - i] = cmd->token[j];
-                j++;
+                exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
+                j = i;
+                while(j < cmd->n_tokens - 1 && (cmd->token[j][0] != '|' || cmd->token[j] == NULL))
+                {
+                    exec_args[j - i] = cmd->token[j];
+                    j++;
+                }
+                exec_args[j - i] = NULL;
+                close(fd[count_pipes][WRITE_END]);
+                dup2(fd[count_pipes][READ_END], STDIN_FILENO);
+                close(fd[count_pipes][READ_END]);
+                execve(com, exec_args, NULL);
+                perror("");
+                exit(0);
             }
-            exec_args[j - i] = NULL;
-            close(fd[count_pipes][WRITE_END]);
-            dup2(fd[count_pipes][READ_END], STDIN_FILENO);
-            close(fd[count_pipes][READ_END]);
-            execve(com, exec_args, NULL);
-            perror("");
-            exit(0);
-        }
-        if (!com && !is_argument(cmd->token[i][0])) 
-        {
-            perror("command not found");
-            exit(1);
+            if (!com && !is_argument(cmd->token[i][0])) 
+            {
+                perror("command not found");
+                exit(1);
+            }
         }
     }
     close(fd[count_pipes][READ_END]);

@@ -95,6 +95,7 @@ char	*ft_getenv(const char *name, char **env);
 // int 	ft_setenv(const char *name, const char *value, int overwrite);
 
 /* execute.c */
+void 	executor(t_cmd *cmd);
 void	execute(t_cmd *cmd);
 void	execute_builtin(t_cmd *cmd, int n_token);
 void	execute_pipes(t_cmd *cmd);

@@ -33,17 +33,24 @@ int	is_builtin(t_cmd *cmd, int n_token)
 
 int ft_echo(t_cmd *cmd, int echo_token)
 {
+    int first_echo_token;
+
+    first_echo_token = echo_token;
     echo_token++; // Avanzar a la posición después de "echo"
 
     while (cmd->token[echo_token])
     {
+        if (strcmp(cmd->token[first_echo_token + 1], "-n") == 0)
+            echo_token++;
         printf("%s ", cmd->token[echo_token]);
         echo_token++;
     }
-
-    printf("\n");
-	return(echo_token);
+    if (strcmp(cmd->token[first_echo_token + 1], "-n") != 0)
+        printf("\n");
+    return echo_token;
 }
+
+
 
 void	ft_cd(t_cmd *cmd, int cd_token)
 {
@@ -72,12 +79,12 @@ int ft_env(t_cmd *cmd)
     if (!cmd->env || !cmd->env[0])
         return -1;
 
-    if (cmd->n_tokens > 1)
+    /* if (cmd->n_tokens > 2) // Hace falta gestionarlo????????????????????????????????
     {
 		printf("%d\n", cmd->n_tokens);
         printf("minishell: env: Demasiados argumentos\n"); // Cambiar error
         return 127;
-    }
+    } */
     while (cmd->env[i] != NULL)
     {
         size = ft_strlen(cmd->env[i]);
@@ -220,14 +227,13 @@ void execute_builtin_exit(t_cmd *cmd, int exit_code)
 	// Esto vale?????????????????????????????
 	clean_tokens(cmd);
 	free(cmd->line);
-	free(cmd->env);
 	free(cmd->prompt); 
 	
     // Salir del programa con el código de salida especificado
     exit(exit_code);
 }
 
-void	ft_exit(t_cmd *cmd, int exit_token)
+void	ft_exit(t_cmd *cmd, int exit_token) // Con textos de argumentos creo que hay que devolver 2
 {
 	int	exit_code;
 

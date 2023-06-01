@@ -26,10 +26,9 @@ int	main(int argc, char **argv, char **env)
 		if(ft_strncmp(cmd.line, "", 1) > 0) 
 			add_history(cmd.line);
 		parse_args(&cmd);
-		execute(&cmd);
-	 	/* count_pipes(&cmd);
+		count_pipes(&cmd);
 		count_processes(&cmd);
-		execute_pipes(&cmd); */
+		executor(&cmd);
 		clean_tokens(&cmd);
 		free(cmd.line);
 		free(cmd.prompt);

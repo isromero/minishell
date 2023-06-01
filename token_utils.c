@@ -91,7 +91,6 @@ int find_len_last_command(t_cmd *cmd)
     return (0);
 }
 
-
 int	is_special(char c)
 {
 	return(c == INPUT_REDIRECT || c == PIPE || c == OUTPUT_REDIRECT \
@@ -107,7 +106,6 @@ int	is_pipe(char c)
 {
 	return(c == PIPE);
 }
-
 
 int	is_special2(char c)
 {

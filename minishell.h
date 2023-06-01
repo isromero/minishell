@@ -100,12 +100,19 @@ void	execute_builtin(t_cmd *cmd, int n_token);
 void	execute_pipes(t_cmd *cmd);
 char	*command_dir(t_cmd *cmd, char *command);
 int 	is_command_exists(t_cmd *cmd, char *command);
+void    execute_first_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, int fd[cmd->n_pipes][2], pid_t pid[cmd->n_processes]);
+void    execute_middle_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, int fd[cmd->n_pipes][2], pid_t pid[cmd->n_processes]);
+void    execute_last_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, int fd[cmd->n_pipes][2], pid_t pid[cmd->n_processes]);
 
 /* expander.c */
 void	print_vars(t_cmd *cmd);
 
 /* parser.c */
 void	parse_args(t_cmd *cmd);
+
+/* pipes_utils.c */
+void    init_pipes(t_cmd *cmd, int fd[cmd->n_pipes][2]);
+void    wait_close_pipes(t_cmd *cmd, int fd[cmd->n_pipes][2]);
 
 /* prompt.c */
 char	*get_prompt(t_cmd *custom_prompt);

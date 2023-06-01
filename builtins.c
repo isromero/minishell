@@ -198,6 +198,7 @@ bool compareVariableName(const char* variable, const char* name)
 
 void ft_unset(t_cmd *cmd, int unset_token)
 {
+	// Meter perrors con errores de argumentos(bad identifiers)
     int i = 0, j = 0;
     int len_of_env = 0;
     char **new_env = NULL;

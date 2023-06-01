@@ -125,6 +125,7 @@ void 	print_tokens(t_cmd *cmd);
 void 	save_token(t_cmd *cmd, char *token);
 int		is_special(char c);
 int		is_argument(char c);
+int		is_argument_extension(char *token);
 int		is_pipe(char c);
 int		is_special2(char c);
 int		is_variable(t_cmd *cmd, int len);

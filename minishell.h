@@ -97,7 +97,7 @@ char	*ft_getenv(const char *name, char **env);
 /* execute.c */
 void	execute(t_cmd *cmd);
 void	execute_builtin(t_cmd *cmd, int n_token);
-void	 execute_pipes();
+void	execute_pipes(t_cmd *cmd);
 char	*command_dir(t_cmd *cmd, char *command);
 int 	is_command_exists(t_cmd *cmd, char *command);
 

@@ -19,6 +19,8 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+ #include <fcntl.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -125,7 +127,7 @@ void 	print_tokens(t_cmd *cmd);
 void 	save_token(t_cmd *cmd, char *token);
 int		is_special(char c);
 int		is_argument(char c);
-int		is_argument_extension(char *token);
+int		is_argument_extension(t_cmd *cmd, int i);
 int		is_pipe(char c);
 int		is_special2(char c);
 int		is_variable(t_cmd *cmd, int len);

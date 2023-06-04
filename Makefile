@@ -13,7 +13,7 @@
 NAME		=	minishell
 CC			=	gcc
 SRCS		=	builtins.c env.c execute.c expander.c minishell.c parser.c \
-				prompt.c token_utils.c pipes_utils.c utils.c
+				prompt.c token_utils.c pipes_utils.c utils.c redirects.c
 
 LIBFT		=	libft/libft.a
 

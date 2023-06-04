@@ -102,41 +102,36 @@ int	is_argument(char c)
 	return(c == ARGUMENT);
 }
 
-int	is_argument_extension(char *token)
+int	is_argument_extension(t_cmd *cmd, int i)
 {
-	int i;
-
-	i = 0;
-	while(token[i])
-	{
 		//grep $PATH???????????????????????????????????????
-		if(token[i][0] == '-')
-			return 1;
-		else if(token[i][0] == DOUBLE_QUOTE && token[i][ft_strlen(token[i]) - 1] == DOUBLE_QUOTE)
-			return 1;
-		else if(token[i][0] == SINGLE_QUOTE && token[i][ft_strlen(token[i]) - 1] == SINGLE_QUOTE)
-			return 1;
-		else if(i >= 2 && ft_strcmp("echo", token[i - 2]) && ft_strcmp("-n", token[i - 1]))
-			return 1;
-		else if(i >= 1 && ft_strcmp("echo", token[i - 1]) && ft_strcmp("-n", token[i]))
-			return 1;
-		else if(i >= 1 && ft_strcmp("echo", token[i - 1]))
-			return 1;
-		else if(ft_strcmp("echo", token[i - 1]) && (token[i][0] == DOUBLE_QUOTE && token[i][ft_strlen(token[i]) - 1] == DOUBLE_QUOTE))
-			return 1;
-		else if(ft_strcmp("echo", token[i - 1]) && (token[i][0] == SINGLE_QUOTE && token[i][ft_strlen(token[i]) - 1] == SINGLE_QUOTE))
-			return 1;
-		//gestionar export con pipes
-		else if(ft_strcmp("export", token[i - 1]) && ft_strchr(token[i], '='))
-			return 1;
-		else if(ft_strcmp("unset", token[i - 1]))
-			return 1;
-		else if(ft_strcmp("pwd", token[i - 1]))
-			return 1;
-		else if(ft_strcmp("cd", token[i - 1]))
-			return 1;
-		i++;
-	}
+	if(cmd->token[i] == NULL)
+		return 1;
+	else if(cmd->token[i][0] == '-')
+		return 1;
+	else if(cmd->token[i][0] == DOUBLE_QUOTE && cmd->token[i][ft_strlen(cmd->token[i]) - 1] == DOUBLE_QUOTE)
+		return 1;
+	else if(cmd->token[i][0] == SINGLE_QUOTE && cmd->token[i][ft_strlen(cmd->token[i]) - 1] == SINGLE_QUOTE)
+		return 1;
+	else if(i >= 2 && ft_strcmp("echo", cmd->token[i - 2]) == 0 && ft_strcmp("-n", cmd->token[i - 1]) == 0)
+		return 1;
+	else if(i >= 1 && ft_strcmp("echo", cmd->token[i - 1]) == 0 && ft_strcmp("-n", cmd->token[i]) == 0)
+		return 1;
+	else if(i >= 1 && ft_strcmp("echo", cmd->token[i - 1]) == 0)
+		return 1;
+	else if(i >= 1 && ft_strcmp("echo", cmd->token[i - 1]) == 0 && (cmd->token[i][0] == DOUBLE_QUOTE && cmd->token[i][ft_strlen(cmd->token[i]) - 1] == DOUBLE_QUOTE))
+		return 1;
+	else if(i >= 1 && ft_strcmp("echo", cmd->token[i - 1]) == 0 && (cmd->token[i][0] == SINGLE_QUOTE && cmd->token[i][ft_strlen(cmd->token[i]) - 1] == SINGLE_QUOTE))
+		return 1;
+	//gestionar export con pipes
+	else if(i >= 1 && ft_strcmp("export", cmd->token[i - 1]) == 0 && ft_strchr(cmd->token[i], '='))
+		return 1;
+	else if(i >= 1 && ft_strcmp("unset", cmd->token[i - 1]) == 0)
+		return 1;
+	else if(i >= 1 && ft_strcmp("pwd", cmd->token[i - 1]) == 0)
+		return 1;
+	else if(i >= 1 && ft_strcmp("cd", cmd->token[i - 1]) == 0)
+		return 1;
 	return(0);
 }
 

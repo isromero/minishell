@@ -50,8 +50,6 @@ int ft_echo(t_cmd *cmd, int echo_token)
     return echo_token;
 }
 
-
-
 void	ft_cd(t_cmd *cmd, int cd_token)
 {
 	char	*path;

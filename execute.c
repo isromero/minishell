@@ -29,17 +29,21 @@ void executor(t_cmd *cmd)
     execute(cmd);
 }
 
-void execute(t_cmd *cmd)
+void execute(t_cmd *cmd) // NO HACER DOBLE FORK.....
 {
     int i;
 	int	j;
+    char *com;
 	
 	i = 0;
 	j = 0;
+    com = NULL;
     while (i < cmd->n_tokens)
     {
-        if (!is_builtin(cmd, i)) // Checkear si es pipe, y demás
+        if (!is_builtin(cmd, i) && !is_argument_extension(cmd, i)) // Checkear si es pipe, y demás
         {
+            // HACER UN INT QUE DEVUELVA ERROR Y NO ENTRAR
+            printf("ESTO ES LA I %d\n", i);
             pid_t pid = fork();
             if (pid == -1)
             {
@@ -48,7 +52,7 @@ void execute(t_cmd *cmd)
             }
             else if (pid == 0)
             {
-                char *com = command_dir(cmd, cmd->token[i]);
+                com = command_dir(cmd, cmd->token[i]);
 				/* Si se obtuvo una ruta válida (com != NULL), se crea un nuevo arreglo exec_args para almacenar los argumentos que se pasarán a execve. */
                 if (com != NULL)
                 {
@@ -73,7 +77,7 @@ void execute(t_cmd *cmd)
                     perror("execve");
                     exit(0);
                 }
-                if (!com && !is_argument(cmd->token[i][0])) // No solo vale con checkear si es argumento '-', sino también textos acompañados de echos, cat..(mirar más
+                if (!com) // No solo vale con checkear si es argumento '-', sino también textos acompañados de echos, cat..(mirar más
 															//comandos que puedan tener textos, y sino buscar una solución global para esto)
                 {
                     perror("command not found"); // Tal vez quitar saltos de línea en errores, checkear eso
@@ -85,7 +89,7 @@ void execute(t_cmd *cmd)
             else
                 wait(NULL);
         }
-        if (is_builtin(cmd, i))
+        if (is_builtin(cmd, i) && !is_argument_extension(cmd, i))
             execute_builtin(cmd, i); // En principio funciona, aunque tal vez necesita pruebas(antes estaba metido todo directo el execute, con su i correspondiente)
         i++;
     }
@@ -142,9 +146,9 @@ void execute_pipes(t_cmd *cmd)
             execute_first_pipes(cmd, i, count_pipes, count_pids, fd, pid);
         if(i == find_len_last_command(cmd))
             execute_last_pipes(cmd, i, count_pipes, count_pids, fd, pid);
-        else if((i != 0 && i != find_len_last_command(cmd)) && (!is_argument(cmd->token[i][0]) && !is_pipe(cmd->token[i][0])))
+        else if((i != 0 && i != find_len_last_command(cmd)) && (!is_argument_extension(cmd, i) && !is_pipe(cmd->token[i][0])))
             execute_middle_pipes(cmd, i, count_pipes, count_pids, fd, pid);
-        if(i != 0 && is_pipe(cmd->token[i - 1][0]) && !is_pipe(cmd->token[i][0]) && !is_argument(cmd->token[i][0]))
+        if(i != 0 && is_pipe(cmd->token[i - 1][0]) && !is_pipe(cmd->token[i][0]) && !is_argument_extension(cmd, i))
             count_pipes++;
         i++;
     }
@@ -185,7 +189,7 @@ void    execute_first_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, 
                 perror("");
                 exit(0);
             }
-            if (!com && !is_argument(cmd->token[i][0])) 
+            if (!com && !is_argument_extension(cmd, i)) 
             {
                 perror("command not found");
                 exit(1);
@@ -231,7 +235,7 @@ void    execute_middle_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids,
                 perror("");
                 exit(0);
             }
-            if (!com && !is_argument(cmd->token[i][0])) 
+            if (!com && !is_argument_extension(cmd, i)) 
             {
                 perror("command not found");
                 exit(1);
@@ -278,7 +282,7 @@ void    execute_last_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, i
                 perror("");
                 exit(0);
             }
-            if (!com && !is_argument(cmd->token[i][0])) 
+            if (!com && !is_argument_extension(cmd, i)) 
             {
                 perror("command not found");
                 exit(1);
@@ -286,6 +290,7 @@ void    execute_last_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, i
         }
     }
     close(fd[count_pipes][READ_END]);
+    close(fd[count_pipes][WRITE_END]);
     free(exec_args);
 }
 

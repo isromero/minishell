@@ -64,9 +64,9 @@ typedef struct cmd
 	char	**env;
 	int		n_pipes;
 	int		n_processes;
+	int 	stdout;
 } t_cmd;
 
-#define INPUT_REDIRECT '<'
 #define HEREDOC_REDIRECT '<<'
 #define HEREDOC_QUOTE '<<Q'
 #define INPUT_REDIRECT '<'
@@ -142,8 +142,14 @@ void 	count_pipes(t_cmd *cmd);
 void	count_processes(t_cmd *cmd);
 int 	find_len_last_command(t_cmd *cmd);
 
-
 /* utils.c */
 char	*ft_strtok(char *str, const char *delim);
 int 	is_number(const char *str);
 #endif
+
+/* redirects.c */
+void	output_redirect(t_cmd *cmd);
+void 	close_redirect(t_cmd *cmd);
+int		find_first_output_redirect(t_cmd *cmd);
+int 	is_redirect(t_cmd *cmd);
+void	output_multiple_redirect(t_cmd *cmd);

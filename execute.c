@@ -63,17 +63,53 @@ void execute(t_cmd *cmd) // NO HACER DOBLE FORK.....
                     if (!exec_args)
                         return ;
 					j = i; // Así guardamos la distancia ya recorrida
-                   	while(j < cmd->n_tokens)
-					{
-						/* Ejemplo del por qué se = así:
-						En la primera iteración del bucle, j tomará el valor de i, que es 2. Si simplemente usamos j como índice para 
-						exec_args, se copiarían los tokens a partir del índice 2, pero queremos que se copien desde el índice 0 en exec_args.
-						Entonces, para compensar el j = i, restamos i a j, obteniendo j - i que es 0 en este caso. */
-						exec_args[j - i] = cmd->token[j];
-						j++;
-					}
-                    exec_args[j - i] = NULL;
-                    execve(com, exec_args, cmd->env);
+                    if (!is_redirect(cmd))
+                    {
+                        while(j < cmd->n_tokens)
+                        {
+                            /* Ejemplo del por qué se = así:
+                            En la primera iteración del bucle, j tomará el valor de i, que es 2. Si simplemente usamos j como índice para 
+                            exec_args, se copiarían los tokens a partir del índice 2, pero queremos que se copien desde el índice 0 en exec_args.
+                            Entonces, para compensar el j = i, restamos i a j, obteniendo j - i que es 0 en este caso. */
+                            exec_args[j - i] = cmd->token[j];
+                            j++;
+                        }
+                        exec_args[j - i] = NULL;
+                        execve(com, exec_args, cmd->env);
+                    }
+                    else if (is_redirect(cmd) == 1)
+                    {
+                        while(j < cmd->n_tokens && cmd->token[j][0] != '>')
+                        {
+                            /* Ejemplo del por qué se = así:
+                            En la primera iteración del bucle, j tomará el valor de i, que es 2. Si simplemente usamos j como índice para 
+                            exec_args, se copiarían los tokens a partir del índice 2, pero queremos que se copien desde el índice 0 en exec_args.
+                            Entonces, para compensar el j = i, restamos i a j, obteniendo j - i que es 0 en este caso. */
+                            exec_args[j - i] = cmd->token[j];
+                            j++;
+                        }
+                        exec_args[j - i] = NULL;
+                        output_redirect(cmd);
+                        execve(com, exec_args, cmd->env);
+                        close_redirect(cmd);
+                    }
+                    else if (is_redirect(cmd) > 1)
+                    {
+                        
+                        while(j < cmd->n_tokens && cmd->token[j][0] != '>')
+                        {
+                            /* Ejemplo del por qué se = así:
+                            En la primera iteración del bucle, j tomará el valor de i, que es 2. Si simplemente usamos j como índice para 
+                            exec_args, se copiarían los tokens a partir del índice 2, pero queremos que se copien desde el índice 0 en exec_args.
+                            Entonces, para compensar el j = i, restamos i a j, obteniendo j - i que es 0 en este caso. */
+                            exec_args[j - i] = cmd->token[j];
+                            j++;
+                        }
+                        exec_args[j - i] = NULL;
+                        output_multiple_redirect(cmd);
+                        execve(com, exec_args, cmd->env);
+                        close_redirect(cmd);
+                    }
                     perror("execve");
                     exit(0);
                 }

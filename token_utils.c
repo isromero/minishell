@@ -111,10 +111,11 @@ int	is_argument_extension(t_cmd *cmd, int i)
 		return 1;
 	// En vez de esto tenemos que checkear que el anterior era argumento o comando, entonces significa 
 	// que es otro argumento, independientemente de que exista o no
-	else if(cmd->token[i][0] >= 'A' && cmd->token[i][0] <= 'Z')
+	// ------------------ Con esto funciona sin sentido con el pipes y no sin pipes ------------------------------
+	/* else if(cmd->token[i][0] >= 'A' && cmd->token[i][0] <= 'Z')
 		return 1;
 	else if(cmd->token[i][0] >= 'a' && cmd->token[i][0] <= 'z')
-		return 1;
+		return 1; */
 	else if(cmd->token[i][0] == DOUBLE_QUOTE && cmd->token[i][ft_strlen(cmd->token[i]) - 1] == DOUBLE_QUOTE)
 		return 1;
 	else if(cmd->token[i][0] == SINGLE_QUOTE && cmd->token[i][ft_strlen(cmd->token[i]) - 1] == SINGLE_QUOTE)

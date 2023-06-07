@@ -23,6 +23,8 @@
 4. PERO si te meten otro redirect se crean archivos pero finaliza todo en el último */
 
 
+/* echo hello | <hola.txt cat GESTIONAR??????????*/ 
+
 int find_first_output_redirect(t_cmd *cmd)
 {
 	int len;
@@ -55,6 +57,22 @@ int is_redirect(t_cmd *cmd)
 		return (1);
 	else if(n_redirects > 1)
 		return (n_redirects);
+	return(0);
+}
+
+int is_redirect_pipes(t_cmd *cmd, int i)
+{
+	int	n_redirects;
+
+	n_redirects = 0;
+	while(cmd->token[i] != NULL && cmd->token[i][0] != '|')
+	{
+		if(cmd->token[i][0] == OUTPUT_REDIRECT)
+			n_redirects++;
+		i++;
+	}
+	if(n_redirects >= 1)
+		return(n_redirects);
 	return(0);
 }
 

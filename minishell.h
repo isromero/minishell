@@ -153,3 +153,4 @@ void 	close_redirect(t_cmd *cmd);
 int		find_first_output_redirect(t_cmd *cmd);
 int 	is_redirect(t_cmd *cmd);
 void	output_multiple_redirect(t_cmd *cmd);
+int 	is_redirect_pipes(t_cmd *cmd, int i);

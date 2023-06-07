@@ -181,11 +181,10 @@ void execute_pipes(t_cmd *cmd)
         if(i == 0)
             execute_first_pipes(cmd, i, count_pipes, count_pids, fd, pid);
         if(i == find_len_last_command(cmd))
-            execute_last_pipes(cmd, i, count_pipes, count_pids, fd, pid);
-        else if((i != 0 && i != find_len_last_command(cmd)) && (!is_argument_extension(cmd, i) && !is_pipe(cmd->token[i][0])))
+             execute_last_pipes(cmd, i, count_pipes, count_pids, fd, pid);
+        if((i != 0 && i != find_len_last_command(cmd)) && (!is_argument_extension(cmd, i) && !is_pipe(cmd->token[i][0])))
             execute_middle_pipes(cmd, i, count_pipes, count_pids, fd, pid);
-        if(i != 0 && is_pipe(cmd->token[i - 1][0]) && !is_pipe(cmd->token[i][0]) && !is_argument_extension(cmd, i))
-            count_pipes++;
+            
         i++;
     }
     wait_close_pipes(cmd, fd);
@@ -200,7 +199,7 @@ void    execute_first_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, 
     com = NULL;
     exec_args = NULL;
     j = 0;
-    pid[count_pids] = fork();
+    pid[count_pids] = fork(); //Checkear error de for
     if(pid[count_pids] == 0)
     {
         if(is_builtin(cmd, i))
@@ -212,16 +211,29 @@ void    execute_first_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, 
             {
                 exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
                 j = i;
-                while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|')
+                while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|' && cmd->token[j][0] != '>')
                 {
                     exec_args[j - i] = cmd->token[j];
                     j++;
                 }
                 exec_args[j - i] = NULL;
-                close(fd[count_pipes][READ_END]);
-                dup2(fd[count_pipes][WRITE_END], STDOUT_FILENO);
-                close(fd[count_pipes][WRITE_END]);
-                execve(com, exec_args, NULL);
+                close(fd[0][READ_END]);
+                dup2(fd[0][WRITE_END], STDOUT_FILENO);
+                close(fd[0][WRITE_END]);
+                if(is_redirect_pipes(cmd, i) == 1)
+                {
+                    output_redirect(cmd);
+                    execve(com, exec_args, NULL);
+                    close_redirect(cmd);
+                }
+               /*  else if(is_redirect_pipes(cmd, i) >= 1)
+                {
+                    output_multiple_redirect(cmd);
+                    execve(com, exec_args, NULL);
+                    close_redirect(cmd);
+                } */
+                else if(is_redirect_pipes(cmd, i) == 0)
+                    execve(com, exec_args, NULL);
                 perror("");
                 exit(0);
             }
@@ -233,7 +245,7 @@ void    execute_first_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, 
         }
         count_pids++;
     }
-    close(fd[count_pipes][WRITE_END]);
+    close(fd[0][WRITE_END]);
     free(exec_args);
 }
 
@@ -258,16 +270,29 @@ void    execute_middle_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids,
             {
                 exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
                 j = i;
-                while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|')
+                while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|' && cmd->token[j][0] != '>')
                 {
                     exec_args[j - i] = cmd->token[j];
                     j++;
                 }
                 exec_args[j - i] = NULL;
-                close(fd[count_pipes][WRITE_END]);
-                dup2(fd[count_pipes][READ_END], STDIN_FILENO);
-                close(fd[count_pipes][READ_END]);
-                execve(com, exec_args, NULL);
+                close(fd[0][WRITE_END]);
+                dup2(fd[0][READ_END], STDIN_FILENO);
+                close(fd[0][READ_END]);
+                if(is_redirect_pipes(cmd, i) == 1)
+                {
+                    output_redirect(cmd);
+                    execve(com, exec_args, NULL);
+                    close_redirect(cmd);
+                }
+               /*  else if(is_redirect_pipes(cmd, i) >= 1)
+                {
+                    output_multiple_redirect(cmd);
+                    execve(com, exec_args, NULL);
+                    close_redirect(cmd);
+                } */
+                if(is_redirect_pipes(cmd, i) == 0)
+                     execve(com, exec_args, NULL);
                 perror("");
                 exit(0);
             }
@@ -279,8 +304,8 @@ void    execute_middle_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids,
         }
         count_pids++;
     }
-    close(fd[count_pipes][READ_END]);
-    close(fd[count_pipes][WRITE_END]);
+    close(fd[0][WRITE_END]);
+    close(fd[0][READ_END]);
     free(exec_args);
 }
 
@@ -305,16 +330,29 @@ void    execute_last_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, i
             {
                 exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
                 j = i;
-                while(j < cmd->n_tokens - 1 && (cmd->token[j][0] != '|' || cmd->token[j] == NULL))
+                while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|' && cmd->token[j][0] != '>')
                 {
                     exec_args[j - i] = cmd->token[j];
                     j++;
                 }
                 exec_args[j - i] = NULL;
-                close(fd[count_pipes][WRITE_END]);
-                dup2(fd[count_pipes][READ_END], STDIN_FILENO);
-                close(fd[count_pipes][READ_END]);
-                execve(com, exec_args, NULL);
+                close(fd[0][WRITE_END]);
+                dup2(fd[0][READ_END], STDIN_FILENO);
+                close(fd[0][READ_END]);
+                if(is_redirect_pipes(cmd, i) == 1)
+                {
+                    output_redirect(cmd);
+                    execve(com, exec_args, NULL);
+                    close_redirect(cmd);
+                }
+                /*  else if(is_redirect_pipes(cmd, i) >= 1)
+                {
+                    output_multiple_redirect(cmd);
+                    execve(com, exec_args, NULL);
+                    close_redirect(cmd);
+                } */
+                else if(is_redirect_pipes(cmd, i) == 0)
+                    execve(com, exec_args, NULL);
                 perror("");
                 exit(0);
             }
@@ -325,8 +363,8 @@ void    execute_last_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, i
             }
         }
     }
-    close(fd[count_pipes][READ_END]);
-    close(fd[count_pipes][WRITE_END]);
+    close(fd[0][READ_END]);
+    close(fd[0][WRITE_END]);
     free(exec_args);
 }
 

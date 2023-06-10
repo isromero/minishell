@@ -12,22 +12,7 @@
 
 #include "minishell.h"
 
-void executor(t_cmd *cmd)
-{
-    int i;
 
-    i = 0;
-    while(cmd->token[i])
-    {
-        if(strchr(cmd->token[i], '|'))
-        {
-            execute_pipes(cmd);
-            return ;
-        }
-        i++;
-    }
-    execute(cmd);
-}
 
 void execute(t_cmd *cmd) // NO HACER DOBLE FORK.....
 {
@@ -42,7 +27,7 @@ void execute(t_cmd *cmd) // NO HACER DOBLE FORK.....
     exec_args = NULL;
     while (i < cmd->n_tokens - 1)
     {
-        if (!is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_special(cmd->token[i][0])/* Introducir is_special con todo */) 
+        if (!is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_special(cmd->token[i][0])/* Pendiente introducir is_special con todo */) 
         {
             // HACER UN INT QUE DEVUELVA ERROR Y NO ENTRAR
             printf("ESTO ES LA I %d\n", i);
@@ -64,7 +49,7 @@ void execute(t_cmd *cmd) // NO HACER DOBLE FORK.....
                     if (!exec_args)
                         return ;
 					j = i; // Así guardamos la distancia ya recorrida
-                    while(j < cmd->n_tokens)
+                    while(j < cmd->n_tokens - 1 && !is_special(cmd->token[j][0]))
                     {
                         /* Ejemplo del por qué se = así:
                         En la primera iteración del bucle, j tomará el valor de i, que es 2. Si simplemente usamos j como índice para 
@@ -74,14 +59,27 @@ void execute(t_cmd *cmd) // NO HACER DOBLE FORK.....
                         j++;
                     }
                     exec_args[j - i] = NULL;
-                    execve(com, exec_args, cmd->env);
+                    if(!is_redirect(cmd))
+                        execve(com, exec_args, cmd->env);
+                    else if(is_redirect(cmd) == 1)
+                    {
+                        output_redirect(cmd);
+                        execve(com, exec_args, cmd->env);
+                        close_redirect(cmd);
+                    }
+                    else if(is_redirect(cmd) > 1)
+                    {
+                        output_multiple_redirect(cmd);
+                        execve(com, exec_args, cmd->env);
+                        close_redirect(cmd);
+                    }
+                    free(exec_args);
                     perror("execve");
                     exit(1);
                 }
-                if (!com) // No solo vale con checkear si es argumento '-', sino también textos acompañados de echos, cat..(mirar más
-															//comandos que puedan tener textos, y sino buscar una solución global para esto)
+                if (!com)
                 {
-                    perror("command not found"); // Tal vez quitar saltos de línea en errores, checkear eso
+                    perror("command not found");
                     exit(1);
                 }
                 else
@@ -129,33 +127,85 @@ void	execute_builtin(t_cmd *cmd, int n_token)
         return;
 }
 
+void executor(t_cmd *cmd)
+{
+    int i;
+    int j;
+
+    i = 0;
+    j = 0;
+    cmd->count_pipes = 0;
+    cmd->count_pids = 0;
+    cmd->fd = (int **)malloc(sizeof(int *) * cmd->n_pipes); // Proteger mallocs + liberaciones?
+    cmd->pid = (int *)malloc(sizeof(int) * cmd->n_processes);
+    while(j < cmd->n_pipes)
+    {
+        cmd->fd[j] = (int *)malloc(sizeof(int) * 2);
+        // Reservamos para fd[x_numero_de_fd][2]
+        j++;
+    }
+    while(cmd->token[i] != NULL)
+    {
+        if(cmd->token[i][0] == '|' && cmd->count_pipes == 0)
+        {
+            init_pipes(cmd);
+            // envía salida
+            dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
+            close(cmd->fd[cmd->count_pipes][WRITE_END]);
+            close(cmd->fd[cmd->count_pipes][READ_END]);
+            execute_pipes(cmd);
+            cmd->count_pids++;
+        }
+        else if(cmd->token[i][0] == '|' && cmd->count_pipes > 0 && cmd->count_pipes < cmd->n_pipes - 1)
+        {
+            // recibe entrada
+            dup2(cmd->fd[cmd->count_pipes][READ_END], STDIN_FILENO);
+            close(cmd->fd[cmd->count_pipes][WRITE_END]);
+            close(cmd->fd[cmd->count_pipes][READ_END]);
+            cmd->count_pipes++;
+            // envía salida
+            dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
+            close(cmd->fd[cmd->count_pipes][WRITE_END]);
+            close(cmd->fd[cmd->count_pipes][READ_END]);
+            execute_pipes(cmd);
+            cmd->count_pids++;
+        }
+        else if (cmd->count_pipes > 0 && cmd->count_pipes == cmd->n_pipes - 1) 
+        {
+            // recibe entrada
+            dup2(cmd->fd[cmd->count_pipes][READ_END], STDIN_FILENO);
+            close(cmd->fd[cmd->count_pipes][WRITE_END]);
+            close(cmd->fd[cmd->count_pipes][READ_END]);
+            execute_pipes(cmd);
+            // cerramos el último pipe que se queda abierto porque solo recibe y no envía??
+            //...^
+            cmd->count_pids++; // no necesario
+        }
+        i++;
+    }
+    wait_close_pipes(cmd);
+    execute(cmd);
+}
+
 void execute_pipes(t_cmd *cmd)
 {
     int i;
-    int count_pids;
-    int count_pipes;
-    pid_t   pid[cmd->n_processes];
-    int     fd[cmd->n_pipes][2];
-    
     i = 0;
-    count_pids = 0;
-    count_pipes = 0;
-    init_pipes(cmd, fd);
     while(i < cmd->n_tokens - 1)
     {
         if(i == 0)
-            execute_first_pipes(cmd, i, count_pipes, count_pids, fd, pid);
+            execute_first_pipes(cmd, i);
         if(i == find_len_last_command(cmd))
-             execute_last_pipes(cmd, i, count_pipes, count_pids, fd, pid);
+             execute_last_pipes(cmd, i);
         if((i != 0 && i != find_len_last_command(cmd)) && (!is_argument_extension(cmd, i) && !is_pipe(cmd->token[i][0])))
-            execute_middle_pipes(cmd, i, count_pipes, count_pids, fd, pid);
+            execute_middle_pipes(cmd, i);
             
         i++;
     }
-    wait_close_pipes(cmd, fd);
+    
 }
 
-void    execute_first_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, int fd[cmd->n_pipes][2], pid_t pid[cmd->n_processes])
+void    execute_first_pipes(t_cmd *cmd, int i)
 {
     char    *com;
     char    **exec_args;
@@ -164,8 +214,8 @@ void    execute_first_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, 
     com = NULL;
     exec_args = NULL;
     j = 0;
-    pid[count_pids] = fork(); //Checkear error de for
-    if(pid[count_pids] == 0)
+    cmd->pid[cmd->count_pids] = fork(); //Checkear error de for
+    if(cmd->pid[cmd->count_pids] == 0)
     {
         if(is_builtin(cmd, i))
             execute_builtin(cmd, i);
@@ -182,9 +232,9 @@ void    execute_first_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, 
                     j++;
                 }
                 exec_args[j - i] = NULL;
-                close(fd[0][READ_END]);
-                dup2(fd[0][WRITE_END], STDOUT_FILENO);
-                close(fd[0][WRITE_END]);
+                close(cmd->fd[0][READ_END]);
+                dup2(cmd->fd[0][WRITE_END], STDOUT_FILENO);
+                close(cmd->fd[0][WRITE_END]);
                 if(is_redirect_pipes(cmd, i) == 1)
                 {
                     output_redirect(cmd);
@@ -208,13 +258,13 @@ void    execute_first_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, 
                 exit(1);
             }
         }
-        count_pids++;
+        cmd->count_pids++;
     }
-    close(fd[0][WRITE_END]);
+    close(cmd->fd[0][WRITE_END]);
     free(exec_args);
 }
 
-void    execute_middle_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, int fd[cmd->n_pipes][2], pid_t pid[cmd->n_processes])
+void    execute_middle_pipes(t_cmd *cmd, int i)
 {
     char    *com;
     char    **exec_args;
@@ -223,8 +273,8 @@ void    execute_middle_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids,
     com = NULL;
     exec_args = NULL;
     j = 0;
-    pid[count_pids] = fork();
-    if(pid[count_pids] == 0)
+    cmd->pid[cmd->count_pids] = fork();
+    if(cmd->pid[cmd->count_pids] == 0)
     {
         if(is_builtin(cmd, i))
             execute_builtin(cmd, i);
@@ -241,9 +291,9 @@ void    execute_middle_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids,
                     j++;
                 }
                 exec_args[j - i] = NULL;
-                close(fd[0][WRITE_END]);
-                dup2(fd[0][READ_END], STDIN_FILENO);
-                close(fd[0][READ_END]);
+                close(cmd->fd[0][WRITE_END]);
+                dup2(cmd->fd[0][READ_END], STDIN_FILENO);
+                close(cmd->fd[0][READ_END]);
                 if(is_redirect_pipes(cmd, i) == 1)
                 {
                     output_redirect(cmd);
@@ -267,14 +317,14 @@ void    execute_middle_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids,
                 exit(1);
             }
         }
-        count_pids++;
+        cmd->count_pids++;
     }
-    close(fd[0][WRITE_END]);
-    close(fd[0][READ_END]);
+    close(cmd->fd[0][WRITE_END]);
+    close(cmd->fd[0][READ_END]);
     free(exec_args);
 }
 
-void    execute_last_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, int fd[cmd->n_pipes][2], pid_t pid[cmd->n_processes])
+void    execute_last_pipes(t_cmd *cmd, int i)
 {
     char    *com;
     char    **exec_args;
@@ -283,8 +333,8 @@ void    execute_last_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, i
     com = NULL;
     j = 0;
     exec_args = NULL;
-    pid[count_pids] = fork();
-    if(pid[count_pids] == 0)
+    cmd->pid[cmd->count_pids] = fork();
+    if(cmd->pid[cmd->count_pids] == 0)
     {
         if(is_builtin(cmd, i))
             execute_builtin(cmd, i);
@@ -301,9 +351,9 @@ void    execute_last_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, i
                     j++;
                 }
                 exec_args[j - i] = NULL;
-                close(fd[0][WRITE_END]);
-                dup2(fd[0][READ_END], STDIN_FILENO);
-                close(fd[0][READ_END]);
+                close(cmd->fd[0][WRITE_END]);
+                dup2(cmd->fd[0][READ_END], STDIN_FILENO);
+                close(cmd->fd[0][READ_END]);
                 if(is_redirect_pipes(cmd, i) == 1)
                 {
                     output_redirect(cmd);
@@ -328,8 +378,8 @@ void    execute_last_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, i
             }
         }
     }
-    close(fd[0][READ_END]);
-    close(fd[0][WRITE_END]);
+    close(cmd->fd[0][READ_END]);
+    close(cmd->fd[0][WRITE_END]);
     free(exec_args);
 }
 
@@ -366,6 +416,9 @@ char  *command_dir(t_cmd *cmd, char *command)
     return (0);
 }
 
+
+/* Es una función muy parecida a command dir pero no devuelve con access ni nada, solo construye el
+comando pasado */
 char *build_command_path(const char *base_path, const char *command)
 {
     size_t base_len = ft_strlen(base_path);
@@ -378,17 +431,20 @@ char *build_command_path(const char *base_path, const char *command)
     ft_strncpy(command_path + base_len + 1, command, command_len);
     command_path[total_len - 1] = '\0';
 
-    return command_path;
+    return (command_path);
 }
 
 
 int is_command_exists(t_cmd *cmd, char *command)
 {
     if (access(command, F_OK) == 0) {
-        return 1; // El comando existe en la ruta actual
+        return 1; 
+        /*  El comando existe en la ruta actual
+        (no necesario, pero útil por si proporcionamos una ruta completa en vez de solo el comando
+        aunque actualmente eso lo hayamos solucionado de otra manera, en un futuro podemos mantener esto) */
     }
 
-    char *path = getenv("PATH");
+    char *path = ft_getenv("PATH", cmd->env);
     if (path != NULL) {
         char *path_copy = ft_strdup(path);
         char *token = ft_strtok(path_copy, ":");

@@ -97,10 +97,13 @@ int	is_argument_extension(t_cmd *cmd, int i)
 		return 1;
 	else if(cmd->token[i][0] == '-')
 		return 1;
+	/* BASTANTE POSIBLE que esto tenga errores en ciertos comandos con 2 argumentos sin '-' etc? */
 	/* Esto checkea si el argumento anterior era comando y el actual es una letra, si es así es que es argumento
 	con esto se solucionan los cannot access 'argumento' y que no se ejecute de nuevo command not found*/
 	else if(i != 0 && ((cmd->token[i][0] >= 'A' && cmd->token[i][0] <= 'Z') \
-	|| (cmd->token[i][0] >= 'a' && cmd->token[i][0] <= 'z')) && is_command_exists(cmd, cmd->token[i - 1]))
+	 || (cmd->token[i][0] >= 'a' && cmd->token[i][0] <= 'z'))\
+	 && (is_command_exists(cmd, cmd->token[i - 1]) || \
+	/* Realmente son solo los redirects */is_special(cmd->token[i - 1][0])))
 		return 1;
 	else if(cmd->token[i][0] == DOUBLE_QUOTE && cmd->token[i][ft_strlen(cmd->token[i]) - 1] == DOUBLE_QUOTE)
 		return 1;

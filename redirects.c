@@ -107,7 +107,6 @@ int find_last_output_redirect(t_cmd *cmd)
 	len = cmd->n_tokens - 2;
 	while(len >= 0)
 	{
-		printf("holasdfdsfsd: %d\n", len);
 		if(cmd->token[len][0] == '>') /* Meter más tipos de redirects */
 			return (len);
 		len--;

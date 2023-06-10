@@ -12,14 +12,14 @@
 
 #include "minishell.h"
 
-void    init_pipes(t_cmd *cmd, int fd[cmd->n_pipes][2])
+void    init_pipes(t_cmd *cmd)
 {
     int i;
 
     i = 0;
-    while(i <= cmd->n_pipes - 1)
+    while(i < cmd->n_pipes)
     {
-        if (pipe(fd[i]) == -1)
+        if (pipe(cmd->fd[i]) == -1)
         {
             perror("pipe");
             exit(1);
@@ -28,15 +28,15 @@ void    init_pipes(t_cmd *cmd, int fd[cmd->n_pipes][2])
     }
 }
 
-void    wait_close_pipes(t_cmd *cmd, int fd[cmd->n_pipes][2])
+void    wait_close_pipes(t_cmd *cmd)
 {
     int i;
 
     i = 0;
     while (i < cmd->n_pipes)
     {
-        close(fd[i][READ_END]);
-        close(fd[i][WRITE_END]);
+        close(cmd->fd[i][READ_END]);
+        close(cmd->fd[i][WRITE_END]);
         i++;
     }
     i = 0;
@@ -45,4 +45,6 @@ void    wait_close_pipes(t_cmd *cmd, int fd[cmd->n_pipes][2])
         wait(NULL);
         i++;
     }
+    free(cmd->fd);
+    free(cmd->pid);
 }

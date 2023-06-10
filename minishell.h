@@ -64,6 +64,11 @@ typedef struct cmd
 	char	**env;
 	int		n_pipes;
 	int		n_processes;
+	int		count_pipes;
+	int		count_pids;
+	int		pipes_stdout; // Posible uso para guardar el estado de antes de empezar redireccionamientos con pipes
+	int		**fd;
+	int		*pid;
 	int 	stdout;
 } t_cmd;
 
@@ -104,9 +109,9 @@ void	execute_pipes(t_cmd *cmd);
 char	*command_dir(t_cmd *cmd, char *command);
 int 	is_command_exists(t_cmd *cmd, char *command);
 char 	*build_command_path(const char *base_path, const char *command);
-void    execute_first_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, int fd[cmd->n_pipes][2], pid_t pid[cmd->n_processes]);
-void    execute_middle_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, int fd[cmd->n_pipes][2], pid_t pid[cmd->n_processes]);
-void    execute_last_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, int fd[cmd->n_pipes][2], pid_t pid[cmd->n_processes]);
+void    execute_first_pipes(t_cmd *cmd, int i);
+void    execute_middle_pipes(t_cmd *cmd, int i);
+void    execute_last_pipes(t_cmd *cmd, int i);
 
 /* expander.c */
 void	print_vars(t_cmd *cmd);
@@ -115,8 +120,8 @@ void	print_vars(t_cmd *cmd);
 void	parse_args(t_cmd *cmd);
 
 /* pipes_utils.c */
-void    init_pipes(t_cmd *cmd, int fd[cmd->n_pipes][2]);
-void    wait_close_pipes(t_cmd *cmd, int fd[cmd->n_pipes][2]);
+void    init_pipes(t_cmd *cmd);
+void    wait_close_pipes(t_cmd *cmd);
 
 /* prompt.c */
 char	*get_prompt(t_cmd *custom_prompt);

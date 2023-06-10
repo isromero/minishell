@@ -103,6 +103,7 @@ void	execute_builtin(t_cmd *cmd, int n_token);
 void	execute_pipes(t_cmd *cmd);
 char	*command_dir(t_cmd *cmd, char *command);
 int 	is_command_exists(t_cmd *cmd, char *command);
+char 	*build_command_path(const char *base_path, const char *command);
 void    execute_first_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, int fd[cmd->n_pipes][2], pid_t pid[cmd->n_processes]);
 void    execute_middle_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, int fd[cmd->n_pipes][2], pid_t pid[cmd->n_processes]);
 void    execute_last_pipes(t_cmd *cmd, int i, int count_pipes, int count_pids, int fd[cmd->n_pipes][2], pid_t pid[cmd->n_processes]);
@@ -139,7 +140,6 @@ int 	is_token(t_cmd *cmd, int len);
 int		check_len_token(t_cmd *cmd, int len);
 int		find_variables(char **token);
 void 	count_pipes(t_cmd *cmd);
-void	count_processes(t_cmd *cmd);
 int 	find_len_last_command(t_cmd *cmd);
 
 /* utils.c */

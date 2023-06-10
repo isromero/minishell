@@ -21,13 +21,13 @@ char *ft_strtok(char *str, const char *delim)
     if (save == NULL || *save == '\0')
         return NULL;
     // Encuentra el inicio del token
-    while (*save && strchr(delim, *save) != NULL)
+    while (*save && ft_strchr(delim, *save) != NULL)
         save++;
     if (*save == '\0')
         return NULL;
     char *token = save;
     // Encuentra el final del token
-    while (*save && strchr(delim, *save) == NULL)
+    while (*save && ft_strchr(delim, *save) == NULL)
         save++;
     if (*save != '\0')
         *save++ = '\0';

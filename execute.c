@@ -34,13 +34,15 @@ void execute(t_cmd *cmd) // NO HACER DOBLE FORK.....
     int i;
 	int	j;
     char *com;
+    char **exec_args;
 	
 	i = 0;
 	j = 0;
     com = NULL;
-    while (i < cmd->n_tokens)
+    exec_args = NULL;
+    while (i < cmd->n_tokens - 1)
     {
-        if (!is_builtin(cmd, i) && !is_argument_extension(cmd, i)) // Checkear si es pipe, y demás
+        if (!is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_special(cmd->token[i][0])/* Introducir is_special con todo */) 
         {
             // HACER UN INT QUE DEVUELVA ERROR Y NO ENTRAR
             printf("ESTO ES LA I %d\n", i);
@@ -56,62 +58,25 @@ void execute(t_cmd *cmd) // NO HACER DOBLE FORK.....
 				/* Si se obtuvo una ruta válida (com != NULL), se crea un nuevo arreglo exec_args para almacenar los argumentos que se pasarán a execve. */
                 if (com != NULL)
                 {
-                    printf("iscommand: %s\n", com); 
 					/* Se asigna memoria dinámicamente para exec_args con un tamaño igual al número de tokens 
 					restantes en cmd desde la posición i, más 1 para el elemento NULL que se agrega al final del arreglo. */
-                    char **exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
+                    exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
                     if (!exec_args)
                         return ;
 					j = i; // Así guardamos la distancia ya recorrida
-                    if (!is_redirect(cmd))
+                    while(j < cmd->n_tokens)
                     {
-                        while(j < cmd->n_tokens)
-                        {
-                            /* Ejemplo del por qué se = así:
-                            En la primera iteración del bucle, j tomará el valor de i, que es 2. Si simplemente usamos j como índice para 
-                            exec_args, se copiarían los tokens a partir del índice 2, pero queremos que se copien desde el índice 0 en exec_args.
-                            Entonces, para compensar el j = i, restamos i a j, obteniendo j - i que es 0 en este caso. */
-                            exec_args[j - i] = cmd->token[j];
-                            j++;
-                        }
-                        exec_args[j - i] = NULL;
-                        execve(com, exec_args, cmd->env);
+                        /* Ejemplo del por qué se = así:
+                        En la primera iteración del bucle, j tomará el valor de i, que es 2. Si simplemente usamos j como índice para 
+                        exec_args, se copiarían los tokens a partir del índice 2, pero queremos que se copien desde el índice 0 en exec_args.
+                        Entonces, para compensar el j = i, restamos i a j, obteniendo j - i que es 0 en este caso. */
+                        exec_args[j - i] = cmd->token[j];
+                        j++;
                     }
-                    else if (is_redirect(cmd) == 1)
-                    {
-                        while(j < cmd->n_tokens && cmd->token[j][0] != '>')
-                        {
-                            /* Ejemplo del por qué se = así:
-                            En la primera iteración del bucle, j tomará el valor de i, que es 2. Si simplemente usamos j como índice para 
-                            exec_args, se copiarían los tokens a partir del índice 2, pero queremos que se copien desde el índice 0 en exec_args.
-                            Entonces, para compensar el j = i, restamos i a j, obteniendo j - i que es 0 en este caso. */
-                            exec_args[j - i] = cmd->token[j];
-                            j++;
-                        }
-                        exec_args[j - i] = NULL;
-                        output_redirect(cmd);
-                        execve(com, exec_args, cmd->env);
-                        close_redirect(cmd);
-                    }
-                    else if (is_redirect(cmd) > 1)
-                    {
-                        
-                        while(j < cmd->n_tokens && cmd->token[j][0] != '>')
-                        {
-                            /* Ejemplo del por qué se = así:
-                            En la primera iteración del bucle, j tomará el valor de i, que es 2. Si simplemente usamos j como índice para 
-                            exec_args, se copiarían los tokens a partir del índice 2, pero queremos que se copien desde el índice 0 en exec_args.
-                            Entonces, para compensar el j = i, restamos i a j, obteniendo j - i que es 0 en este caso. */
-                            exec_args[j - i] = cmd->token[j];
-                            j++;
-                        }
-                        exec_args[j - i] = NULL;
-                        output_multiple_redirect(cmd);
-                        execve(com, exec_args, cmd->env);
-                        close_redirect(cmd);
-                    }
+                    exec_args[j - i] = NULL;
+                    execve(com, exec_args, cmd->env);
                     perror("execve");
-                    exit(0);
+                    exit(1);
                 }
                 if (!com) // No solo vale con checkear si es argumento '-', sino también textos acompañados de echos, cat..(mirar más
 															//comandos que puedan tener textos, y sino buscar una solución global para esto)
@@ -401,31 +366,50 @@ char  *command_dir(t_cmd *cmd, char *command)
     return (0);
 }
 
-int is_command_exists(t_cmd *cmd, char *command) 
+char *build_command_path(const char *base_path, const char *command)
 {
-    char 	*path;
-    char 	*dir;
-	size_t	dir_len;
-	
-	path = ft_getenv("PATH", cmd->env);
-	dir = ft_strtok(path, ":");
-    while (dir != NULL) 
-	{
-        // Construye la ruta completa al archivo ejecutable
-        char executable_path[PATH_MAX];
-        dir_len = ft_strlen(dir);
+    size_t base_len = ft_strlen(base_path);
+    size_t command_len = ft_strlen(command);
+    size_t total_len = base_len + command_len + 2; // +2 para '/' y '\0'
 
-		ft_strcpy(executable_path, dir);
-        executable_path[dir_len] = '/';
-        ft_strcpy(executable_path + dir_len + 1, command);
-		
-        // Verifica si el archivo ejecutable existe y es ejecutable
-        if (access(executable_path, F_OK) == 0)
-            return (1);
-        dir = ft_strtok(NULL, ":");
+    char *command_path = (char *)malloc(total_len * sizeof(char));
+    ft_strncpy(command_path, base_path, base_len);
+    command_path[base_len] = '/';
+    ft_strncpy(command_path + base_len + 1, command, command_len);
+    command_path[total_len - 1] = '\0';
+
+    return command_path;
+}
+
+
+int is_command_exists(t_cmd *cmd, char *command)
+{
+    if (access(command, F_OK) == 0) {
+        return 1; // El comando existe en la ruta actual
     }
-    // El archivo ejecutable no existe en ningún directorio del PATH
-    return (0);
+
+    char *path = getenv("PATH");
+    if (path != NULL) {
+        char *path_copy = ft_strdup(path);
+        char *token = ft_strtok(path_copy, ":");
+
+        while (token != NULL) {
+            char *command_path = build_command_path(token, command);
+            if (access(command_path, F_OK) == 0) {
+                free(path_copy);
+                free(command_path);
+                return 1; // El comando existe en una de las rutas de PATH
+            }
+            free(command_path);
+            token = ft_strtok(NULL, ":");
+        }
+
+        free(path_copy);
+    }
+   /*  if (is_builtin(cmd, command))
+        return 1; */
+
+    return 0; // El comando no existe en ninguna ubicación conocida
 }
 
 // METER UN TRY_ACCESS PARA EJECUTAR COSAS DENTRO DE NUESTRA MINISHELL

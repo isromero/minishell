@@ -27,7 +27,6 @@ int	main(int argc, char **argv, char **env)
 			add_history(cmd.line);
 		parse_args(&cmd);
 		count_pipes(&cmd);
-		count_processes(&cmd);
 		executor(&cmd);
 		clean_tokens(&cmd);
 		free(cmd.line);

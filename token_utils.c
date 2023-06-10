@@ -51,30 +51,18 @@ void save_token(t_cmd *cmd, char *token)
     cmd->token = new_token;
 }
 
-void	count_processes(t_cmd *cmd)
-{
-    int i;
-
-    i = 0;
-	cmd->n_processes = 0;
-    while(cmd->token[i] != NULL)
-    {
-        if(!is_pipe(cmd->token[i][0]))
-            cmd->n_processes++;
-        i++;
-    }
-}
-
 void count_pipes(t_cmd *cmd)
 {
     int i = 0;
 	cmd->n_pipes = 0;
+	cmd->n_processes = 0;
     while (cmd->token[i] != NULL)
 	{
 		if(cmd->token[i][0] == '|')
 			cmd->n_pipes++;
 		i++;
 	}
+	cmd->n_processes = cmd->n_pipes + 1;
 }
 
 int find_len_last_command(t_cmd *cmd)
@@ -109,13 +97,11 @@ int	is_argument_extension(t_cmd *cmd, int i)
 		return 1;
 	else if(cmd->token[i][0] == '-')
 		return 1;
-	// En vez de esto tenemos que checkear que el anterior era argumento o comando, entonces significa 
-	// que es otro argumento, independientemente de que exista o no
-	// ------------------ Con esto funciona sin sentido con el pipes y no sin pipes ------------------------------
-	/* else if(cmd->token[i][0] >= 'A' && cmd->token[i][0] <= 'Z')
+	/* Esto checkea si el argumento anterior era comando y el actual es una letra, si es así es que es argumento
+	con esto se solucionan los cannot access 'argumento' y que no se ejecute de nuevo command not found*/
+	else if(i != 0 && ((cmd->token[i][0] >= 'A' && cmd->token[i][0] <= 'Z') \
+	|| (cmd->token[i][0] >= 'a' && cmd->token[i][0] <= 'z')) && is_command_exists(cmd, cmd->token[i - 1]))
 		return 1;
-	else if(cmd->token[i][0] >= 'a' && cmd->token[i][0] <= 'z')
-		return 1; */
 	else if(cmd->token[i][0] == DOUBLE_QUOTE && cmd->token[i][ft_strlen(cmd->token[i]) - 1] == DOUBLE_QUOTE)
 		return 1;
 	else if(cmd->token[i][0] == SINGLE_QUOTE && cmd->token[i][ft_strlen(cmd->token[i]) - 1] == SINGLE_QUOTE)

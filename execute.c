@@ -86,15 +86,28 @@ void execute(t_cmd *cmd)
                         j++;
                     }
                     exec_args[j - i] = NULL;
-                    if(!is_redirect(cmd))
+                    if(!is_output_redirect(cmd))
                         execve(com, exec_args, cmd->env);
-                    else if(is_redirect(cmd) == 1)
+                    /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
+                    else if(is_append_redirect(cmd) == 1)
+                    {
+                        append_redirect(cmd);
+                        execve(com, exec_args, cmd->env);
+                        close_redirect(cmd);
+                    }
+                    else if(is_append_redirect(cmd) > 1)
+                    {
+                        append_multiple_redirect(cmd);
+                        execve(com, exec_args, cmd->env);
+                        close_redirect(cmd);
+                    }
+                    else if(is_output_redirect(cmd) == 1)
                     {
                         output_redirect(cmd);
                         execve(com, exec_args, cmd->env);
                         close_redirect(cmd);
                     }
-                    else if(is_redirect(cmd) > 1)
+                    else if(is_output_redirect(cmd) > 1)
                     {
                         output_multiple_redirect(cmd);
                         execve(com, exec_args, cmd->env);
@@ -242,15 +255,28 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                 close(cmd->fd[cmd->count_pipes][READ_END]);
                 dup2(stdout, STDOUT_FILENO);
                 close(stdout);
-                if(!is_redirect(cmd))
+                if(!is_output_redirect(cmd))
                     execve(com, exec_args, cmd->env);
-                else if(is_redirect(cmd) == 1)
+                /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
+                else if(is_append_redirect(cmd) == 1)
+                {
+                    append_redirect(cmd);
+                    execve(com, exec_args, cmd->env);
+                    close_redirect(cmd);
+                }
+                else if(is_append_redirect(cmd) > 1)
+                {
+                    append_multiple_redirect(cmd);
+                    execve(com, exec_args, cmd->env);
+                    close_redirect(cmd);
+                }
+                else if(is_output_redirect(cmd) == 1)
                 {
                     output_redirect(cmd);
                     execve(com, exec_args, cmd->env);
                     close_redirect(cmd);
                 }
-                else if(is_redirect(cmd) > 1)
+                else if(is_output_redirect(cmd) > 1)
                 {
                     output_multiple_redirect(cmd);
                     execve(com, exec_args, cmd->env);
@@ -306,15 +332,28 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                 close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
                 dup2(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END], STDOUT_FILENO);
                 close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
-                if(!is_redirect(cmd[0]))
+                if(!is_output_redirect(cmd[0]))
                     execve(com, exec_args, cmd[0]->env);
-                else if(is_redirect(cmd[0]) == 1)
+                /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
+                else if(is_append_redirect(cmd[0]) == 1)
+                {
+                    append_redirect(cmd[0]);
+                    execve(com, exec_args, cmd[0]->env);
+                    close_redirect(cmd[0]);
+                }
+                else if(is_append_redirect(cmd[0]) > 1)
+                {
+                    append_multiple_redirect(cmd[0]);
+                    execve(com, exec_args, cmd[0]->env);
+                    close_redirect(cmd[0]);
+                }
+                else if(is_output_redirect(cmd[0]) == 1)
                 {
                     output_redirect(cmd[0]);
                     execve(com, exec_args, cmd[0]->env);
                     close_redirect(cmd[0]);
                 }
-                else if(is_redirect(cmd[0]) > 1)
+                else if(is_output_redirect(cmd[0]) > 1)
                 {
                     output_multiple_redirect(cmd[0]);
                     execve(com, exec_args, cmd[0]->env);
@@ -366,15 +405,28 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                 close(cmd->fd[cmd->count_pipes][READ_END]);
                 dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
                 close(cmd->fd[cmd->count_pipes][WRITE_END]);
-                if(!is_redirect(cmd))
+                if(!is_output_redirect(cmd))
                     execve(com, exec_args, cmd->env);
-                else if(is_redirect(cmd) == 1)
+                /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
+                else if(is_append_redirect(cmd) == 1)
+                {
+                    append_redirect(cmd);
+                    execve(com, exec_args, cmd->env);
+                    close_redirect(cmd);
+                }
+                else if(is_append_redirect(cmd) > 1)
+                {
+                    append_multiple_redirect(cmd);
+                    execve(com, exec_args, cmd->env);
+                    close_redirect(cmd);
+                }
+                else if(is_output_redirect(cmd) == 1)
                 {
                     output_redirect(cmd);
                     execve(com, exec_args, cmd->env);
                     close_redirect(cmd);
                 }
-                else if(is_redirect(cmd) > 1)
+                else if(is_output_redirect(cmd) > 1)
                 {
                     output_multiple_redirect(cmd);
                     execve(com, exec_args, cmd->env);
@@ -393,7 +445,7 @@ void    execute_first_pipes(t_cmd *cmd, int i)
     free(exec_args); // aquí?
 }
 
-void    execute_pipes(t_cmd *cmd, int i)
+/* void    execute_pipes(t_cmd *cmd, int i)
 {
     char    *com;
     char    **exec_args;
@@ -433,7 +485,7 @@ void    execute_pipes(t_cmd *cmd, int i)
     }
     free(exec_args); // aquí?
     
-}
+} */
 
 char  *command_dir(t_cmd *cmd, char *command) 
 {

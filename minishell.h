@@ -73,13 +73,13 @@ typedef struct cmd
 	int 	stdout;
 } t_cmd;
 
-#define HEREDOC_REDIRECT '<<'
+#define HEREDOC_REDIRECT "<<"
 #define HEREDOC_QUOTE '<<Q'
 #define INPUT_REDIRECT '<'
 #define INPUT_REDIRECT '<'
 #define PIPE '|'
 #define OUTPUT_REDIRECT '>'
-#define APPEND_REDIRECT '>>'
+#define APPEND_REDIRECT ">>"
 #define ARGUMENT '-'
 #define DOUBLE_QUOTE '"'
 #define ARGUMENT '-'
@@ -158,7 +158,14 @@ int 	is_number(const char *str);
 /* redirects.c */
 void	output_redirect(t_cmd *cmd);
 void 	close_redirect(t_cmd *cmd);
-int		find_first_output_redirect(t_cmd *cmd);
-int 	is_redirect(t_cmd *cmd);
+
+int 	is_output_redirect(t_cmd *cmd);
 void	output_multiple_redirect(t_cmd *cmd);
 int 	is_redirect_pipes(t_cmd *cmd, int i);
+void	append_redirect(t_cmd *cmd);
+void	append_multiple_redirect(t_cmd *cmd);
+int 	is_append_redirect(t_cmd *cmd);
+int		find_first_output_redirect(t_cmd *cmd);
+int		find_last_output_redirect(t_cmd *cmd);
+int 	find_first_append_redirect(t_cmd *cmd);
+int 	find_last_append_redirect(t_cmd *cmd);

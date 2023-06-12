@@ -51,33 +51,6 @@ void save_token(t_cmd *cmd, char *token)
     cmd->token = new_token;
 }
 
-void count_pipes(t_cmd *cmd)
-{
-    int i = 0;
-	cmd->n_pipes = 0;
-	cmd->n_processes = 0;
-    while (cmd->token[i] != NULL)
-	{
-		if(cmd->token[i][0] == '|')
-			cmd->n_pipes++;
-		i++;
-	}
-	cmd->n_processes = cmd->n_pipes + 1;
-}
-
-int find_len_last_command(t_cmd *cmd)
-{
-    int i;
-
-    i = cmd->n_tokens - 2; // 5
-    while(i >= 0)
-    {
-        if(cmd->token[i][0] == '|')
-            return (i + 1); // La posición del token después del último pipe
-        i--;
-    }
-    return (0);
-}
 
 int	is_special(char c)
 {

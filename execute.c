@@ -12,9 +12,36 @@
 
 #include "minishell.h"
 
+void executor(t_cmd *cmd)
+{
+    int i;
+    int j;
 
+    i = 0;
+    j = 0;
+    cmd->count_pipes = 0;
+    cmd->count_pids = 0;
+    cmd->pid = (int *)malloc(sizeof(int) * cmd->n_processes);
+    cmd->fd = (int **)malloc(sizeof(int *) * cmd->n_pipes); // Proteger mallocs + liberaciones?
+    while(j < cmd->n_pipes)
+    {
+        cmd->fd[j] = (int *)malloc(sizeof(int) * 2);
+        // Reservamos para fd[x_numero_de_fd][2]
+        j++;
+    }
+    while(cmd->token[i] != NULL)
+    {
+        if(ft_strchr(cmd->token[i], '|'))
+        {
+            redirecting_pipes(cmd);
+            return ;
+        }
+        i++;
+    }
+    execute(cmd);
+}
 
-void execute(t_cmd *cmd) // NO HACER DOBLE FORK.....
+void execute(t_cmd *cmd)
 {
     int i;
 	int	j;
@@ -83,7 +110,7 @@ void execute(t_cmd *cmd) // NO HACER DOBLE FORK.....
                     exit(1);
                 }
                 else
-                    exit(0);
+                    exit(1);
             }
             else
                 wait(NULL);
@@ -127,85 +154,62 @@ void	execute_builtin(t_cmd *cmd, int n_token)
         return;
 }
 
-void executor(t_cmd *cmd)
+
+void redirecting_pipes(t_cmd *cmd) /* dobles comandos como grep y cat se quedan en bucle, error de restauración de stdout stdin?? */
 {
     int i;
-    int j;
+    int first_time;
+    int len;
+    int stdin = dup(STDIN_FILENO);
+    int stdout = dup(STDOUT_FILENO);
 
     i = 0;
-    j = 0;
-    cmd->count_pipes = 0;
-    cmd->count_pids = 0;
-    cmd->fd = (int **)malloc(sizeof(int *) * cmd->n_pipes); // Proteger mallocs + liberaciones?
-    cmd->pid = (int *)malloc(sizeof(int) * cmd->n_processes);
-    while(j < cmd->n_pipes)
+    len = 0;
+    first_time = 0; 
+    init_pipes(cmd);
+    while(i < cmd->n_tokens - 1)
     {
-        cmd->fd[j] = (int *)malloc(sizeof(int) * 2);
-        // Reservamos para fd[x_numero_de_fd][2]
-        j++;
-    }
-    while(cmd->token[i] != NULL)
-    {
-        if(cmd->token[i][0] == '|' && cmd->count_pipes == 0)
+        if(cmd->token[i][0] == '|' && cmd->count_pipes == 0 && first_time == 0)
         {
-            init_pipes(cmd);
+            first_time = 1;
+            dprintf(2, "INICIOOOOOOOOOOOOOO\n");
             // envía salida
-            dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
-            close(cmd->fd[cmd->count_pipes][WRITE_END]);
-            close(cmd->fd[cmd->count_pipes][READ_END]);
-            execute_pipes(cmd);
+            /* dprintf(0, "Esto debería ser 0: %d\n", cmd->count_pipes); */
+            execute_first_pipes(cmd, 0);
             cmd->count_pids++;
         }
-        else if(cmd->token[i][0] == '|' && cmd->count_pipes > 0 && cmd->count_pipes < cmd->n_pipes - 1)
+        else if(cmd->token[i][0] == '|' && (first_time == 1 || cmd->count_pipes > 0) && cmd->count_pipes < cmd->n_pipes - 1)
         {
             // recibe entrada
-            dup2(cmd->fd[cmd->count_pipes][READ_END], STDIN_FILENO);
-            close(cmd->fd[cmd->count_pipes][WRITE_END]);
-            close(cmd->fd[cmd->count_pipes][READ_END]);
-            cmd->count_pipes++;
-            // envía salida
-            dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
-            close(cmd->fd[cmd->count_pipes][WRITE_END]);
-            close(cmd->fd[cmd->count_pipes][READ_END]);
-            execute_pipes(cmd);
+            dprintf(2, "MEDIOOOOOOOOOO\n");
+            first_time = 0;
+            len = find_len_command_pipes(cmd, i);
+            execute_middle_pipes(&cmd, len);
             cmd->count_pids++;
+            dprintf(2, "fuerita: %d\n", cmd->count_pipes);
         }
-        else if (cmd->count_pipes > 0 && cmd->count_pipes == cmd->n_pipes - 1) 
+       
+        else if (cmd->token[i + 1] == NULL && (first_time == 1 || cmd->count_pipes > 0) && cmd->count_pipes == cmd->n_pipes - 1) 
         {
+            dprintf(2, "FINALLLLLLLLL\n");
+            first_time = 0;
             // recibe entrada
-            dup2(cmd->fd[cmd->count_pipes][READ_END], STDIN_FILENO);
-            close(cmd->fd[cmd->count_pipes][WRITE_END]);
-            close(cmd->fd[cmd->count_pipes][READ_END]);
-            execute_pipes(cmd);
+            len = find_len_command_pipes(cmd, i);
+            execute_last_pipes(cmd, len, stdout);
             // cerramos el último pipe que se queda abierto porque solo recibe y no envía??
             //...^
             cmd->count_pids++; // no necesario
         }
         i++;
     }
+    dup2(stdin, STDIN_FILENO);
+    close(stdin);
+    dup2(stdout, STDOUT_FILENO);
+    close(stdout);
     wait_close_pipes(cmd);
-    execute(cmd);
 }
 
-void execute_pipes(t_cmd *cmd)
-{
-    int i;
-    i = 0;
-    while(i < cmd->n_tokens - 1)
-    {
-        if(i == 0)
-            execute_first_pipes(cmd, i);
-        if(i == find_len_last_command(cmd))
-             execute_last_pipes(cmd, i);
-        if((i != 0 && i != find_len_last_command(cmd)) && (!is_argument_extension(cmd, i) && !is_pipe(cmd->token[i][0])))
-            execute_middle_pipes(cmd, i);
-            
-        i++;
-    }
-    
-}
-
-void    execute_first_pipes(t_cmd *cmd, int i)
+void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
 {
     char    *com;
     char    **exec_args;
@@ -214,7 +218,7 @@ void    execute_first_pipes(t_cmd *cmd, int i)
     com = NULL;
     exec_args = NULL;
     j = 0;
-    cmd->pid[cmd->count_pids] = fork(); //Checkear error de for
+    cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
     if(cmd->pid[cmd->count_pids] == 0)
     {
         if(is_builtin(cmd, i))
@@ -232,48 +236,116 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                     j++;
                 }
                 exec_args[j - i] = NULL;
-                close(cmd->fd[0][READ_END]);
-                dup2(cmd->fd[0][WRITE_END], STDOUT_FILENO);
-                close(cmd->fd[0][WRITE_END]);
-                if(is_redirect_pipes(cmd, i) == 1)
+                dprintf(2, "%d:", cmd->count_pipes);
+                close(cmd->fd[cmd->count_pipes][WRITE_END]);
+                dup2(cmd->fd[cmd->count_pipes][READ_END], STDIN_FILENO);
+                close(cmd->fd[cmd->count_pipes][READ_END]);
+                dup2(stdout, STDOUT_FILENO);
+                close(stdout);
+                if(!is_redirect(cmd))
+                    execve(com, exec_args, cmd->env);
+                else if(is_redirect(cmd) == 1)
                 {
                     output_redirect(cmd);
-                    execve(com, exec_args, NULL);
+                    execve(com, exec_args, cmd->env);
                     close_redirect(cmd);
                 }
-               /*  else if(is_redirect_pipes(cmd, i) >= 1)
+                else if(is_redirect(cmd) > 1)
                 {
                     output_multiple_redirect(cmd);
-                    execve(com, exec_args, NULL);
+                    execve(com, exec_args, cmd->env);
                     close_redirect(cmd);
-                } */
-                else if(is_redirect_pipes(cmd, i) == 0)
-                    execve(com, exec_args, NULL);
+                }
                 perror("");
                 exit(0);
             }
             if (!com && !is_argument_extension(cmd, i)) 
             {
                 perror("command not found");
-                exit(1);
+                exit(0);
             }
         }
-        cmd->count_pids++;
     }
-    close(cmd->fd[0][WRITE_END]);
-    free(exec_args);
+    free(exec_args); // aquí?
 }
 
-void    execute_middle_pipes(t_cmd *cmd, int i)
+void    execute_middle_pipes(t_cmd **cmd, int i)
 {
     char    *com;
     char    **exec_args;
-    int j;
+    int     j;
 
     com = NULL;
     exec_args = NULL;
     j = 0;
-    cmd->pid[cmd->count_pids] = fork();
+    cmd[0]->pid[cmd[0]->count_pids] = fork(); //Checkear error de fork
+    if(cmd[0]->pid[cmd[0]->count_pids] == 0)
+    {
+        if(is_builtin(cmd[0], i))
+            execute_builtin(cmd[0], i);
+        else
+        {
+            com = command_dir(cmd[0], cmd[0]->token[i]);
+            if (com != NULL)
+            {
+                exec_args = (char **)malloc(sizeof(char *) * (cmd[0]->n_tokens - i + 1));
+                j = i;
+                while(j < cmd[0]->n_tokens - 1 && cmd[0]->token[j][0] != '|' && cmd[0]->token[j][0] != '>')
+                {
+                    exec_args[j - i] = cmd[0]->token[j];
+                    j++;
+                }
+                exec_args[j - i] = NULL;
+                //recibe entrada
+                close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
+                dup2(cmd[0]->fd[cmd[0]->count_pipes][READ_END], STDIN_FILENO);
+                close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
+                cmd[0]->count_pipes++;
+                dprintf(2, "dentro: %d\n", cmd[0]->count_pipes);
+                // envía salida
+                close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
+                dup2(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END], STDOUT_FILENO);
+                close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
+                if(!is_redirect(cmd[0]))
+                    execve(com, exec_args, cmd[0]->env);
+                else if(is_redirect(cmd[0]) == 1)
+                {
+                    output_redirect(cmd[0]);
+                    execve(com, exec_args, cmd[0]->env);
+                    close_redirect(cmd[0]);
+                }
+                else if(is_redirect(cmd[0]) > 1)
+                {
+                    output_multiple_redirect(cmd[0]);
+                    execve(com, exec_args, cmd[0]->env);
+                    close_redirect(cmd[0]);
+                }
+                perror("");
+                exit(0);
+            }
+            if (!com && !is_argument_extension(cmd[0], i)) 
+            {
+                perror("command not found");
+                exit(0);
+            }
+        }
+    }
+    else
+        cmd[0]->count_pipes++;
+    free(exec_args); // aquí?
+}
+
+
+void    execute_first_pipes(t_cmd *cmd, int i)
+{
+    char    *com;
+    char    **exec_args;
+    int     j;
+
+    com = NULL;
+    exec_args = NULL;
+    j = 0;
+    cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
     if(cmd->pid[cmd->count_pids] == 0)
     {
         if(is_builtin(cmd, i))
@@ -281,7 +353,7 @@ void    execute_middle_pipes(t_cmd *cmd, int i)
         else
         {
             com = command_dir(cmd, cmd->token[i]);
-            if(com != NULL)
+            if (com != NULL)
             {
                 exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
                 j = i;
@@ -291,49 +363,46 @@ void    execute_middle_pipes(t_cmd *cmd, int i)
                     j++;
                 }
                 exec_args[j - i] = NULL;
-                close(cmd->fd[0][WRITE_END]);
-                dup2(cmd->fd[0][READ_END], STDIN_FILENO);
-                close(cmd->fd[0][READ_END]);
-                if(is_redirect_pipes(cmd, i) == 1)
+                close(cmd->fd[cmd->count_pipes][READ_END]);
+                dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
+                close(cmd->fd[cmd->count_pipes][WRITE_END]);
+                if(!is_redirect(cmd))
+                    execve(com, exec_args, cmd->env);
+                else if(is_redirect(cmd) == 1)
                 {
                     output_redirect(cmd);
-                    execve(com, exec_args, NULL);
+                    execve(com, exec_args, cmd->env);
                     close_redirect(cmd);
                 }
-               /*  else if(is_redirect_pipes(cmd, i) >= 1)
+                else if(is_redirect(cmd) > 1)
                 {
                     output_multiple_redirect(cmd);
-                    execve(com, exec_args, NULL);
+                    execve(com, exec_args, cmd->env);
                     close_redirect(cmd);
-                } */
-                if(is_redirect_pipes(cmd, i) == 0)
-                     execve(com, exec_args, NULL);
+                }
                 perror("");
                 exit(0);
             }
             if (!com && !is_argument_extension(cmd, i)) 
             {
                 perror("command not found");
-                exit(1);
+                exit(0);
             }
         }
-        cmd->count_pids++;
     }
-    close(cmd->fd[0][WRITE_END]);
-    close(cmd->fd[0][READ_END]);
-    free(exec_args);
+    free(exec_args); // aquí?
 }
 
-void    execute_last_pipes(t_cmd *cmd, int i)
+void    execute_pipes(t_cmd *cmd, int i)
 {
     char    *com;
     char    **exec_args;
-    int j;
+    int     j;
 
     com = NULL;
-    j = 0;
     exec_args = NULL;
-    cmd->pid[cmd->count_pids] = fork();
+    j = 0;
+    cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
     if(cmd->pid[cmd->count_pids] == 0)
     {
         if(is_builtin(cmd, i))
@@ -341,7 +410,7 @@ void    execute_last_pipes(t_cmd *cmd, int i)
         else
         {
             com = command_dir(cmd, cmd->token[i]);
-            if(com != NULL)
+            if (com != NULL)
             {
                 exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
                 j = i;
@@ -351,38 +420,20 @@ void    execute_last_pipes(t_cmd *cmd, int i)
                     j++;
                 }
                 exec_args[j - i] = NULL;
-                close(cmd->fd[0][WRITE_END]);
-                dup2(cmd->fd[0][READ_END], STDIN_FILENO);
-                close(cmd->fd[0][READ_END]);
-                if(is_redirect_pipes(cmd, i) == 1)
-                {
-                    output_redirect(cmd);
-                    execve(com, exec_args, NULL);
-                    close_redirect(cmd);
-                }
-                /*  else if(is_redirect_pipes(cmd, i) >= 1)
-                {
-                    output_multiple_redirect(cmd);
-                    execve(com, exec_args, NULL);
-                    close_redirect(cmd);
-                } */
-                else if(is_redirect_pipes(cmd, i) == 0)
-                    execve(com, exec_args, NULL);
+                execve(com, exec_args, NULL);
                 perror("");
                 exit(0);
             }
             if (!com && !is_argument_extension(cmd, i)) 
             {
                 perror("command not found");
-                exit(1);
+                exit(0);
             }
         }
     }
-    close(cmd->fd[0][READ_END]);
-    close(cmd->fd[0][WRITE_END]);
-    free(exec_args);
+    free(exec_args); // aquí?
+    
 }
-
 
 char  *command_dir(t_cmd *cmd, char *command) 
 {
@@ -459,7 +510,6 @@ int is_command_exists(t_cmd *cmd, char *command)
             free(command_path);
             token = ft_strtok(NULL, ":");
         }
-
         free(path_copy);
     }
    /*  if (is_builtin(cmd, command))

@@ -131,7 +131,7 @@ void	output_multiple_redirect(t_cmd *cmd)
 	while(i < len)
 	{
 		if(cmd->token[i][0] == OUTPUT_REDIRECT)
-			open(cmd->token[i + 1], O_CREAT, S_IRUSR | S_IWUSR);
+			open(cmd->token[i + 1], O_CREAT | O_WRONLY | O_TRUNC , S_IRUSR | S_IWUSR);
 		i++;
 	}
     cmd->stdout = dup(STDOUT_FILENO);

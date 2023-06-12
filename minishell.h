@@ -69,6 +69,7 @@ typedef struct cmd
 	int		pipes_stdout; // Posible uso para guardar el estado de antes de empezar redireccionamientos con pipes
 	int		**fd;
 	int		*pid;
+	char	**exec_args;
 	int 	stdout;
 } t_cmd;
 
@@ -105,13 +106,15 @@ char	*ft_getenv(const char *name, char **env);
 void 	executor(t_cmd *cmd);
 void	execute(t_cmd *cmd);
 void	execute_builtin(t_cmd *cmd, int n_token);
-void	execute_pipes(t_cmd *cmd);
+void 	redirecting_pipes(t_cmd *cmd);
+void    execute_pipes(t_cmd *cmd, int i);
+void    execute_last_pipes(t_cmd *cmd, int len, int stdout);
+void    execute_middle_pipes(t_cmd **cmd, int i);
+void    execute_first_pipes(t_cmd *cmd, int i);
 char	*command_dir(t_cmd *cmd, char *command);
 int 	is_command_exists(t_cmd *cmd, char *command);
 char 	*build_command_path(const char *base_path, const char *command);
-void    execute_first_pipes(t_cmd *cmd, int i);
-void    execute_middle_pipes(t_cmd *cmd, int i);
-void    execute_last_pipes(t_cmd *cmd, int i);
+
 
 /* expander.c */
 void	print_vars(t_cmd *cmd);
@@ -122,6 +125,8 @@ void	parse_args(t_cmd *cmd);
 /* pipes_utils.c */
 void    init_pipes(t_cmd *cmd);
 void    wait_close_pipes(t_cmd *cmd);
+int 	find_len_command_pipes(t_cmd *cmd, int i);
+void 	count_pipes(t_cmd *cmd);
 
 /* prompt.c */
 char	*get_prompt(t_cmd *custom_prompt);
@@ -144,8 +149,6 @@ int 	check_len_special(t_cmd *cmd, int len);
 int 	is_token(t_cmd *cmd, int len);
 int		check_len_token(t_cmd *cmd, int len);
 int		find_variables(char **token);
-void 	count_pipes(t_cmd *cmd);
-int 	find_len_last_command(t_cmd *cmd);
 
 /* utils.c */
 char	*ft_strtok(char *str, const char *delim);

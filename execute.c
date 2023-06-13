@@ -89,30 +89,9 @@ void execute(t_cmd *cmd)
                     if(!is_output_redirect(cmd))
                         execve(com, exec_args, cmd->env);
                     /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
-                    else if(is_append_redirect(cmd) == 1)
-                    {
-                        append_redirect(cmd);
-                        execve(com, exec_args, cmd->env);
-                        close_redirect(cmd);
-                    }
-                    else if(is_append_redirect(cmd) > 1)
-                    {
-                        append_multiple_redirect(cmd);
-                        execve(com, exec_args, cmd->env);
-                        close_redirect(cmd);
-                    }
-                    else if(is_output_redirect(cmd) == 1)
-                    {
-                        output_redirect(cmd);
-                        execve(com, exec_args, cmd->env);
-                        close_redirect(cmd);
-                    }
-                    else if(is_output_redirect(cmd) > 1)
-                    {
-                        output_multiple_redirect(cmd);
-                        execve(com, exec_args, cmd->env);
-                        close_redirect(cmd);
-                    }
+                    execute_appends(cmd, com, exec_args);
+                    execute_output_redirects(cmd, com, exec_args);
+                    execute_input_redirects(cmd, com, exec_args);
                     free(exec_args);
                     perror("execve");
                     exit(1);
@@ -222,6 +201,55 @@ void redirecting_pipes(t_cmd *cmd) /* dobles comandos como grep y cat se quedan 
     wait_close_pipes(cmd);
 }
 
+void execute_appends(t_cmd *cmd, char *com, char **exec_args)
+{
+    if(is_append_redirect(cmd) == 1)
+    {
+        append_redirect(cmd);
+        execve(com, exec_args, cmd->env);
+        close_redirect(cmd);
+    }
+    else if(is_append_redirect(cmd) > 1)
+    {
+        append_multiple_redirect(cmd);
+        execve(com, exec_args, cmd->env);
+        close_redirect(cmd);
+    }
+}
+
+void execute_output_redirects(t_cmd *cmd, char *com, char **exec_args)
+{
+    if(is_output_redirect(cmd) == 1)
+    {
+        output_redirect(cmd);
+        execve(com, exec_args, cmd->env);
+        close_redirect(cmd);
+    }
+    else if(is_output_redirect(cmd) > 1)
+    {
+        output_multiple_redirect(cmd);
+        execve(com, exec_args, cmd->env);
+        close_redirect(cmd);
+    }
+}
+
+void execute_input_redirects(t_cmd *cmd, char *com, char **exec_args)
+{
+    if(is_input_redirect(cmd) == 1)
+    {
+        input_redirect(cmd);
+        execve(com, exec_args, cmd->env);
+        close_input_redirect(cmd);
+    }
+    else if(is_input_redirect(cmd) > 1)
+    {
+        input_multiple_redirect(cmd);
+        execve(com, exec_args, cmd->env);
+        close_input_redirect(cmd);
+    }
+}
+
+
 void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
 {
     char    *com;
@@ -258,30 +286,9 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                 if(!is_output_redirect(cmd))
                     execve(com, exec_args, cmd->env);
                 /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
-                else if(is_append_redirect(cmd) == 1)
-                {
-                    append_redirect(cmd);
-                    execve(com, exec_args, cmd->env);
-                    close_redirect(cmd);
-                }
-                else if(is_append_redirect(cmd) > 1)
-                {
-                    append_multiple_redirect(cmd);
-                    execve(com, exec_args, cmd->env);
-                    close_redirect(cmd);
-                }
-                else if(is_output_redirect(cmd) == 1)
-                {
-                    output_redirect(cmd);
-                    execve(com, exec_args, cmd->env);
-                    close_redirect(cmd);
-                }
-                else if(is_output_redirect(cmd) > 1)
-                {
-                    output_multiple_redirect(cmd);
-                    execve(com, exec_args, cmd->env);
-                    close_redirect(cmd);
-                }
+                execute_appends(cmd, com, exec_args);
+                execute_output_redirects(cmd, com, exec_args);
+                execute_input_redirects(cmd, com, exec_args);
                 perror("");
                 exit(0);
             }
@@ -335,30 +342,9 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                 if(!is_output_redirect(cmd[0]))
                     execve(com, exec_args, cmd[0]->env);
                 /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
-                else if(is_append_redirect(cmd[0]) == 1)
-                {
-                    append_redirect(cmd[0]);
-                    execve(com, exec_args, cmd[0]->env);
-                    close_redirect(cmd[0]);
-                }
-                else if(is_append_redirect(cmd[0]) > 1)
-                {
-                    append_multiple_redirect(cmd[0]);
-                    execve(com, exec_args, cmd[0]->env);
-                    close_redirect(cmd[0]);
-                }
-                else if(is_output_redirect(cmd[0]) == 1)
-                {
-                    output_redirect(cmd[0]);
-                    execve(com, exec_args, cmd[0]->env);
-                    close_redirect(cmd[0]);
-                }
-                else if(is_output_redirect(cmd[0]) > 1)
-                {
-                    output_multiple_redirect(cmd[0]);
-                    execve(com, exec_args, cmd[0]->env);
-                    close_redirect(cmd[0]);
-                }
+                execute_appends(cmd[0], com, exec_args);
+                execute_output_redirects(cmd[0], com, exec_args);
+                execute_input_redirects(cmd[0], com, exec_args);
                 perror("");
                 exit(0);
             }
@@ -408,30 +394,9 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                 if(!is_output_redirect(cmd))
                     execve(com, exec_args, cmd->env);
                 /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
-                else if(is_append_redirect(cmd) == 1)
-                {
-                    append_redirect(cmd);
-                    execve(com, exec_args, cmd->env);
-                    close_redirect(cmd);
-                }
-                else if(is_append_redirect(cmd) > 1)
-                {
-                    append_multiple_redirect(cmd);
-                    execve(com, exec_args, cmd->env);
-                    close_redirect(cmd);
-                }
-                else if(is_output_redirect(cmd) == 1)
-                {
-                    output_redirect(cmd);
-                    execve(com, exec_args, cmd->env);
-                    close_redirect(cmd);
-                }
-                else if(is_output_redirect(cmd) > 1)
-                {
-                    output_multiple_redirect(cmd);
-                    execve(com, exec_args, cmd->env);
-                    close_redirect(cmd);
-                }
+                execute_appends(cmd, com, exec_args);
+                execute_output_redirects(cmd, com, exec_args);
+                execute_input_redirects(cmd, com, exec_args);
                 perror("");
                 exit(0);
             }

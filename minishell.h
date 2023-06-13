@@ -71,11 +71,11 @@ typedef struct cmd
 	int		*pid;
 	char	**exec_args;
 	int 	stdout;
+	int 	stdin;
 } t_cmd;
 
 #define HEREDOC_REDIRECT "<<"
 #define HEREDOC_QUOTE '<<Q'
-#define INPUT_REDIRECT '<'
 #define INPUT_REDIRECT '<'
 #define PIPE '|'
 #define OUTPUT_REDIRECT '>'
@@ -114,6 +114,9 @@ void    execute_first_pipes(t_cmd *cmd, int i);
 char	*command_dir(t_cmd *cmd, char *command);
 int 	is_command_exists(t_cmd *cmd, char *command);
 char 	*build_command_path(const char *base_path, const char *command);
+void 	execute_appends(t_cmd *cmd, char *com, char **exec_args);
+void 	execute_output_redirects(t_cmd *cmd, char *com, char **exec_args);
+void 	execute_input_redirects(t_cmd *cmd, char *com, char **exec_args);
 
 
 /* expander.c */
@@ -169,3 +172,10 @@ int		find_first_output_redirect(t_cmd *cmd);
 int		find_last_output_redirect(t_cmd *cmd);
 int 	find_first_append_redirect(t_cmd *cmd);
 int 	find_last_append_redirect(t_cmd *cmd);
+/*input_redirect.c*/
+int 	is_input_redirect(t_cmd *cmd);
+int 	find_first_input_redirect(t_cmd *cmd);
+int 	find_last_input_redirect(t_cmd *cmd);
+void    input_redirect(t_cmd *cmd);
+void	input_multiple_redirect(t_cmd *cmd);
+void 	close_input_redirect(t_cmd *cmd);

@@ -42,12 +42,12 @@ int find_last_output_redirect(t_cmd *cmd)
 {
 	int len;
 
-	len = 0;
-	while(cmd->token[len] != NULL)
+	len = cmd->n_tokens - 2;
+	while(len >= 0)
 	{
-		if(cmd->token[len][0] == OUTPUT_REDIRECT) /* Meter más tipos de redirects */
+		if(cmd->token[len][0] == '>') /* Meter más tipos de redirects */
 			return (len);
-		len++;
+		len--;
 	}
 	return(0);
 }

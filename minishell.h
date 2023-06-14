@@ -75,7 +75,6 @@ typedef struct cmd
 } t_cmd;
 
 #define HEREDOC_REDIRECT "<<"
-#define HEREDOC_QUOTE '<<Q'
 #define INPUT_REDIRECT '<'
 #define PIPE '|'
 #define OUTPUT_REDIRECT '>'
@@ -117,6 +116,7 @@ char 	*build_command_path(const char *base_path, const char *command);
 void 	execute_appends(t_cmd *cmd, char *com, char **exec_args);
 void 	execute_output_redirects(t_cmd *cmd, char *com, char **exec_args);
 void 	execute_input_redirects(t_cmd *cmd, char *com, char **exec_args);
+void 	execute_heredoc_redirects(t_cmd *cmd, char *com, char **exec_args);
 
 
 /* expander.c */
@@ -158,10 +158,9 @@ char	*ft_strtok(char *str, const char *delim);
 int 	is_number(const char *str);
 #endif
 
-/* redirects.c */
+/* output_redirects.c */
 void	output_redirect(t_cmd *cmd);
-void 	close_redirect(t_cmd *cmd);
-
+void 	close_output_redirect(t_cmd *cmd);
 int 	is_output_redirect(t_cmd *cmd);
 void	output_multiple_redirect(t_cmd *cmd);
 int 	is_redirect_pipes(t_cmd *cmd, int i);
@@ -172,10 +171,17 @@ int		find_first_output_redirect(t_cmd *cmd);
 int		find_last_output_redirect(t_cmd *cmd);
 int 	find_first_append_redirect(t_cmd *cmd);
 int 	find_last_append_redirect(t_cmd *cmd);
-/*input_redirect.c*/
+
+/*input_redirects.c*/
 int 	is_input_redirect(t_cmd *cmd);
 int 	find_first_input_redirect(t_cmd *cmd);
 int 	find_last_input_redirect(t_cmd *cmd);
 void    input_redirect(t_cmd *cmd);
 void	input_multiple_redirect(t_cmd *cmd);
+int     is_heredoc_redirect(t_cmd *cmd);
+int     find_first_heredoc_redirect(t_cmd *cmd);
+int		find_last_heredoc_redirect(t_cmd *cmd);
+char 	*find_heredoc_delim(t_cmd *cmd);
+int		heredoc_content(t_cmd *cmd, int fd);
+void    heredoc_redirect(t_cmd *cmd);
 void 	close_input_redirect(t_cmd *cmd);

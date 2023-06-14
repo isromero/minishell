@@ -80,7 +80,6 @@ int find_last_append_redirect(t_cmd *cmd)
 	return(0);
 }
 
-
 int is_output_redirect(t_cmd *cmd)
 {
 	int len;
@@ -230,7 +229,7 @@ void	append_multiple_redirect(t_cmd *cmd)
     close(fd);
 }
 
-void close_redirect(t_cmd *cmd)
+void close_output_redirect(t_cmd *cmd)
 {
 	dup2(cmd->stdout, STDOUT_FILENO);
     close(cmd->stdout);

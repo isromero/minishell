@@ -57,19 +57,21 @@ void execute(t_cmd *cmd)
         if (!is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_special(cmd->token[i][0])/* Pendiente introducir is_special con todo */) 
         {
             // HACER UN INT QUE DEVUELVA ERROR Y NO ENTRAR
-            printf("ESTO ES LA I %d\n", i);
+            //printf("ESTO ES LA I %d\n", i);
             pid_t pid = fork();
             if (pid == -1)
             {
                 perror("fork");
-                return;
+                exit(1);
             }
             else if (pid == 0)
             {
+                
                 com = command_dir(cmd, cmd->token[i]);
 				/* Si se obtuvo una ruta válida (com != NULL), se crea un nuevo arreglo exec_args para almacenar los argumentos que se pasarán a execve. */
                 if (com != NULL)
                 {
+                    
 					/* Se asigna memoria dinámicamente para exec_args con un tamaño igual al número de tokens 
 					restantes en cmd desde la posición i, más 1 para el elemento NULL que se agrega al final del arreglo. */
                     exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
@@ -86,10 +88,11 @@ void execute(t_cmd *cmd)
                         j++;
                     }
                     exec_args[j - i] = NULL;
-                    if(!is_output_redirect(cmd))
+                    if(!is_output_redirect(cmd) && !is_input_redirect(cmd) && !is_append_redirect(cmd))
                         execve(com, exec_args, cmd->env);
                     /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
                     execute_appends(cmd, com, exec_args);
+                    execute_heredoc_redirects(cmd, com, exec_args);
                     execute_output_redirects(cmd, com, exec_args);
                     execute_input_redirects(cmd, com, exec_args);
                     free(exec_args);
@@ -181,7 +184,7 @@ void redirecting_pipes(t_cmd *cmd) /* dobles comandos como grep y cat se quedan 
             dprintf(2, "fuerita: %d\n", cmd->count_pipes);
         }
        
-        else if (cmd->token[i + 1] == NULL && (first_time == 1 || cmd->count_pipes > 0) && cmd->count_pipes == cmd->n_pipes - 1) 
+        else if (!is_special(cmd->token[i][0]) && cmd->token[i + 1] == NULL && (first_time == 1 || cmd->count_pipes > 0) && cmd->count_pipes == cmd->n_pipes - 1) 
         {
             dprintf(2, "FINALLLLLLLLL\n");
             first_time = 0;
@@ -207,13 +210,13 @@ void execute_appends(t_cmd *cmd, char *com, char **exec_args)
     {
         append_redirect(cmd);
         execve(com, exec_args, cmd->env);
-        close_redirect(cmd);
+        close_output_redirect(cmd);
     }
     else if(is_append_redirect(cmd) > 1)
     {
         append_multiple_redirect(cmd);
         execve(com, exec_args, cmd->env);
-        close_redirect(cmd);
+        close_output_redirect(cmd);
     }
 }
 
@@ -223,13 +226,13 @@ void execute_output_redirects(t_cmd *cmd, char *com, char **exec_args)
     {
         output_redirect(cmd);
         execve(com, exec_args, cmd->env);
-        close_redirect(cmd);
+        close_output_redirect(cmd);
     }
     else if(is_output_redirect(cmd) > 1)
     {
         output_multiple_redirect(cmd);
         execve(com, exec_args, cmd->env);
-        close_redirect(cmd);
+        close_output_redirect(cmd);
     }
 }
 
@@ -247,6 +250,22 @@ void execute_input_redirects(t_cmd *cmd, char *com, char **exec_args)
         execve(com, exec_args, cmd->env);
         close_input_redirect(cmd);
     }
+}
+
+void execute_heredoc_redirects(t_cmd *cmd, char *com, char **exec_args)
+{
+    if(is_heredoc_redirect(cmd) == 1)
+    {
+        heredoc_redirect(cmd);
+        execve(com, exec_args, cmd->env);
+        close_input_redirect(cmd);
+    }
+  /*   else if(is_heredoc_redirect(cmd) > 1)
+    {
+        input_multiple_redirect(cmd);
+        execve(com, exec_args, cmd->env);
+        close_input_redirect(cmd);
+    } */
 }
 
 
@@ -271,19 +290,19 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
             {
                 exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
                 j = i;
-                while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|' && cmd->token[j][0] != '>')
+                while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|' && cmd->token[j][0] != '>' \
+                && cmd->token[j][0] != '<' /* STRCMP DE HEREDOCS Y APPENDS */)
                 {
                     exec_args[j - i] = cmd->token[j];
                     j++;
                 }
                 exec_args[j - i] = NULL;
-                dprintf(2, "%d:", cmd->count_pipes);
                 close(cmd->fd[cmd->count_pipes][WRITE_END]);
                 dup2(cmd->fd[cmd->count_pipes][READ_END], STDIN_FILENO);
                 close(cmd->fd[cmd->count_pipes][READ_END]);
                 dup2(stdout, STDOUT_FILENO);
                 close(stdout);
-                if(!is_output_redirect(cmd))
+                if(!is_output_redirect(cmd) && !is_input_redirect(cmd) && !is_append_redirect(cmd))
                     execve(com, exec_args, cmd->env);
                 /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
                 execute_appends(cmd, com, exec_args);
@@ -323,7 +342,8 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
             {
                 exec_args = (char **)malloc(sizeof(char *) * (cmd[0]->n_tokens - i + 1));
                 j = i;
-                while(j < cmd[0]->n_tokens - 1 && cmd[0]->token[j][0] != '|' && cmd[0]->token[j][0] != '>')
+                while(j < cmd[0]->n_tokens - 1 && cmd[0]->token[j][0] != '|' && cmd[0]->token[j][0] != '>' \
+                && cmd[0]->token[j][0] != '<' /* STRCMP DE HEREDOCS Y APPENDS */)
                 {
                     exec_args[j - i] = cmd[0]->token[j];
                     j++;
@@ -334,12 +354,11 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                 dup2(cmd[0]->fd[cmd[0]->count_pipes][READ_END], STDIN_FILENO);
                 close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
                 cmd[0]->count_pipes++;
-                dprintf(2, "dentro: %d\n", cmd[0]->count_pipes);
                 // envía salida
                 close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
                 dup2(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END], STDOUT_FILENO);
                 close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
-                if(!is_output_redirect(cmd[0]))
+                if(!is_output_redirect(cmd[0]) && !is_input_redirect(cmd[0]) && !is_append_redirect(cmd[0]))
                     execve(com, exec_args, cmd[0]->env);
                 /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
                 execute_appends(cmd[0], com, exec_args);
@@ -382,7 +401,8 @@ void    execute_first_pipes(t_cmd *cmd, int i)
             {
                 exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
                 j = i;
-                while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|' && cmd->token[j][0] != '>')
+                while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|' && cmd->token[j][0] != '>' \
+                && cmd->token[j][0] != '<' /* STRCMP DE HEREDOCS Y APPENDS */)
                 {
                     exec_args[j - i] = cmd->token[j];
                     j++;
@@ -391,7 +411,7 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                 close(cmd->fd[cmd->count_pipes][READ_END]);
                 dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
                 close(cmd->fd[cmd->count_pipes][WRITE_END]);
-                if(!is_output_redirect(cmd))
+                if(!is_output_redirect(cmd) && !is_input_redirect(cmd) && !is_append_redirect(cmd))
                     execve(com, exec_args, cmd->env);
                 /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
                 execute_appends(cmd, com, exec_args);

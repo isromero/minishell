@@ -52,6 +52,7 @@ void execute(t_cmd *cmd)
 	j = 0;
     com = NULL;
     exec_args = NULL;
+
     while (i < cmd->n_tokens - 1)
     {
         if (!is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_special(cmd->token[i][0])/* Pendiente introducir is_special con todo */) 
@@ -88,6 +89,7 @@ void execute(t_cmd *cmd)
                         j++;
                     }
                     exec_args[j - i] = NULL;
+                    
                     if(!is_output_redirect(cmd) && !is_input_redirect(cmd) && !is_append_redirect(cmd))
                         execve(com, exec_args, cmd->env);
                     /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
@@ -256,16 +258,18 @@ void execute_heredoc_redirects(t_cmd *cmd, char *com, char **exec_args)
 {
     if(is_heredoc_redirect(cmd) == 1)
     {
+        
         heredoc_redirect(cmd);
         execve(com, exec_args, cmd->env);
         close_input_redirect(cmd);
     }
-  /*   else if(is_heredoc_redirect(cmd) > 1)
+    /* No sabemos si hay que gestionarlos */
+   /*  else if(is_heredoc_redirect(cmd) > 1)
     {
-        input_multiple_redirect(cmd);
+        heredoc_multiple_redirect(cmd);
         execve(com, exec_args, cmd->env);
         close_input_redirect(cmd);
-    } */
+    } */ 
 }
 
 

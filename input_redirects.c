@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 19:37:01 by adgutier          #+#    #+#             */
-/*   Updated: 2023/06/14 19:07:20 by isromero         ###   ########.fr       */
+/*   Updated: 2023/06/15 18:01:454 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -191,8 +191,8 @@ int		heredoc_content(t_cmd *cmd, int fd)
 		ft_putchar_fd('\n', fd);
 		free(prompt);
 	}
-	else if(*prompt == '\n')
-		ft_putchar_fd('\n', fd);
+	else if(!prompt)
+		return (1);
 	return (0);
 }
 
@@ -201,7 +201,6 @@ void    heredoc_redirect(t_cmd *cmd)
 	int	fd;
 	pid_t pid;
 
-	
 	pid = fork();
 	if (pid == -1)
 	{  
@@ -210,24 +209,39 @@ void    heredoc_redirect(t_cmd *cmd)
 	}
 	else if (pid == 0)
 	{
+		
 		printf("delimitator: %s\n", find_heredoc_delim(cmd));
 		/* preguntar a pacheco sobre archivos temporales */
+		/* tal vez hacer unlink al abrir y al cerrar */
 		fd = open("/tmp/heredocBURMITO", O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+		
 		if (fd == -1)
 		{
 			perror("");
 			exit(1);
 		}
+		/* DEVUELVE DOBLE PROMPT, ARREGLAR */
+		signal(SIGINT, SIG_IGN);
+		signal(SIGINT, &handle_ctrlc_heredoc);
 		while (1)
 		{
 			if(heredoc_content(cmd, fd) == 1)
 				break;
 		}
 		close(fd);
-		exit(1);
+		exit(0);
 	}
 	else
+	{
 		wait(NULL);
+		/* BORRAR ARCHIVO CUANDO MANDEMOS SEÑAL DE CTRL-D */
+		if (unlink("/tmp/heredocBURMITO") == -1)
+		{
+            perror("unlink");
+            exit(1);
+        }
+		exit(0);
+	}
 }
 
 void close_input_redirect(t_cmd *cmd)

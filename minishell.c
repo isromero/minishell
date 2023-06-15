@@ -12,6 +12,9 @@
 
 #include "minishell.h"
 
+int g_status;
+
+
 int	main(int argc, char **argv, char **env)
 {
 	t_cmd	cmd;
@@ -19,10 +22,17 @@ int	main(int argc, char **argv, char **env)
 	(void)argv;
 	//print_minishell();
 	cmd.env = env;
+	
+	unlink("/tmp/heredocBURMITO");
+	signal(SIGINT, handle_ctrlc);
 	while(1)
 	{
 		cmd.prompt = get_prompt(&cmd);
 		cmd.line = readline(cmd.prompt);
+		if (cmd.line == NULL) {
+            handle_ctrld();  // Llamar a la función cuando se detecta Ctrl-D
+            break;
+        }
 		if(ft_strncmp(cmd.line, "", 1) > 0) 
 			add_history(cmd.line);
 		parse_args(&cmd);
@@ -33,6 +43,6 @@ int	main(int argc, char **argv, char **env)
 		free(cmd.prompt);
 	}
 	rl_clear_history();
-	free(cmd.env);
-    return (0);
+	/* free(cmd.env); */
+    return (g_status); // revisar si hay que devolver g_status
 }

@@ -20,7 +20,7 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/stat.h>
- #include <fcntl.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -185,3 +185,11 @@ char 	*find_heredoc_delim(t_cmd *cmd);
 int		heredoc_content(t_cmd *cmd, int fd);
 void    heredoc_redirect(t_cmd *cmd);
 void 	close_input_redirect(t_cmd *cmd);
+
+/* signals.c */
+void    handle_ctrld();
+void    handle_ctrlc();
+void    handle_ctrld_heredoc();
+void    handle_ctrlc_heredoc(int sig);
+
+extern int g_status;

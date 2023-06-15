@@ -139,6 +139,8 @@ void	print_minishell();
 void 	clean_tokens(t_cmd *cmd);
 void 	print_tokens(t_cmd *cmd);
 void 	save_token(t_cmd *cmd, char *token);
+int		is_redirects(char c);
+int		is_redirects_double_char(char *token);
 int		is_special(char c);
 int		is_argument(char c);
 int		is_argument_extension(t_cmd *cmd, int i);

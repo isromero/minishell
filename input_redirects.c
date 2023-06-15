@@ -191,8 +191,8 @@ int		heredoc_content(t_cmd *cmd, int fd)
 		ft_putchar_fd('\n', fd);
 		free(prompt);
 	}
-	else if(!prompt)
-		return (1);
+	else if(*prompt == '\n') /* ? */
+		ft_putchar_fd('\n', fd);
 	return (0);
 }
 

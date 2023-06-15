@@ -14,7 +14,6 @@
 
 int g_status;
 
-
 int	main(int argc, char **argv, char **env)
 {
 	t_cmd	cmd;
@@ -44,5 +43,6 @@ int	main(int argc, char **argv, char **env)
 	}
 	rl_clear_history();
 	/* free(cmd.env); */
+	
     return (g_status); // revisar si hay que devolver g_status
 }

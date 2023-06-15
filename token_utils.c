@@ -51,11 +51,19 @@ void save_token(t_cmd *cmd, char *token)
     cmd->token = new_token;
 }
 
-
 int	is_special(char c)
 {
-	return(c == INPUT_REDIRECT || c == PIPE || c == OUTPUT_REDIRECT \
-	|| c == VARIABLE);
+	return(c == INPUT_REDIRECT || c == PIPE || c == OUTPUT_REDIRECT);
+}
+
+int	is_redirects(char c)
+{
+	return(c == INPUT_REDIRECT || c == OUTPUT_REDIRECT);
+}
+
+int	is_redirects_double_char(char *token)
+{
+	return(ft_strcmp(APPEND_REDIRECT, token) == 0 || ft_strcmp(HEREDOC_REDIRECT, token) == 0);
 }
 
 int	is_argument(char c)
@@ -70,13 +78,16 @@ int	is_argument_extension(t_cmd *cmd, int i)
 		return 1;
 	else if(cmd->token[i][0] == '-')
 		return 1;
+	else if(cmd->token[i][0] == '$')
+		return 1;
 	/* BASTANTE POSIBLE que esto tenga errores en ciertos comandos con 2 argumentos sin '-' etc? */
 	/* Esto checkea si el argumento anterior era comando y el actual es una letra, si es así es que es argumento
 	con esto se solucionan los cannot access 'argumento' y que no se ejecute de nuevo command not found*/
 	else if(i != 0 && ((cmd->token[i][0] >= 'A' && cmd->token[i][0] <= 'Z') \
 	 || (cmd->token[i][0] >= 'a' && cmd->token[i][0] <= 'z'))\
-	 && (is_command_exists(cmd, cmd->token[i - 1]) || \
-	/* Realmente son solo los redirects */is_special(cmd->token[i - 1][0])))
+	 && (is_command_exists(cmd, cmd->token[i - 1]) \
+	 || is_redirects(cmd->token[i - 1][0]) || is_redirects_double_char(cmd->token[i - 1])))
+	/* Realmente son solo los redirects */
 		return 1;
 	else if(cmd->token[i][0] == DOUBLE_QUOTE && cmd->token[i][ft_strlen(cmd->token[i]) - 1] == DOUBLE_QUOTE)
 		return 1;

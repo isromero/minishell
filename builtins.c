@@ -37,7 +37,13 @@ int ft_echo(t_cmd *cmd, int echo_token)
 
     first_echo_token = echo_token;
     echo_token++; // Avanzar a la posición después de "echo"
-
+	if (ft_strcmp(cmd->token[0], "echo") == 0 && ft_strcmp(cmd->token[1], "$?") == 0) 
+	{
+    	ft_putnbr_fd(g_status, STDOUT_FILENO);
+		ft_putchar_fd('\n', STDOUT_FILENO);
+		return (0);
+	}
+	/* el -n falla  */
     while (cmd->token[echo_token])
     {
         if (strcmp(cmd->token[first_echo_token + 1], "-n") == 0)

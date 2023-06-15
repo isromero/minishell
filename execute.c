@@ -54,7 +54,7 @@ void execute(t_cmd *cmd)
     exec_args = NULL;
 
     while (i < cmd->n_tokens - 1)
-    {
+    {                                                                 //LS $ NO PETA
         if (!is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_special(cmd->token[i][0])/* Pendiente introducir is_special con todo */) 
         {
             // HACER UN INT QUE DEVUELVA ERROR Y NO ENTRAR
@@ -72,7 +72,6 @@ void execute(t_cmd *cmd)
 				/* Si se obtuvo una ruta válida (com != NULL), se crea un nuevo arreglo exec_args para almacenar los argumentos que se pasarán a execve. */
                 if (com != NULL)
                 {
-                    
 					/* Se asigna memoria dinámicamente para exec_args con un tamaño igual al número de tokens 
 					restantes en cmd desde la posición i, más 1 para el elemento NULL que se agrega al final del arreglo. */
                     exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
@@ -89,13 +88,19 @@ void execute(t_cmd *cmd)
                         j++;
                     }
                     exec_args[j - i] = NULL;
-                    
-                    if(!is_output_redirect(cmd) && !is_input_redirect(cmd) && !is_append_redirect(cmd))
-                        execve(com, exec_args, cmd->env);
+                    if(!is_output_redirect(cmd) && !is_input_redirect(cmd) \
+                     && !is_append_redirect(cmd) && !is_heredoc_redirect(cmd))
+                    {
+                        if(execve(com, exec_args, cmd->env) == -1)
+                        {
+                            g_status = 2;
+                            exit(g_status);
+                        }
+                    }
                     /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
                     execute_appends(cmd, com, exec_args);
-                    execute_heredoc_redirects(cmd, com, exec_args);
                     execute_output_redirects(cmd, com, exec_args);
+                    execute_heredoc_redirects(cmd, com, exec_args);
                     execute_input_redirects(cmd, com, exec_args);
                     free(exec_args);
                     perror("execve");
@@ -103,14 +108,20 @@ void execute(t_cmd *cmd)
                 }
                 if (!com)
                 {
+                    g_status = 127;
                     perror("command not found");
-                    exit(1);
+                    exit(g_status);
                 }
                 else
                     exit(1);
             }
             else
-                wait(NULL);
+            {
+                int child_status;
+                wait(&child_status); // Esperar a que el proceso hijo termine
+                if (WIFEXITED(child_status))
+                    g_status = WEXITSTATUS(child_status); // Obtener el estado de salida del proceso hijo
+            }
         }
         if (is_builtin(cmd, i) && !is_argument_extension(cmd, i))
             execute_builtin(cmd, i); // En principio funciona, aunque tal vez necesita pruebas(antes estaba metido todo directo el execute, con su i correspondiente)
@@ -169,32 +180,22 @@ void redirecting_pipes(t_cmd *cmd) /* dobles comandos como grep y cat se quedan 
         if(cmd->token[i][0] == '|' && cmd->count_pipes == 0 && first_time == 0)
         {
             first_time = 1;
-            dprintf(2, "INICIOOOOOOOOOOOOOO\n");
-            // envía salida
-            /* dprintf(0, "Esto debería ser 0: %d\n", cmd->count_pipes); */
             execute_first_pipes(cmd, 0);
             cmd->count_pids++;
         }
         else if(cmd->token[i][0] == '|' && (first_time == 1 || cmd->count_pipes > 0) && cmd->count_pipes < cmd->n_pipes - 1)
         {
-            // recibe entrada
-            dprintf(2, "MEDIOOOOOOOOOO\n");
             first_time = 0;
             len = find_len_command_pipes(cmd, i);
             execute_middle_pipes(&cmd, len);
             cmd->count_pids++;
-            dprintf(2, "fuerita: %d\n", cmd->count_pipes);
         }
        
         else if (!is_special(cmd->token[i][0]) && cmd->token[i + 1] == NULL && (first_time == 1 || cmd->count_pipes > 0) && cmd->count_pipes == cmd->n_pipes - 1) 
         {
-            dprintf(2, "FINALLLLLLLLL\n");
             first_time = 0;
-            // recibe entrada
             len = find_len_command_pipes(cmd, i);
             execute_last_pipes(cmd, len, stdout);
-            // cerramos el último pipe que se queda abierto porque solo recibe y no envía??
-            //...^
             cmd->count_pids++; // no necesario
         }
         i++;
@@ -258,7 +259,6 @@ void execute_heredoc_redirects(t_cmd *cmd, char *com, char **exec_args)
 {
     if(is_heredoc_redirect(cmd) == 1)
     {
-        
         heredoc_redirect(cmd);
         execve(com, exec_args, cmd->env);
         close_input_redirect(cmd);
@@ -282,46 +282,67 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
     com = NULL;
     exec_args = NULL;
     j = 0;
-    cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
-    if(cmd->pid[cmd->count_pids] == 0)
+    if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0] && !is_redirects_double_char(cmd->token[i])))
     {
-        if(is_builtin(cmd, i))
-            execute_builtin(cmd, i);
-        else
+        cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
+        if(cmd->pid[cmd->count_pids] == 0)
         {
-            com = command_dir(cmd, cmd->token[i]);
-            if (com != NULL)
+           
+            if(is_builtin(cmd, i))
+                execute_builtin(cmd, i);
+            else
             {
-                exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
-                j = i;
-                while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|' && cmd->token[j][0] != '>' \
-                && cmd->token[j][0] != '<' /* STRCMP DE HEREDOCS Y APPENDS */)
+                com = command_dir(cmd, cmd->token[i]);
+                if (com != NULL)
                 {
-                    exec_args[j - i] = cmd->token[j];
-                    j++;
+                    exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
+                    j = i;
+                    while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|' && cmd->token[j][0] != '>' \
+                    && cmd->token[j][0] != '<' /* STRCMP DE HEREDOCS Y APPENDS */)
+                    {
+                        exec_args[j - i] = cmd->token[j];
+                        j++;
+                    }
+                    exec_args[j - i] = NULL;
+                    close(cmd->fd[cmd->count_pipes][WRITE_END]);
+                    dup2(cmd->fd[cmd->count_pipes][READ_END], STDIN_FILENO);
+                    close(cmd->fd[cmd->count_pipes][READ_END]);
+                    dup2(stdout, STDOUT_FILENO);
+                    close(stdout);
+                    if(!is_output_redirect(cmd) && !is_input_redirect(cmd) && \
+                        !is_append_redirect(cmd) && !is_heredoc_redirect(cmd))
+                    {
+                        if(execve(com, exec_args, cmd->env) == -1)
+                        {
+                            g_status = 2;
+                            exit(g_status);
+                        }
+                    }
+                    /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
+                    execute_appends(cmd, com, exec_args);
+                    execute_output_redirects(cmd, com, exec_args);
+                    execute_heredoc_redirects(cmd, com, exec_args);
+                    execute_input_redirects(cmd, com, exec_args);
+                    perror("execve:");
+                    exit(1);
                 }
-                exec_args[j - i] = NULL;
-                close(cmd->fd[cmd->count_pipes][WRITE_END]);
-                dup2(cmd->fd[cmd->count_pipes][READ_END], STDIN_FILENO);
-                close(cmd->fd[cmd->count_pipes][READ_END]);
-                dup2(stdout, STDOUT_FILENO);
-                close(stdout);
-                if(!is_output_redirect(cmd) && !is_input_redirect(cmd) && !is_append_redirect(cmd))
-                    execve(com, exec_args, cmd->env);
-                /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
-                execute_appends(cmd, com, exec_args);
-                execute_output_redirects(cmd, com, exec_args);
-                execute_input_redirects(cmd, com, exec_args);
-                perror("");
-                exit(0);
-            }
-            if (!com && !is_argument_extension(cmd, i)) 
-            {
-                perror("command not found");
-                exit(0);
+                if (!com)
+                {
+                    g_status = 127;
+                    perror("command not found");
+                    exit(g_status);
+                }
             }
         }
-    }
+        else
+        { 
+            int child_status;
+            wait(&child_status); // Esperar a que el proceso hijo termine
+            if (WIFEXITED(child_status))
+                g_status = WEXITSTATUS(child_status); // Obtener el estado de salida del proceso hijo
+        }
+    } 
+    
     free(exec_args); // aquí?
 }
 
@@ -334,52 +355,70 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
     com = NULL;
     exec_args = NULL;
     j = 0;
-    cmd[0]->pid[cmd[0]->count_pids] = fork(); //Checkear error de fork
-    if(cmd[0]->pid[cmd[0]->count_pids] == 0)
+    if (!is_argument_extension(cmd[0], i) && !is_redirects(cmd[0]->token[i][0] && !is_redirects_double_char(cmd[0]->token[i])))
     {
-        if(is_builtin(cmd[0], i))
-            execute_builtin(cmd[0], i);
-        else
+        cmd[0]->pid[cmd[0]->count_pids] = fork(); //Checkear error de fork
+        if(cmd[0]->pid[cmd[0]->count_pids] == 0)
         {
-            com = command_dir(cmd[0], cmd[0]->token[i]);
-            if (com != NULL)
+            if(is_builtin(cmd[0], i))
+                execute_builtin(cmd[0], i);
+            else
             {
-                exec_args = (char **)malloc(sizeof(char *) * (cmd[0]->n_tokens - i + 1));
-                j = i;
-                while(j < cmd[0]->n_tokens - 1 && cmd[0]->token[j][0] != '|' && cmd[0]->token[j][0] != '>' \
-                && cmd[0]->token[j][0] != '<' /* STRCMP DE HEREDOCS Y APPENDS */)
+                com = command_dir(cmd[0], cmd[0]->token[i]);
+                if (com != NULL)
                 {
-                    exec_args[j - i] = cmd[0]->token[j];
-                    j++;
+                    exec_args = (char **)malloc(sizeof(char *) * (cmd[0]->n_tokens - i + 1));
+                    j = i;
+                    while(j < cmd[0]->n_tokens - 1 && cmd[0]->token[j][0] != '|' && cmd[0]->token[j][0] != '>' \
+                    && cmd[0]->token[j][0] != '<' /* STRCMP DE HEREDOCS Y APPENDS */)
+                    {
+                        exec_args[j - i] = cmd[0]->token[j];
+                        j++;
+                    }
+                    exec_args[j - i] = NULL;
+                    //recibe entrada
+                    close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
+                    dup2(cmd[0]->fd[cmd[0]->count_pipes][READ_END], STDIN_FILENO);
+                    close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
+                    cmd[0]->count_pipes++;
+                    // envía salida
+                    close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
+                    dup2(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END], STDOUT_FILENO);
+                    close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
+                    if(!is_output_redirect(cmd[0]) && !is_input_redirect(cmd[0]) && \
+                        !is_append_redirect(cmd[0]) && !is_heredoc_redirect(cmd[0]))
+                     {
+                        if(execve(com, exec_args, cmd[0]->env) == -1)
+                        {
+                            g_status = 2;
+                            exit(g_status);
+                        }
+                    }
+                    /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
+                    execute_appends(cmd[0], com, exec_args);
+                    execute_output_redirects(cmd[0], com, exec_args);
+                    execute_heredoc_redirects(cmd[0], com, exec_args);
+                    execute_input_redirects(cmd[0], com, exec_args);
+                    perror("execve:");
+                    exit(1);
                 }
-                exec_args[j - i] = NULL;
-                //recibe entrada
-                close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
-                dup2(cmd[0]->fd[cmd[0]->count_pipes][READ_END], STDIN_FILENO);
-                close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
-                cmd[0]->count_pipes++;
-                // envía salida
-                close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
-                dup2(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END], STDOUT_FILENO);
-                close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
-                if(!is_output_redirect(cmd[0]) && !is_input_redirect(cmd[0]) && !is_append_redirect(cmd[0]))
-                    execve(com, exec_args, cmd[0]->env);
-                /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
-                execute_appends(cmd[0], com, exec_args);
-                execute_output_redirects(cmd[0], com, exec_args);
-                execute_input_redirects(cmd[0], com, exec_args);
-                perror("");
-                exit(0);
-            }
-            if (!com && !is_argument_extension(cmd[0], i)) 
-            {
-                perror("command not found");
-                exit(0);
+                if (!com) 
+                {
+                    g_status = 127;
+                    perror("command not found");
+                    exit(g_status);
+                }
             }
         }
+        else
+        {
+            cmd[0]->count_pipes++;
+            int child_status;
+            wait(&child_status); // Esperar a que el proceso hijo termine
+            if (WIFEXITED(child_status))
+                g_status = WEXITSTATUS(child_status); // Obtener el estado de salida del proceso hijo
+        }
     }
-    else
-        cmd[0]->count_pipes++;
     free(exec_args); // aquí?
 }
 
@@ -393,42 +432,61 @@ void    execute_first_pipes(t_cmd *cmd, int i)
     com = NULL;
     exec_args = NULL;
     j = 0;
-    cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
-    if(cmd->pid[cmd->count_pids] == 0)
+    if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0] && !is_redirects_double_char(cmd->token[i])))
     {
-        if(is_builtin(cmd, i))
-            execute_builtin(cmd, i);
+        cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
+        if(cmd->pid[cmd->count_pids] == 0)
+        {
+            if(is_builtin(cmd, i))
+                execute_builtin(cmd, i);
+            else
+            {
+                com = command_dir(cmd, cmd->token[i]);
+                if (com != NULL)
+                {
+                    exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
+                    j = i;
+                    while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|' && cmd->token[j][0] != '>' \
+                    && cmd->token[j][0] != '<' /* STRCMP DE HEREDOCS Y APPENDS */)
+                    {
+                        exec_args[j - i] = cmd->token[j];
+                        j++;
+                    }
+                    exec_args[j - i] = NULL;
+                    close(cmd->fd[cmd->count_pipes][READ_END]);
+                    dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
+                    close(cmd->fd[cmd->count_pipes][WRITE_END]);
+                    if(!is_output_redirect(cmd) && !is_input_redirect(cmd) && \
+                        !is_append_redirect(cmd) && !is_heredoc_redirect(cmd))
+                    {
+                        if(execve(com, exec_args, cmd->env) == -1)
+                        {
+                            g_status = 2;
+                            exit(g_status);
+                        }
+                    }
+                    /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
+                    execute_appends(cmd, com, exec_args);
+                    execute_output_redirects(cmd, com, exec_args);
+                    execute_heredoc_redirects(cmd, com, exec_args);
+                    execute_input_redirects(cmd, com, exec_args);
+                    perror("execve:");
+                    exit(1);
+                }
+                if (!com) 
+                {
+                    g_status = 127;
+                    perror("command not found");
+                    exit(g_status);
+                }
+            }
+        }
         else
         {
-            com = command_dir(cmd, cmd->token[i]);
-            if (com != NULL)
-            {
-                exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
-                j = i;
-                while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|' && cmd->token[j][0] != '>' \
-                && cmd->token[j][0] != '<' /* STRCMP DE HEREDOCS Y APPENDS */)
-                {
-                    exec_args[j - i] = cmd->token[j];
-                    j++;
-                }
-                exec_args[j - i] = NULL;
-                close(cmd->fd[cmd->count_pipes][READ_END]);
-                dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
-                close(cmd->fd[cmd->count_pipes][WRITE_END]);
-                if(!is_output_redirect(cmd) && !is_input_redirect(cmd) && !is_append_redirect(cmd))
-                    execve(com, exec_args, cmd->env);
-                /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
-                execute_appends(cmd, com, exec_args);
-                execute_output_redirects(cmd, com, exec_args);
-                execute_input_redirects(cmd, com, exec_args);
-                perror("");
-                exit(0);
-            }
-            if (!com && !is_argument_extension(cmd, i)) 
-            {
-                perror("command not found");
-                exit(0);
-            }
+            int child_status;
+            wait(&child_status); // Esperar a que el proceso hijo termine
+            if (WIFEXITED(child_status))
+                g_status = WEXITSTATUS(child_status); // Obtener el estado de salida del proceso hijo
         }
     }
     free(exec_args); // aquí?
@@ -502,6 +560,8 @@ char  *command_dir(t_cmd *cmd, char *command)
 			ft_strcat(dir, command);
             return (dir);
         }
+        else if(access(executable_path, F_OK) == -1)
+            g_status = 126; /* ?????? */
         dir = ft_strtok(NULL, ":");
     }
     // El archivo ejecutable no existe en ningún directorio del PATH
@@ -560,3 +620,7 @@ int is_command_exists(t_cmd *cmd, char *command)
 }
 
 // METER UN TRY_ACCESS PARA EJECUTAR COSAS DENTRO DE NUESTRA MINISHELL
+// Si da error un access devolver 126????????????????
+
+/* minishell -> ls -l | <
+minishell: syntax error near unexpected token `newline' */

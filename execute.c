@@ -47,15 +47,20 @@ void execute(t_cmd *cmd)
 	int	j;
     char *com;
     char **exec_args;
+    int first_variable;
+    
 	
 	i = 0;
 	j = 0;
     com = NULL;
     exec_args = NULL;
-
+    first_variable = 0;
     while (i < cmd->n_tokens - 1)
-    {                                                                 //LS $ NO PETA
-        if (!is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_special(cmd->token[i][0])/* Pendiente introducir is_special con todo */) 
+    {
+        if(is_variable(cmd->token[i][0]) && first_variable == 0)
+            first_variable = 1; // Para que solo se ejecute una vez las variables
+        replace_vars(cmd, i);
+        if (!is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_special(cmd->token[i][0] && !is_redirects(cmd->token[j][0])))/* Pendiente introducir is_special con todo */ 
         {
             // HACER UN INT QUE DEVUELVA ERROR Y NO ENTRAR
             //printf("ESTO ES LA I %d\n", i);
@@ -67,18 +72,18 @@ void execute(t_cmd *cmd)
             }
             else if (pid == 0)
             {
-                
                 com = command_dir(cmd, cmd->token[i]);
 				/* Si se obtuvo una ruta válida (com != NULL), se crea un nuevo arreglo exec_args para almacenar los argumentos que se pasarán a execve. */
                 if (com != NULL)
                 {
+
 					/* Se asigna memoria dinámicamente para exec_args con un tamaño igual al número de tokens 
 					restantes en cmd desde la posición i, más 1 para el elemento NULL que se agrega al final del arreglo. */
                     exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
                     if (!exec_args)
                         return ;
 					j = i; // Así guardamos la distancia ya recorrida
-                    while(j < cmd->n_tokens - 1 && !is_special(cmd->token[j][0]))
+                    while(j < cmd->n_tokens - 1 && !is_special(cmd->token[j][0]) && !is_redirects(cmd->token[j][0]))
                     {
                         /* Ejemplo del por qué se = así:
                         En la primera iteración del bucle, j tomará el valor de i, que es 2. Si simplemente usamos j como índice para 
@@ -98,6 +103,7 @@ void execute(t_cmd *cmd)
                         }
                     }
                     /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
+                    //CAMBIAR LOS STATUS DE REDIRECTSSSSSSSSSSSSSSSSSSSSSSSSSSSS execve
                     execute_appends(cmd, com, exec_args);
                     execute_output_redirects(cmd, com, exec_args);
                     execute_heredoc_redirects(cmd, com, exec_args);
@@ -106,10 +112,10 @@ void execute(t_cmd *cmd)
                     perror("execve");
                     exit(1);
                 }
-                if (!com)
+                else if (!com)
                 {
                     g_status = 127;
-                    perror("command not found");
+                    printf("minishell: %s: command not found\n", cmd->token[i]);
                     exit(g_status);
                 }
                 else
@@ -119,12 +125,19 @@ void execute(t_cmd *cmd)
             {
                 int child_status;
                 wait(&child_status); // Esperar a que el proceso hijo termine
-                if (WIFEXITED(child_status))
+                if (WIFEXITED(child_status) && WEXITSTATUS(child_status) > 0)
+                {
                     g_status = WEXITSTATUS(child_status); // Obtener el estado de salida del proceso hijo
+                    return ;
+                }
             }
         }
-        if (is_builtin(cmd, i) && !is_argument_extension(cmd, i))
+        if (is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_special(cmd->token[i][0] && !is_redirects(cmd->token[i][0])))
+        {
             execute_builtin(cmd, i); // En principio funciona, aunque tal vez necesita pruebas(antes estaba metido todo directo el execute, con su i correspondiente)
+            g_status = 0; /* Reinicializamos a 0 porque cuando se pone un echo $? necesitamos reestablecer el status después de haberse ejecutado para siguientes iteraciones */
+        }
+           
         i++;
     }
 }

@@ -12,28 +12,57 @@
 
 #include "minishell.h"
 
-void print_vars(t_cmd *cmd)
+int special_for_vars(char c)
 {
-	int	i;
+	return(c == INPUT_REDIRECT || c == PIPE || c == OUTPUT_REDIRECT);
+}
+
+void print_vars(t_cmd *cmd, int i)
+{
+
 	char *path;
 	char *aux;
 	char *var;
 
-	i = 0;
 	aux = NULL;
-	while(cmd->token[i])
+	if(cmd->token[i][0] == VARIABLE)
 	{
-		if(cmd->token[i][0] == VARIABLE)
-		{
-			aux = cmd->token[i];
-			var = &aux[1];
-
-			// Quedarse solo con la lógica(está mal seguro)
-			path = ft_getenv(var, cmd->env);
-			if(path == NULL)
-				return ;
-			printf("minishell: %s\n", path);
-		}
-		i++;
+		aux = cmd->token[i];
+		var = &aux[1];
+		path = ft_getenv(var, cmd->env);
+		if(path == NULL)
+			return ;
+		printf("-minishell: %s\n", path);
+		free(path);
 	}
+}
+
+void replace_vars(t_cmd *cmd, int i)
+{
+    char *path;
+    char *aux;
+    char *var;
+
+    aux = NULL;
+    while (cmd->token[i] != NULL && !special_for_vars(cmd->token[i][0]))
+    {
+        if (cmd->token[i][0] == VARIABLE)
+        {
+            aux = cmd->token[i];
+            var = &aux[1];
+            path = ft_getenv(var, cmd->env);
+            if (path != NULL)
+            {
+                replace_token(cmd, i, path); // Sustituir el token por el valor expandido
+                free(path);
+            }
+        }
+        i++;
+    }
+}
+
+void replace_token(t_cmd *cmd, int index, const char *new_token)
+{
+    free(cmd->token[index]); // Liberar el token original
+    cmd->token[index] = ft_strdup(new_token); // Asignar el nuevo token duplicado
 }

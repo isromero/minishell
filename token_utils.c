@@ -56,6 +56,11 @@ int	is_special(char c)
 	return(c == INPUT_REDIRECT || c == PIPE || c == OUTPUT_REDIRECT);
 }
 
+int	is_variable(char c)
+{
+	return(c == VARIABLE);
+}
+
 int	is_redirects(char c)
 {
 	return(c == INPUT_REDIRECT || c == OUTPUT_REDIRECT);
@@ -125,16 +130,6 @@ int	is_special2(char c)
 	return(c == INPUT_REDIRECT || c == PIPE || c == OUTPUT_REDIRECT);
 }
 
-int	is_variable(t_cmd *cmd, int len)
-{
-	int	i;
-
-	i = 0;
-	while(cmd->line[i + len] != ' ' && cmd->line[i + len] != '\0' && !is_special2(cmd->line[i + len]))
-		i++;
-	return (i);
-}
-
 // ARREGLAR COMILLAS AL FINAL SOLO, NO DETECTA
 int is_double_quote(t_cmd *cmd, int len)
 {
@@ -172,7 +167,7 @@ int check_len_special(t_cmd *cmd, int len)
 	int i;
 
 	i = 0;
-	while(cmd->line[i + len] != ' ' && is_special(cmd->line[i + len]))
+	while(cmd->line[i + len] != ' ' && is_special(cmd->line[i + len])) /* cmd->line[i + len] != '\0' hay que meterlo?*/
 		i++;
 	// Gestión de errores
 	if(i > 2)
@@ -184,9 +179,10 @@ int check_len_special(t_cmd *cmd, int len)
 	return (-1);
 }
 
-int is_token(t_cmd *cmd, int len)
+int prompt_token_len(t_cmd *cmd, int len)
 {
     int i = 0;
+	/* en principio no hace falta checkear los appends y heredocs ya que los detectará este */
     while (cmd->line[i + len] != '\0' && cmd->line[i + len] != ' ' && !is_special2(cmd->line[i + len]))
         i++;
     return i;
@@ -200,15 +196,15 @@ int	check_len_token(t_cmd *cmd, int len)
 		while(cmd->line[i + len] != '\0' && cmd->line[i + len] != ' ')
 			i++;
 		if(cmd->line[len] == VARIABLE)
-			return(is_variable(cmd, len));
+			return(prompt_token_len(cmd, len));
 		else if(cmd->line[len] == SINGLE_QUOTE)
 			return(is_single_quote(cmd, len));
 		else if(cmd->line[len] == DOUBLE_QUOTE)
 			return(is_double_quote(cmd, len));
-		else if(is_special2(cmd->line[len] )) // < > | 
-			return(check_len_special(cmd, len)); // << < > >> |
+		else if(is_special2(cmd->line[len] )) // << < > >> | 
+			return(check_len_special(cmd, len));
 		else if(cmd->line[len] != '\0')
-			return(is_token(cmd, len));
+			return(prompt_token_len(cmd, len));
 	}
 	return i;
 }

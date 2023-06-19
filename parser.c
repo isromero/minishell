@@ -39,11 +39,12 @@ void parse_args(t_cmd *cmd)
             save_token(cmd, token);
             i += len;
         }
-        else /* CHECKEAR: ls | ls */
+        /* En principio esto no hace falta */
+        /*   else
         {
             perror("Error: introducir token válido");
             break;
-        }
+        } */
     }
     // Asegurarse de que el último elemento del arreglo sea NULL
     save_token(cmd, NULL);

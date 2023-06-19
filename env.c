@@ -15,16 +15,31 @@
 char *ft_getenv(const char *name, char **env) 
 {
     size_t name_len = ft_strlen(name);
+    int i;
 
-    // Recorrer el arreglo hasta encontrar el puntero nulo
-    for (int i = 0; env[i] != NULL; i++)
-	{
-        // Comparar el nombre de la variable con la clave en cada elemento del arreglo
-        if (ft_strncmp(name, env[i], name_len) == 0 && env[i][name_len] == '=') 
-		{
-            // Retornar el puntero al valor de la variable de entorno (después del '=')
-            return &env[i][name_len + 1];
+    i = 0;
+    while (env[i] != NULL && env[i][0] != ' ')
+    {
+        if (ft_strncmp(name, env[i], name_len) == 0 && env[i][name_len] == '=')
+        {
+            char *value_start = env[i] + name_len + 1;  // Puntero al inicio del valor después del '='
+            // Buscar el primer carácter de tubería '|' o el final de línea '\0'
+            char *value_end = ft_strchr(value_start, '|');
+            if (value_end == NULL)
+                value_end = ft_strchr(value_start, '\0');
+            // Calcular la longitud del valor y copiarlo en una nueva cadena
+            size_t value_len = value_end - value_start + 1;
+            char *value = (char *)malloc((value_len + 1) * sizeof(char));
+            if (value == NULL)
+            {
+                // Manejo de error por falta de memoria
+                return NULL;
+            }
+            ft_strncpy(value, value_start, value_len);
+            value[value_len] = '\0';
+            return value;
         }
+        i++;
     }
     // La variable de entorno no fue encontrada
     return NULL;

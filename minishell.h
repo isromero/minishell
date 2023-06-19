@@ -117,10 +117,13 @@ void 	execute_appends(t_cmd *cmd, char *com, char **exec_args);
 void 	execute_output_redirects(t_cmd *cmd, char *com, char **exec_args);
 void 	execute_input_redirects(t_cmd *cmd, char *com, char **exec_args);
 void 	execute_heredoc_redirects(t_cmd *cmd, char *com, char **exec_args);
-
+void 	execute_vars(t_cmd *cmd, int i);
 
 /* expander.c */
-void	print_vars(t_cmd *cmd);
+void	replace_vars(t_cmd *cmd, int i);
+int		special_for_vars(char c);
+void	replace_token(t_cmd *cmd, int index, const char *new_token);
+void	print_vars(t_cmd *cmd, int i);
 
 /* parser.c */
 void	parse_args(t_cmd *cmd);
@@ -142,16 +145,16 @@ void 	save_token(t_cmd *cmd, char *token);
 int		is_redirects(char c);
 int		is_redirects_double_char(char *token);
 int		is_special(char c);
+int		is_variable(char c);
 int		is_argument(char c);
 int		is_argument_extension(t_cmd *cmd, int i);
 int		is_pipe(char c);
 int		is_special2(char c);
-int		is_variable(t_cmd *cmd, int len);
 int 	is_double_quote(t_cmd *cmd, int len);
 int 	is_single_quote(t_cmd *cmd, int len);
 void 	error_special(); // Meter perror mejor?
 int 	check_len_special(t_cmd *cmd, int len);
-int 	is_token(t_cmd *cmd, int len);
+int 	prompt_token_len(t_cmd *cmd, int len);
 int		check_len_token(t_cmd *cmd, int len);
 int		find_variables(char **token);
 

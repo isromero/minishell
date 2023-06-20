@@ -48,8 +48,7 @@ void execute(t_cmd *cmd)
     char *com;
     char **exec_args;
     int first_variable;
-    
-	
+
 	i = 0;
 	j = 0;
     com = NULL;
@@ -115,7 +114,7 @@ void execute(t_cmd *cmd)
                 else if (!com)
                 {
                     g_status = 127;
-                    printf("minishell: %s: command not found\n", cmd->token[i]);
+                    printf("-minishell: %s: command not found\n", cmd->token[i]);
                     exit(g_status);
                 }
                 else
@@ -125,7 +124,7 @@ void execute(t_cmd *cmd)
             {
                 int child_status;
                 wait(&child_status); // Esperar a que el proceso hijo termine
-                if (WIFEXITED(child_status) && WEXITSTATUS(child_status) > 0)
+                if (WIFEXITED(child_status) && WEXITSTATUS(child_status) > 0) // Wexitstatus: Si el hijo terminó y cambió g_status
                 {
                     g_status = WEXITSTATUS(child_status); // Obtener el estado de salida del proceso hijo
                     return ;
@@ -203,7 +202,6 @@ void redirecting_pipes(t_cmd *cmd) /* dobles comandos como grep y cat se quedan 
             execute_middle_pipes(&cmd, len);
             cmd->count_pids++;
         }
-       
         else if (!is_special(cmd->token[i][0]) && cmd->token[i + 1] == NULL && (first_time == 1 || cmd->count_pipes > 0) && cmd->count_pipes == cmd->n_pipes - 1) 
         {
             first_time = 0;
@@ -295,14 +293,17 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
     com = NULL;
     exec_args = NULL;
     j = 0;
+    replace_vars(cmd, i);
     if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0] && !is_redirects_double_char(cmd->token[i])))
     {
         cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
         if(cmd->pid[cmd->count_pids] == 0)
         {
-           
             if(is_builtin(cmd, i))
+            {
                 execute_builtin(cmd, i);
+                g_status = 0;
+            }
             else
             {
                 com = command_dir(cmd, cmd->token[i]);
@@ -342,7 +343,7 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                 if (!com)
                 {
                     g_status = 127;
-                    perror("command not found");
+                    printf("-minishell: %s: command not found\n", cmd->token[i]);
                     exit(g_status);
                 }
             }
@@ -351,11 +352,13 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
         { 
             int child_status;
             wait(&child_status); // Esperar a que el proceso hijo termine
-            if (WIFEXITED(child_status))
+            if (WIFEXITED(child_status) && WEXITSTATUS(child_status) >= 0) // Wexitstatus: Si el hijo terminó y cambió g_status
+            {
                 g_status = WEXITSTATUS(child_status); // Obtener el estado de salida del proceso hijo
+                return ;
+            }
         }
     } 
-    
     free(exec_args); // aquí?
 }
 
@@ -368,13 +371,17 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
     com = NULL;
     exec_args = NULL;
     j = 0;
+    replace_vars(cmd[0], i);
     if (!is_argument_extension(cmd[0], i) && !is_redirects(cmd[0]->token[i][0] && !is_redirects_double_char(cmd[0]->token[i])))
     {
         cmd[0]->pid[cmd[0]->count_pids] = fork(); //Checkear error de fork
         if(cmd[0]->pid[cmd[0]->count_pids] == 0)
         {
             if(is_builtin(cmd[0], i))
+            {
                 execute_builtin(cmd[0], i);
+                g_status = 0;
+            }     
             else
             {
                 com = command_dir(cmd[0], cmd[0]->token[i]);
@@ -415,10 +422,10 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                     perror("execve:");
                     exit(1);
                 }
-                if (!com) 
+                if (!com)
                 {
                     g_status = 127;
-                    perror("command not found");
+                    printf("-minishell: %s: command not found\n", cmd[0]->token[i]);
                     exit(g_status);
                 }
             }
@@ -428,8 +435,11 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
             cmd[0]->count_pipes++;
             int child_status;
             wait(&child_status); // Esperar a que el proceso hijo termine
-            if (WIFEXITED(child_status))
+            if (WIFEXITED(child_status) && WEXITSTATUS(child_status) >= 0) // Wexitstatus: Si el hijo terminó y cambió g_status
+            {
                 g_status = WEXITSTATUS(child_status); // Obtener el estado de salida del proceso hijo
+                return ;
+            }
         }
     }
     free(exec_args); // aquí?
@@ -445,13 +455,17 @@ void    execute_first_pipes(t_cmd *cmd, int i)
     com = NULL;
     exec_args = NULL;
     j = 0;
+    replace_vars(cmd, i);
     if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0] && !is_redirects_double_char(cmd->token[i])))
     {
         cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
         if(cmd->pid[cmd->count_pids] == 0)
         {
             if(is_builtin(cmd, i))
+            {
                 execute_builtin(cmd, i);
+                g_status = 0;
+            }
             else
             {
                 com = command_dir(cmd, cmd->token[i]);
@@ -486,10 +500,10 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                     perror("execve:");
                     exit(1);
                 }
-                if (!com) 
+                if (!com)
                 {
                     g_status = 127;
-                    perror("command not found");
+                    printf("-minishell: %s: command not found\n", cmd->token[i]);
                     exit(g_status);
                 }
             }
@@ -498,8 +512,11 @@ void    execute_first_pipes(t_cmd *cmd, int i)
         {
             int child_status;
             wait(&child_status); // Esperar a que el proceso hijo termine
-            if (WIFEXITED(child_status))
+            if (WIFEXITED(child_status) && WEXITSTATUS(child_status) >= 0) // Wexitstatus: Si el hijo terminó y cambió g_status
+            {
                 g_status = WEXITSTATUS(child_status); // Obtener el estado de salida del proceso hijo
+                return ;
+            }
         }
     }
     free(exec_args); // aquí?
@@ -637,3 +654,5 @@ int is_command_exists(t_cmd *cmd, char *command)
 
 /* minishell -> ls -l | <
 minishell: syntax error near unexpected token `newline' */
+
+/* echo $? | cat SE QUEDA EN BUCLE */

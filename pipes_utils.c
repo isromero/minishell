@@ -40,12 +40,15 @@ void    wait_close_pipes(t_cmd *cmd)
         i++;
     }
     /* CHECKEAR: en principio no es necesario estos waits desde que hicimos waitexited... pero funciona con estos waits tambien */
-   /*  i = 0; 
+    i = 0; 
     while (i < cmd->n_processes)
     {
-        wait(NULL);
+        int child_status;
+        wait(&child_status); // Esperar a que el proceso hijo termine
+        if (WIFEXITED(child_status) && WEXITSTATUS(child_status) >= 0) // Wexitstatus: Si el hijo terminó y cambió g_status
+            g_status = WEXITSTATUS(child_status); // Obtener el estado de salida del proceso hijo
         i++;
-    } */
+    }
     // Tal vez bucle de liberación de fd's
     free(cmd->fd);
     free(cmd->pid);

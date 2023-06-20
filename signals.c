@@ -18,27 +18,24 @@ void    handle_ctrld_heredoc()
 	exit(0);
 }
 
-void    handle_ctrlc_heredoc(int sig)
+void    handle_ctrlc_heredoc()
 {
-    (void)sig;
     ft_putchar_fd('\n', STDOUT_FILENO);
     exit(0);
 }
 
 void    handle_ctrlc()
 {
-    rl_replace_line("", 0);
-	rl_on_new_line();
     ft_putchar_fd('\n', STDOUT_FILENO);
-    rl_on_new_line();
-    rl_redisplay();
+	rl_on_new_line();
+	rl_replace_line("", 0);
+	rl_redisplay();
     g_status = 130;
 }
 
 void    handle_ctrld()
 {
     g_status = 0;
-    /* por qué sin llamarla actualiza correctamente g_status */
 }
 
 

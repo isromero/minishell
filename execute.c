@@ -311,8 +311,7 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                 {
                     exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
                     j = i;
-                    while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|' && cmd->token[j][0] != '>' \
-                    && cmd->token[j][0] != '<' /* STRCMP DE HEREDOCS Y APPENDS */)
+                    while(j < cmd->n_tokens - 1 && !is_special(cmd->token[j][0]) && !is_redirects(cmd->token[j][0]))
                     {
                         exec_args[j - i] = cmd->token[j];
                         j++;
@@ -348,16 +347,6 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                 }
             }
         }
-        else
-        { 
-            int child_status;
-            wait(&child_status); // Esperar a que el proceso hijo termine
-            if (WIFEXITED(child_status) && WEXITSTATUS(child_status) >= 0) // Wexitstatus: Si el hijo terminó y cambió g_status
-            {
-                g_status = WEXITSTATUS(child_status); // Obtener el estado de salida del proceso hijo
-                return ;
-            }
-        }
     } 
     free(exec_args); // aquí?
 }
@@ -389,8 +378,7 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                 {
                     exec_args = (char **)malloc(sizeof(char *) * (cmd[0]->n_tokens - i + 1));
                     j = i;
-                    while(j < cmd[0]->n_tokens - 1 && cmd[0]->token[j][0] != '|' && cmd[0]->token[j][0] != '>' \
-                    && cmd[0]->token[j][0] != '<' /* STRCMP DE HEREDOCS Y APPENDS */)
+                    while(j < cmd[0]->n_tokens - 1 && !is_special(cmd[0]->token[j][0]) && !is_redirects(cmd[0]->token[j][0]))
                     {
                         exec_args[j - i] = cmd[0]->token[j];
                         j++;
@@ -431,16 +419,7 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
             }
         }
         else
-        {
             cmd[0]->count_pipes++;
-            int child_status;
-            wait(&child_status); // Esperar a que el proceso hijo termine
-            if (WIFEXITED(child_status) && WEXITSTATUS(child_status) >= 0) // Wexitstatus: Si el hijo terminó y cambió g_status
-            {
-                g_status = WEXITSTATUS(child_status); // Obtener el estado de salida del proceso hijo
-                return ;
-            }
-        }
     }
     free(exec_args); // aquí?
 }
@@ -473,8 +452,7 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                 {
                     exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
                     j = i;
-                    while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|' && cmd->token[j][0] != '>' \
-                    && cmd->token[j][0] != '<' /* STRCMP DE HEREDOCS Y APPENDS */)
+                    while(j < cmd->n_tokens - 1 && !is_special(cmd->token[j][0]) && !is_redirects(cmd->token[j][0]))
                     {
                         exec_args[j - i] = cmd->token[j];
                         j++;
@@ -506,16 +484,6 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                     printf("-minishell: %s: command not found\n", cmd->token[i]);
                     exit(g_status);
                 }
-            }
-        }
-        else
-        {
-            int child_status;
-            wait(&child_status); // Esperar a que el proceso hijo termine
-            if (WIFEXITED(child_status) && WEXITSTATUS(child_status) >= 0) // Wexitstatus: Si el hijo terminó y cambió g_status
-            {
-                g_status = WEXITSTATUS(child_status); // Obtener el estado de salida del proceso hijo
-                return ;
             }
         }
     }

@@ -195,6 +195,6 @@ void 	close_input_redirect(t_cmd *cmd);
 void    handle_ctrld();
 void    handle_ctrlc();
 void    handle_ctrld_heredoc();
-void    handle_ctrlc_heredoc(int sig);
+void    handle_ctrlc_heredoc();
 
 extern int g_status;

@@ -17,6 +17,7 @@ int special_for_vars(char c)
 	return(c == INPUT_REDIRECT || c == PIPE || c == OUTPUT_REDIRECT);
 }
 
+/* En desuso */
 void print_vars(t_cmd *cmd, int i)
 {
 

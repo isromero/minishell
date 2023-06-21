@@ -172,35 +172,15 @@ char *find_heredoc_delim(t_cmd *cmd)
 	return(0);
 }
 
-// void print_vars(t_cmd *prompt, int i)
-// {
-
-// 	char *path;
-// 	char *aux;
-// 	char *var;
-
-// 	aux = NULL;
-// 	if(prompt[i] == VARIABLE)
-// 	{
-// 		aux = cmd->token[i];
-// 		var = &aux[1];
-// 		path = ft_getenv(var, cmd->env);
-// 		if(path == NULL)
-// 			return ;
-// 		printf("%s\n", path);
-// 		free(path);
-// 	}
-// }
-
-// void write_variable_heredoc(char *prompt, int i, int fd)
-// {
-// 	i++;
-// 	while(prompt[i])
-// 	{
+/* void write_variable_heredoc(char *prompt, int i, int fd)
+{
+	i++;
+	while(prompt[i])
+	{
 		
-// 	}
-// }
-/* void write_expand_heredoc(char *prompt, int fd)
+	}
+}
+void write_expand_heredoc(char *prompt, int fd)
 {
 	int i;
 	while(prompt[i] != '\0')
@@ -213,6 +193,35 @@ char *find_heredoc_delim(t_cmd *cmd)
 		}
 	}
 } */
+
+void replace_vars_heredoc(t_cmd *cmd, char *line)
+{
+    char *path;
+    char *aux;
+    char *var;
+
+    aux = NULL;
+	aux = line;
+	var = &aux[1];
+	path = ft_getenv(var, cmd->env);
+	if (path != NULL)
+	{
+		replace_line_heredoc(line, path); // Sustituir el token por el valor expandido
+		free(path);
+	}
+	else /* En el caso de que no exista liberamos path y dejamos line como estaba */
+	{
+		free(path);
+		return ;
+	}
+		
+}
+
+void replace_line_heredoc(char *line, const char *new_token)
+{
+    free(line); // Liberar el token original
+    line = ft_strdup(new_token); // Asignar el nuevo token duplicado
+}
 
 int	heredoc_content(t_cmd *cmd, int fd) 
 {
@@ -228,6 +237,8 @@ int	heredoc_content(t_cmd *cmd, int fd)
 	}
 	if(line && *line != '\n')
 	{
+		if(line[0] == VARIABLE)
+			replace_vars_heredoc(cmd, line);
 		ft_putstr_fd(line, fd);
 		ft_putchar_fd('\n', fd);
 		free(line);
@@ -276,7 +287,6 @@ void    heredoc_redirect(t_cmd **cmd)
             write(1, buffer, bytes_read);
         close(fd);
         exit(0);
-
 	}
 	else
 	{

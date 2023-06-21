@@ -72,7 +72,7 @@ typedef struct cmd
 	char	**exec_args;
 	int 	stdout;
 	int 	stdin;
-	int		pollitasana;
+	char	**save_lines;
 } t_cmd;
 
 #define HEREDOC_REDIRECT "<<"
@@ -189,7 +189,7 @@ int     find_first_heredoc_redirect(t_cmd *cmd);
 int		find_last_heredoc_redirect(t_cmd *cmd);
 char 	*find_heredoc_delim(t_cmd *cmd);
 int		heredoc_content(t_cmd *cmd, int fd);
-void    heredoc_redirect(t_cmd *cmd);
+void    heredoc_redirect(t_cmd **cmd);
 void 	close_input_redirect(t_cmd *cmd);
 
 /* signals.c */

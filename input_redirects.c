@@ -172,6 +172,47 @@ char *find_heredoc_delim(t_cmd *cmd)
 	return(0);
 }
 
+// void print_vars(t_cmd *prompt, int i)
+// {
+
+// 	char *path;
+// 	char *aux;
+// 	char *var;
+
+// 	aux = NULL;
+// 	if(prompt[i] == VARIABLE)
+// 	{
+// 		aux = cmd->token[i];
+// 		var = &aux[1];
+// 		path = ft_getenv(var, cmd->env);
+// 		if(path == NULL)
+// 			return ;
+// 		printf("%s\n", path);
+// 		free(path);
+// 	}
+// }
+
+// void write_variable_heredoc(char *prompt, int i, int fd)
+// {
+// 	i++;
+// 	while(prompt[i])
+// 	{
+		
+// 	}
+// }
+/* void write_expand_heredoc(char *prompt, int fd)
+{
+	int i;
+	while(prompt[i] != '\0')
+	{
+		if(prompt[i] != VARIABLE)
+			ft_putchar_fd(prompt[i], fd)
+		else if(prompt[i] == VARIABLE)
+		{
+			
+		}
+	}
+} */
 
 int	heredoc_content(t_cmd *cmd, int fd) 
 {
@@ -185,7 +226,7 @@ int	heredoc_content(t_cmd *cmd, int fd)
 		free(line);
 		return(1);
 	}
-	else if(line && *line != '\n')
+	if(line && *line != '\n')
 	{
 		ft_putstr_fd(line, fd);
 		ft_putchar_fd('\n', fd);
@@ -196,7 +237,7 @@ int	heredoc_content(t_cmd *cmd, int fd)
 	return (0);
 }
 
-void    heredoc_redirect(t_cmd *cmd)
+void    heredoc_redirect(t_cmd **cmd)
 {
 	int	fd;
 	pid_t pid;
@@ -210,11 +251,10 @@ void    heredoc_redirect(t_cmd *cmd)
 	}
 	else if (pid == 0)
 	{
-		printf("delimitator: %s\n", find_heredoc_delim(cmd));
+		printf("delimitator: %s\n", find_heredoc_delim(cmd[0]));
 		/* preguntar a pacheco sobre archivos temporales */
 		/* tal vez hacer unlink al abrir y al cerrar */
 		fd = open("/tmp/heredocBURMITO", O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
-		
 		if (fd == -1)
 		{
 			perror("");
@@ -225,11 +265,18 @@ void    heredoc_redirect(t_cmd *cmd)
 		signal(SIGINT, &handle_ctrlc_heredoc);
 		while (1)
 		{
-			if(heredoc_content(cmd, fd) == 1)
+			if(heredoc_content(cmd[0], fd) == 1)
 				break;
 		}
 		close(fd);
-		exit(0);
+		fd = open("/tmp/heredocBURMITO", O_RDONLY); /* Lo abrimos de nuevo después de cerrar para empezar desde el principio del archivo */
+        char buffer[1024]; 
+        ssize_t bytes_read;
+        while ((bytes_read = read(fd, buffer, sizeof(buffer))) > 0)
+            write(1, buffer, bytes_read);
+        close(fd);
+        exit(0);
+
 	}
 	else
 	{

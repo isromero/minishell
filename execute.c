@@ -270,7 +270,7 @@ void execute_heredoc_redirects(t_cmd *cmd, char *com, char **exec_args)
 {
     if(is_heredoc_redirect(cmd) == 1)
     {
-        heredoc_redirect(cmd);
+        heredoc_redirect(&cmd);
         execve(com, exec_args, cmd->env);
         close_input_redirect(cmd);
     }

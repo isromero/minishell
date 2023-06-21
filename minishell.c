@@ -23,13 +23,15 @@ int	main(int argc, char **argv, char **env)
 	cmd.env = env;
 	
 	unlink("/tmp/heredocBURMITO");
-	signal(SIGINT, handle_ctrlc);
+	/* signal(SIGQUIT, SIG_IGN); */
 	while(1)
 	{
+		signal(SIGINT, &handle_ctrlc);
 		cmd.prompt = get_prompt(&cmd);
 		cmd.line = readline(cmd.prompt);
-		if (cmd.line == NULL) {
-            handle_ctrld();  // Llamar a la función cuando se detecta Ctrl-D
+		if (cmd.line == NULL)
+		{
+            handle_ctrld();
             break;
         }
 		if(ft_strncmp(cmd.line, "", 1) > 0) 
@@ -44,5 +46,5 @@ int	main(int argc, char **argv, char **env)
 	rl_clear_history();
 	/* free(cmd.env); */
 	
-    return (g_status); // revisar si hay que devolver g_status
+    return (g_status);
 }

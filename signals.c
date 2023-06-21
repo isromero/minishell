@@ -33,6 +33,11 @@ void    handle_ctrlc()
     g_status = 130;
 }
 
+void	handle_ctrlc2(int sig)
+{
+    (void)sig;
+}
+
 void    handle_ctrld()
 {
     g_status = 0;

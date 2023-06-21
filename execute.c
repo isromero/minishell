@@ -54,6 +54,7 @@ void execute(t_cmd *cmd)
     com = NULL;
     exec_args = NULL;
     first_variable = 0;
+    signal(SIGINT, &handle_ctrlc2);
     while (i < cmd->n_tokens - 1)
     {
         if(is_variable(cmd->token[i][0]) && first_variable == 0)
@@ -62,7 +63,6 @@ void execute(t_cmd *cmd)
         if (!is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_special(cmd->token[i][0] && !is_redirects(cmd->token[j][0])))/* Pendiente introducir is_special con todo */ 
         {
             // HACER UN INT QUE DEVUELVA ERROR Y NO ENTRAR
-            //printf("ESTO ES LA I %d\n", i);
             pid_t pid = fork();
             if (pid == -1)
             {
@@ -75,7 +75,6 @@ void execute(t_cmd *cmd)
 				/* Si se obtuvo una ruta válida (com != NULL), se crea un nuevo arreglo exec_args para almacenar los argumentos que se pasarán a execve. */
                 if (com != NULL)
                 {
-
 					/* Se asigna memoria dinámicamente para exec_args con un tamaño igual al número de tokens 
 					restantes en cmd desde la posición i, más 1 para el elemento NULL que se agrega al final del arreglo. */
                     exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
@@ -124,7 +123,7 @@ void execute(t_cmd *cmd)
             {
                 int child_status;
                 wait(&child_status); // Esperar a que el proceso hijo termine
-                if (WIFEXITED(child_status) && WEXITSTATUS(child_status) > 0) // Wexitstatus: Si el hijo terminó y cambió g_status
+                if (WIFEXITED(child_status) && WEXITSTATUS(child_status) >= 0) // Wexitstatus: Si el hijo terminó y cambió g_status
                 {
                     g_status = WEXITSTATUS(child_status); // Obtener el estado de salida del proceso hijo
                     return ;
@@ -187,6 +186,7 @@ void redirecting_pipes(t_cmd *cmd) /* dobles comandos como grep y cat se quedan 
     len = 0;
     first_time = 0; 
     init_pipes(cmd);
+    signal(SIGINT, &handle_ctrlc2);
     while(i < cmd->n_tokens - 1)
     {
         if(cmd->token[i][0] == '|' && cmd->count_pipes == 0 && first_time == 0)

@@ -172,26 +172,26 @@ char *find_heredoc_delim(t_cmd *cmd)
 	return(0);
 }
 
-int		heredoc_content(t_cmd *cmd, int fd) 
+
+int	heredoc_content(t_cmd *cmd, int fd) 
 {
-	char *prompt;
+	char *line;
 
 	/* Gestionar variables, cadenas literales(QUOTES) */
 	
-	prompt = readline(">");
-	
-	if(ft_strcmp(prompt, find_heredoc_delim(cmd)) == 0)
+	line = readline(">");
+	if(ft_strcmp(line, find_heredoc_delim(cmd)) == 0)
 	{
-		free(prompt);
+		free(line);
 		return(1);
 	}
-	if(prompt && *prompt != '\n')
+	else if(line && *line != '\n')
 	{
-		ft_putstr_fd(prompt, fd);
+		ft_putstr_fd(line, fd);
 		ft_putchar_fd('\n', fd);
-		free(prompt);
+		free(line);
 	}
-	else if(*prompt == '\n') /* ? */
+	else if(*line == '\n') /* ? */
 		ft_putchar_fd('\n', fd);
 	return (0);
 }
@@ -202,6 +202,7 @@ void    heredoc_redirect(t_cmd *cmd)
 	pid_t pid;
 
 	pid = fork();
+	signal(SIGINT, SIG_IGN);
 	if (pid == -1)
 	{  
 		perror("fork");
@@ -209,7 +210,6 @@ void    heredoc_redirect(t_cmd *cmd)
 	}
 	else if (pid == 0)
 	{
-		
 		printf("delimitator: %s\n", find_heredoc_delim(cmd));
 		/* preguntar a pacheco sobre archivos temporales */
 		/* tal vez hacer unlink al abrir y al cerrar */
@@ -234,6 +234,7 @@ void    heredoc_redirect(t_cmd *cmd)
 	else
 	{
 		wait(NULL);
+		signal(SIGINT, &handle_ctrlc);
 		/* BORRAR ARCHIVO CUANDO MANDEMOS SEÑAL DE CTRL-D */
 		if (unlink("/tmp/heredocBURMITO") == -1)
 		{

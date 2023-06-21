@@ -72,6 +72,7 @@ typedef struct cmd
 	char	**exec_args;
 	int 	stdout;
 	int 	stdin;
+	int		pollitasana;
 } t_cmd;
 
 #define HEREDOC_REDIRECT "<<"
@@ -194,6 +195,7 @@ void 	close_input_redirect(t_cmd *cmd);
 /* signals.c */
 void    handle_ctrld();
 void    handle_ctrlc();
+void	handle_ctrlc2(int sig);
 void    handle_ctrld_heredoc();
 void    handle_ctrlc_heredoc();
 

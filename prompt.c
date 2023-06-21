@@ -32,7 +32,6 @@ char *get_prompt(t_cmd *custom_prompt)
     ft_strcat(custom_prompt->prompt, cwd);
     ft_strcat(custom_prompt->prompt, COLOR_WHITE);
     ft_strcat(custom_prompt->prompt, "$ ");
-
     return (custom_prompt->prompt);
 }
 

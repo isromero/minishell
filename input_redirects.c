@@ -172,57 +172,6 @@ char *find_heredoc_delim(t_cmd *cmd)
 	return(0);
 }
 
-/* void write_variable_heredoc(char *prompt, int i, int fd)
-{
-	i++;
-	while(prompt[i])
-	{
-		
-	}
-}
-void write_expand_heredoc(char *prompt, int fd)
-{
-	int i;
-	while(prompt[i] != '\0')
-	{
-		if(prompt[i] != VARIABLE)
-			ft_putchar_fd(prompt[i], fd)
-		else if(prompt[i] == VARIABLE)
-		{
-			
-		}
-	}
-} */
-
-void replace_vars_heredoc(t_cmd *cmd, char *line)
-{
-    char *path;
-    char *aux;
-    char *var;
-
-    aux = NULL;
-	aux = line;
-	var = &aux[1];
-	path = ft_getenv(var, cmd->env);
-	if (path != NULL)
-	{
-		replace_line_heredoc(line, path); // Sustituir el token por el valor expandido
-		free(path);
-	}
-	else /* En el caso de que no exista liberamos path y dejamos line como estaba */
-	{
-		free(path);
-		return ;
-	}
-		
-}
-
-void replace_line_heredoc(char *line, const char *new_token)
-{
-    free(line); // Liberar el token original
-    line = ft_strdup(new_token); // Asignar el nuevo token duplicado
-}
-
 int	heredoc_content(t_cmd *cmd, int fd) 
 {
 	char *line;
@@ -235,10 +184,8 @@ int	heredoc_content(t_cmd *cmd, int fd)
 		free(line);
 		return(1);
 	}
-	if(line && *line != '\n')
+	else if(line && *line != '\n')
 	{
-		if(line[0] == VARIABLE)
-			replace_vars_heredoc(cmd, line);
 		ft_putstr_fd(line, fd);
 		ft_putchar_fd('\n', fd);
 		free(line);
@@ -246,6 +193,60 @@ int	heredoc_content(t_cmd *cmd, int fd)
 	else if(*line == '\n') /* ? */
 		ft_putchar_fd('\n', fd);
 	return (0);
+}
+
+char* replace_vars_heredoc(t_cmd *cmd, const char *buffer, int i)
+{
+    char *path;
+    char *var;
+    int var_length = 0;
+    int j;
+
+    var = NULL;
+    i++;
+    j = i;
+    while (buffer[j] != '\0' && buffer[j] != ' ' && buffer[j] != '\n' &&
+           buffer[j] != '$' && buffer[j] != '\t')
+    {
+        var_length++;
+        j++;
+    }
+    var = malloc(var_length + 1);
+    strncpy(var, &buffer[i], var_length);
+    var[var_length] = '\0';
+    path = ft_getenv(var, cmd->env);
+    free(var);
+
+    if (path != NULL)
+    {
+        // Crear una nueva cadena con la parte seleccionada reemplazada por el valor
+        char *result = malloc(strlen(buffer) + strlen(path) + 1);
+        strncpy(result, buffer, i - 1);
+        strcpy(result + i - 1, path);
+        strcat(result, buffer + i + var_length);
+        free(path);
+        return result;
+    }
+    else
+    {
+        // Si no se encuentra el valor, devolver una copia del buffer original
+        return strdup(buffer);
+    }
+}
+
+void replace_env_vars(t_cmd *cmd, char *buffer) 
+{
+	int	i;
+	char *result;
+
+	i = 0;
+	result = NULL;
+	while(buffer[i] != '\0' && buffer[i] != '\n' && buffer[i] != '\t')
+	{
+		if(buffer[i] == '$')
+			buffer = replace_vars_heredoc(cmd, buffer, i);
+		i++;
+	}
 }
 
 void    heredoc_redirect(t_cmd **cmd)
@@ -265,7 +266,7 @@ void    heredoc_redirect(t_cmd **cmd)
 		printf("delimitator: %s\n", find_heredoc_delim(cmd[0]));
 		/* preguntar a pacheco sobre archivos temporales */
 		/* tal vez hacer unlink al abrir y al cerrar */
-		fd = open("/tmp/heredocBURMITO", O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+		fd = open("abueno", O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
 		if (fd == -1)
 		{
 			perror("");
@@ -280,11 +281,15 @@ void    heredoc_redirect(t_cmd **cmd)
 				break;
 		}
 		close(fd);
-		fd = open("/tmp/heredocBURMITO", O_RDONLY); /* Lo abrimos de nuevo después de cerrar para empezar desde el principio del archivo */
+		fd = open("abueno", O_RDONLY); /* Lo abrimos de nuevo después de cerrar para empezar desde el principio del archivo */
         char buffer[1024]; 
         ssize_t bytes_read;
-        while ((bytes_read = read(fd, buffer, sizeof(buffer))) > 0)
-            write(1, buffer, bytes_read);
+        while ((bytes_read = read(fd, buffer, sizeof(buffer))) > 0) 
+		{
+			replace_env_vars(cmd[0], buffer);
+			write(1, buffer, strlen(buffer));
+			write(1, "\n", 1);
+		}
         close(fd);
         exit(0);
 	}
@@ -293,7 +298,7 @@ void    heredoc_redirect(t_cmd **cmd)
 		wait(NULL);
 		signal(SIGINT, &handle_ctrlc);
 		/* BORRAR ARCHIVO CUANDO MANDEMOS SEÑAL DE CTRL-D */
-		if (unlink("/tmp/heredocBURMITO") == -1)
+		if (unlink("abueno") == -1)
 		{
             perror("unlink");
             exit(1);
@@ -301,6 +306,114 @@ void    heredoc_redirect(t_cmd **cmd)
 		exit(0);
 	}
 }
+
+// void replace_vars_heredoc(t_cmd *cmd, char *line)
+// {
+//     char *path;
+//     char *aux;
+//     char *var;
+
+//     aux = NULL;
+// 	aux = line;
+// 	var = &aux[1];
+// 	path = ft_getenv(var, cmd->env);
+// 	if (path != NULL)
+// 	{
+// 		free(line); // Liberar el token original
+//     	line = ft_strdup(path); // Asignar el nuevo token duplicado
+// 		free(path);
+// 	}
+// 	else /* En el caso de que no exista liberamos path y dejamos line como estaba */
+// 	{
+// 		free(path);
+// 		return ;
+// 	}	
+// }
+
+// int	heredoc_content(t_cmd *cmd, int fd) 
+// {
+// 	char *line;
+// 	char *aux;
+// 	int len;
+
+// 	/* Gestionar variables, cadenas literales(QUOTES) */
+// 	line = NULL;
+// 	aux = readline(">");
+// 	len = ft_strlen(line);
+// 	line = (char *)malloc(sizeof(char) * (len + 2)); /* > + '\0' */
+// 	strcpy(line, aux);
+// 	line[len] = '\0';
+// 	if(ft_strcmp(line, find_heredoc_delim(cmd)) == 0)
+// 	{
+// 		free(line);
+// 		return(1);
+// 	}
+// 	else if(line && *line != '\n')
+// 	{
+// 		if(line[0] == VARIABLE)
+// 			replace_vars_heredoc(cmd, line);
+// 		ft_putstr_fd(line, fd);
+// 		ft_putchar_fd('\n', fd);
+// 		free(line);
+// 	}
+// 	else if(*line == '\n') /* ? */
+// 		ft_putchar_fd('\n', fd);
+// 	return (0);
+// }
+
+// void    heredoc_redirect(t_cmd **cmd)
+// {
+// 	int	fd;
+// 	pid_t pid;
+
+// 	pid = fork();
+// 	signal(SIGINT, SIG_IGN);
+// 	if (pid == -1)
+// 	{  
+// 		perror("fork");
+//     	exit(1);
+// 	}
+// 	else if (pid == 0)
+// 	{
+// 		printf("delimitator: %s\n", find_heredoc_delim(cmd[0]));
+// 		/* preguntar a pacheco sobre archivos temporales */
+// 		/* tal vez hacer unlink al abrir y al cerrar */
+// 		fd = open("/tmp/heredocBURMITO", O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+// 		if (fd == -1)
+// 		{
+// 			perror("");
+// 			exit(1);
+// 		}
+// 		/* DEVUELVE DOBLE PROMPT, ARREGLAR */
+// 		signal(SIGINT, SIG_IGN);
+// 		signal(SIGINT, &handle_ctrlc_heredoc);
+// 		while (1)
+// 		{
+// 			if(heredoc_content(cmd[0], fd) == 1)
+// 				break;
+// 		}
+// 		close(fd);
+// 		fd = open("/tmp/heredocBURMITO", O_RDONLY); /* Lo abrimos de nuevo después de cerrar para empezar desde el principio del archivo */
+//         char buffer[1024]; 
+//         ssize_t bytes_read;
+//         while ((bytes_read = read(fd, buffer, sizeof(buffer))) > 0)
+//             write(1, buffer, bytes_read);
+//         close(fd);
+//         exit(0);
+// 	}
+// 	else
+// 	{
+// 		wait(NULL);
+// 		signal(SIGINT, &handle_ctrlc);
+// 		/* BORRAR ARCHIVO CUANDO MANDEMOS SEÑAL DE CTRL-D */
+// 		if (unlink("/tmp/heredocBURMITO") == -1)
+// 		{
+//             perror("unlink");
+//             exit(1);
+//         }
+// 		exit(0);
+// 	}
+// }
 
 void close_input_redirect(t_cmd *cmd)
 {

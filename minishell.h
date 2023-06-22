@@ -123,7 +123,6 @@ void 	execute_vars(t_cmd *cmd, int i);
 /* expander.c */
 void	replace_vars(t_cmd *cmd, int i);
 int		special_for_vars(char c);
-void	replace_token(t_cmd *cmd, int index, const char *new_token);
 void	print_vars(t_cmd *cmd, int i);
 
 /* parser.c */
@@ -190,8 +189,7 @@ int		find_last_heredoc_redirect(t_cmd *cmd);
 char 	*find_heredoc_delim(t_cmd *cmd);
 int		heredoc_content(t_cmd *cmd, int fd);
 void    heredoc_redirect(t_cmd **cmd);
-void 	replace_vars_heredoc(t_cmd *cmd, char *line);
-void 	replace_line_heredoc(char *line, const char *new_token);
+char* replace_vars_heredoc(t_cmd *cmd, const char *buffer, int i);
 void 	close_input_redirect(t_cmd *cmd);
 
 /* signals.c */

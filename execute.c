@@ -624,3 +624,5 @@ int is_command_exists(t_cmd *cmd, char *command)
 minishell: syntax error near unexpected token `newline' */
 
 /* echo $? | cat SE QUEDA EN BUCLE */
+
+/* checkear env -i ./minishell */

@@ -12,6 +12,7 @@
 
 #include "minishell.h"
 
+ // $USER$PATH NO FUNCIONA EL PARSEO ENTRE VARIABLES JUNTAS /////////////////////////////////////////////////////////////////////
 void parse_args(t_cmd *cmd)
 {
     int len = 0;

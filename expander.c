@@ -54,16 +54,11 @@ void replace_vars(t_cmd *cmd, int i)
             path = ft_getenv(var, cmd->env);
             if (path != NULL)
             {
-                replace_token(cmd, i, path); // Sustituir el token por el valor expandido
+                free(cmd->token[i]); // Liberar el token original
+                cmd->token[i] = ft_strdup(path); // Asignar el nuevo token duplicado
                 free(path);
             }
         }
         i++;
     }
-}
-
-void replace_token(t_cmd *cmd, int index, const char *new_token)
-{
-    free(cmd->token[index]); // Liberar el token original
-    cmd->token[index] = ft_strdup(new_token); // Asignar el nuevo token duplicado
 }

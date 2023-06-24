@@ -189,7 +189,7 @@ int		find_last_heredoc_redirect(t_cmd *cmd);
 char 	*find_heredoc_delim(t_cmd *cmd);
 int		heredoc_content(t_cmd *cmd, int fd);
 void    heredoc_redirect(t_cmd **cmd);
-char* replace_vars_heredoc(t_cmd *cmd, const char *buffer, int i);
+void 	replace_vars_heredoc(t_cmd *cmd, char *buffer, int i);
 void 	close_input_redirect(t_cmd *cmd);
 
 /* signals.c */

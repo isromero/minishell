@@ -195,56 +195,53 @@ int	heredoc_content(t_cmd *cmd, int fd)
 	return (0);
 }
 
-char* replace_vars_heredoc(t_cmd *cmd, const char *buffer, int i)
+void replace_vars_heredoc(t_cmd *cmd, char *buffer, int i)
 {
     char *path;
     char *var;
-    int var_length = 0;
+    int var_length;
     int j;
 
     var = NULL;
-    i++;
-    j = i;
+	var_length = 0;
+    j = ++i;
     while (buffer[j] != '\0' && buffer[j] != ' ' && buffer[j] != '\n' &&
-           buffer[j] != '$' && buffer[j] != '\t')
+           buffer[j] != '$' && buffer[j] != '\t' && !is_special(buffer[j]) && !is_redirects(buffer[j]))  /* más comprobaciones??? \t??*/
     {
         var_length++;
         j++;
     }
-    var = malloc(var_length + 1);
+    var = malloc(var_length);
     strncpy(var, &buffer[i], var_length);
     var[var_length] = '\0';
     path = ft_getenv(var, cmd->env);
-    free(var);
-
     if (path != NULL)
     {
-        // Crear una nueva cadena con la parte seleccionada reemplazada por el valor
-        char *result = malloc(strlen(buffer) + strlen(path) + 1);
-        strncpy(result, buffer, i - 1);
-        strcpy(result + i - 1, path);
-        strcat(result, buffer + i + var_length);
+        // Crear una nueva cadena con el reemplazo
+        size_t replace_length = ft_strlen(path);
+        char *replacement = malloc(replace_length);
+        strncpy(replacement, path, replace_length);
+        replacement[replace_length] = '\0';
+
+        // Actualizar el buffer con el reemplazo
+        char *start = &buffer[i - 1];
+        char *end = &buffer[i - 1 + var_length];
+        memmove(start + replace_length, end + 1, strlen(end));
+        memcpy(start, replacement, replace_length);
         free(path);
-        return result;
-    }
-    else
-    {
-        // Si no se encuentra el valor, devolver una copia del buffer original
-        return strdup(buffer);
+        free(replacement);
     }
 }
 
 void replace_env_vars(t_cmd *cmd, char *buffer) 
 {
 	int	i;
-	char *result;
 
 	i = 0;
-	result = NULL;
-	while(buffer[i] != '\0' && buffer[i] != '\n' && buffer[i] != '\t')
+	while(buffer[i] != '\0')
 	{
 		if(buffer[i] == '$')
-			buffer = replace_vars_heredoc(cmd, buffer, i);
+			replace_vars_heredoc(cmd, buffer, i);
 		i++;
 	}
 }
@@ -288,7 +285,6 @@ void    heredoc_redirect(t_cmd **cmd)
 		{
 			replace_env_vars(cmd[0], buffer);
 			write(1, buffer, strlen(buffer));
-			write(1, "\n", 1);
 		}
         close(fd);
         exit(0);

@@ -73,6 +73,7 @@ typedef struct cmd
 	int 	stdout;
 	int 	stdin;
 	char	**save_lines;
+	int		in_quote_heredoc;
 } t_cmd;
 
 #define HEREDOC_REDIRECT "<<"

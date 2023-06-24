@@ -161,15 +161,31 @@ int find_last_heredoc_redirect(t_cmd *cmd)
 char *find_heredoc_delim(t_cmd *cmd)
 {
 	int len;
+	char *delim;
+	size_t delim_len;
 
+	delim = NULL;
+	delim_len = 0;
 	len = cmd->n_tokens - 2;
-	while(len >= 0)
+	while (len >= 0)
 	{
-		if(ft_strcmp(cmd->token[len], HEREDOC_REDIRECT) == 0) /* Meter más tipos de redirects */
-			return (cmd->token[len + 1]); /* Cuidado tal vez con ACCESO A NULLS */
+		if (ft_strcmp(cmd->token[len], HEREDOC_REDIRECT) == 0)
+		{
+			delim = cmd->token[len + 1];
+			delim_len = ft_strlen(delim);
+			if ((delim[0] == '\'' || delim[0] == '\"') && delim_len > 1 && delim[delim_len - 1] == delim[0]) /* Si delim_len > 1 significa que no es solo un carácter y que puede tener comillas */
+			{
+				cmd->in_quote_heredoc = 1;
+				memmove(delim, delim + 1, delim_len - 2);
+				delim[delim_len - 2] = '\0';
+			}
+			else if((delim[0] == '\'' || delim[0] == '\"') && delim_len > 1 && delim[delim_len - 1] != delim[0]) /* En bash si no cierras comillas del delimitador no puedes cerrar el proceso con el delimitador */
+				delim = "NOT DELIMITATORXXxXxxXXxxXXXXXX"; /* nombre inventado para no poder cerrar el proceso del heredoc */
+			return delim;
+		}
 		len--;
 	}
-	return(0);
+	return (0);
 }
 
 int	heredoc_content(t_cmd *cmd, int fd) 
@@ -195,7 +211,7 @@ int	heredoc_content(t_cmd *cmd, int fd)
 	return (0);
 }
 
-void replace_vars_heredoc(t_cmd *cmd, char *buffer, int i)
+void replace_vars_heredoc(t_cmd *cmd, char *buffer, int i) /* parece tener algunos errores de memoria con la longitud muy de vez en cuando, CHECKEAR!!!!!!!!!! */
 {
     char *path;
     char *var;
@@ -251,6 +267,7 @@ void    heredoc_redirect(t_cmd **cmd)
 	int	fd;
 	pid_t pid;
 
+	cmd[0]->in_quote_heredoc = 0;
 	pid = fork();
 	signal(SIGINT, SIG_IGN);
 	if (pid == -1)
@@ -263,7 +280,7 @@ void    heredoc_redirect(t_cmd **cmd)
 		printf("delimitator: %s\n", find_heredoc_delim(cmd[0]));
 		/* preguntar a pacheco sobre archivos temporales */
 		/* tal vez hacer unlink al abrir y al cerrar */
-		fd = open("abueno", O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+		fd = open("/tmp/heredocBURMITO", O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
 		if (fd == -1)
 		{
 			perror("");
@@ -278,12 +295,14 @@ void    heredoc_redirect(t_cmd **cmd)
 				break;
 		}
 		close(fd);
-		fd = open("abueno", O_RDONLY); /* Lo abrimos de nuevo después de cerrar para empezar desde el principio del archivo */
+		fd = open("/tmp/heredocBURMITO", O_RDONLY); /* Lo abrimos de nuevo después de cerrar para empezar desde el principio del archivo */
         char buffer[1024]; 
         ssize_t bytes_read;
         while ((bytes_read = read(fd, buffer, sizeof(buffer))) > 0) 
 		{
-			replace_env_vars(cmd[0], buffer);
+			char *delim = find_heredoc_delim(cmd[0]);
+			if (delim && delim[0] != '\"' && delim[0] != '\'' && cmd[0]->in_quote_heredoc == 0) /* cosas como "'a" NO FUNCIONAN, gestionar??????*/
+				replace_env_vars(cmd[0], buffer);
 			write(1, buffer, strlen(buffer));
 		}
         close(fd);
@@ -294,7 +313,7 @@ void    heredoc_redirect(t_cmd **cmd)
 		wait(NULL);
 		signal(SIGINT, &handle_ctrlc);
 		/* BORRAR ARCHIVO CUANDO MANDEMOS SEÑAL DE CTRL-D */
-		if (unlink("abueno") == -1)
+		if (unlink("/tmp/heredocBURMITO") == -1)
 		{
             perror("unlink");
             exit(1);
@@ -302,114 +321,6 @@ void    heredoc_redirect(t_cmd **cmd)
 		exit(0);
 	}
 }
-
-// void replace_vars_heredoc(t_cmd *cmd, char *line)
-// {
-//     char *path;
-//     char *aux;
-//     char *var;
-
-//     aux = NULL;
-// 	aux = line;
-// 	var = &aux[1];
-// 	path = ft_getenv(var, cmd->env);
-// 	if (path != NULL)
-// 	{
-// 		free(line); // Liberar el token original
-//     	line = ft_strdup(path); // Asignar el nuevo token duplicado
-// 		free(path);
-// 	}
-// 	else /* En el caso de que no exista liberamos path y dejamos line como estaba */
-// 	{
-// 		free(path);
-// 		return ;
-// 	}	
-// }
-
-// int	heredoc_content(t_cmd *cmd, int fd) 
-// {
-// 	char *line;
-// 	char *aux;
-// 	int len;
-
-// 	/* Gestionar variables, cadenas literales(QUOTES) */
-// 	line = NULL;
-// 	aux = readline(">");
-// 	len = ft_strlen(line);
-// 	line = (char *)malloc(sizeof(char) * (len + 2)); /* > + '\0' */
-// 	strcpy(line, aux);
-// 	line[len] = '\0';
-// 	if(ft_strcmp(line, find_heredoc_delim(cmd)) == 0)
-// 	{
-// 		free(line);
-// 		return(1);
-// 	}
-// 	else if(line && *line != '\n')
-// 	{
-// 		if(line[0] == VARIABLE)
-// 			replace_vars_heredoc(cmd, line);
-// 		ft_putstr_fd(line, fd);
-// 		ft_putchar_fd('\n', fd);
-// 		free(line);
-// 	}
-// 	else if(*line == '\n') /* ? */
-// 		ft_putchar_fd('\n', fd);
-// 	return (0);
-// }
-
-// void    heredoc_redirect(t_cmd **cmd)
-// {
-// 	int	fd;
-// 	pid_t pid;
-
-// 	pid = fork();
-// 	signal(SIGINT, SIG_IGN);
-// 	if (pid == -1)
-// 	{  
-// 		perror("fork");
-//     	exit(1);
-// 	}
-// 	else if (pid == 0)
-// 	{
-// 		printf("delimitator: %s\n", find_heredoc_delim(cmd[0]));
-// 		/* preguntar a pacheco sobre archivos temporales */
-// 		/* tal vez hacer unlink al abrir y al cerrar */
-// 		fd = open("/tmp/heredocBURMITO", O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
-// 		if (fd == -1)
-// 		{
-// 			perror("");
-// 			exit(1);
-// 		}
-// 		/* DEVUELVE DOBLE PROMPT, ARREGLAR */
-// 		signal(SIGINT, SIG_IGN);
-// 		signal(SIGINT, &handle_ctrlc_heredoc);
-// 		while (1)
-// 		{
-// 			if(heredoc_content(cmd[0], fd) == 1)
-// 				break;
-// 		}
-// 		close(fd);
-// 		fd = open("/tmp/heredocBURMITO", O_RDONLY); /* Lo abrimos de nuevo después de cerrar para empezar desde el principio del archivo */
-//         char buffer[1024]; 
-//         ssize_t bytes_read;
-//         while ((bytes_read = read(fd, buffer, sizeof(buffer))) > 0)
-//             write(1, buffer, bytes_read);
-//         close(fd);
-//         exit(0);
-// 	}
-// 	else
-// 	{
-// 		wait(NULL);
-// 		signal(SIGINT, &handle_ctrlc);
-// 		/* BORRAR ARCHIVO CUANDO MANDEMOS SEÑAL DE CTRL-D */
-// 		if (unlink("/tmp/heredocBURMITO") == -1)
-// 		{
-//             perror("unlink");
-//             exit(1);
-//         }
-// 		exit(0);
-// 	}
-// }
 
 void close_input_redirect(t_cmd *cmd)
 {

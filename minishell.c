@@ -22,7 +22,7 @@ int	main(int argc, char **argv, char **env)
 	//print_minishell();
 	cmd.env = env;
 	
-	unlink("abueno");
+	unlink("/tmp/heredocBURMITO");
 	/* signal(SIGQUIT, SIG_IGN); */
 	while(1)
 	{

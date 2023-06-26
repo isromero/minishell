@@ -45,6 +45,42 @@ char *ft_getenv(const char *name, char **env)
     return NULL;
 }
 
+void get_default_env(t_cmd *cmd, char **env)
+{
+    char pwd[1024];
+    char *pwd_command;
+
+    getcwd(pwd, sizeof(pwd));
+    int env_index = 0;
+    while (env[env_index] != NULL)
+    {
+        if (strncmp(env[env_index], "PWD=", 4) == 0)
+        {
+            free(env[env_index]);
+            env[env_index] = malloc(strlen(pwd) + 5);
+            sprintf(env[env_index], "PWD=%s", pwd);
+        }
+        else if (strncmp(env[env_index], "SHLVL=", 6) == 0)
+        {
+            free(env[env_index]);
+            env[env_index] = strdup("SHLVL=1");
+        }
+        else if (strncmp(env[env_index], "OLDPWD=", 7) == 0)
+        {
+            free(env[env_index]);
+            env[env_index] = strdup("OLDPWD=");
+        }
+        else if (strncmp(env[env_index], "_=", 2) == 0)
+        {
+            free(env[env_index]);
+            env[env_index] = malloc(strlen(pwd) + 14);
+            sprintf(env[env_index], "_=%s/minishell", pwd);
+        }
+        env_index++;
+    }
+    cmd->env = env;
+}
+
 ////////////////////////////////////// FUNCIÓN QUE HAY QUE ARREGLAR ////////////////////////////////////////////////////////////////////////////
 
 // int ft_setenv(const char *name, const char *value, int overwrite) 

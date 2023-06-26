@@ -101,6 +101,8 @@ void	ft_exit(t_cmd *cmd, int exit_token);
 
 /* env.c */
 char	*ft_getenv(const char *name, char **env);
+void 	get_default_env(t_cmd *cmd, char **env);
+void	init_ms_env(t_cmd *cmd, char **env);
 // int 	ft_setenv(const char *name, const char *value, int overwrite);
 
 /* execute.c */

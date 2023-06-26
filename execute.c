@@ -302,6 +302,7 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
             {
                 execute_builtin(cmd, i);
                 g_status = 0;
+                exit(g_status);
             }
             else
             {
@@ -369,6 +370,7 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
             {
                 execute_builtin(cmd[0], i);
                 g_status = 0;
+                exit(g_status);
             }     
             else
             {
@@ -443,6 +445,7 @@ void    execute_first_pipes(t_cmd *cmd, int i)
             {
                 execute_builtin(cmd, i);
                 g_status = 0;
+                exit(g_status);
             }
             else
             {
@@ -579,12 +582,7 @@ int is_command_exists(t_cmd *cmd, char *command)
     return 0; // El comando no existe en ninguna ubicación conocida
 }
 
-// METER UN TRY_ACCESS PARA EJECUTAR COSAS DENTRO DE NUESTRA MINISHELL
-// Si da error un access devolver 126????????????????
-
 /* minishell -> ls -l | <
 minishell: syntax error near unexpected token `newline' */
-
-/* echo $? | cat SE QUEDA EN BUCLE */
 
 /* checkear env -i ./minishell */

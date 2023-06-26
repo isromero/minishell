@@ -179,8 +179,16 @@ char *find_heredoc_delim(t_cmd *cmd)
 				memmove(delim, delim + 1, delim_len - 2);
 				delim[delim_len - 2] = '\0';
 			}
-			else if((delim[0] == '\'' || delim[0] == '\"') && delim_len > 1 && delim[delim_len - 1] != delim[0]) /* En bash si no cierras comillas del delimitador no puedes cerrar el proceso con el delimitador */
+			else if((delim[0] == '\'' || delim[0] == '\"') && delim_len > 1 && delim[delim_len - 1] != delim[0] && cmd->in_quote_heredoc == 0) /* En bash si no cierras comillas del delimitador no puedes cerrar el proceso con el delimitador */
+			{
+				printf("MICOÑOGORDO=%c\n",delim[0]);
+				printf("MICOÑOGORDO=%d\n",delim[delim_len - 1]);
 				delim = "NOT DELIMITATORXXxXxxXXxxXXXXXX"; /* nombre inventado para no poder cerrar el proceso del heredoc */
+			}
+			int b;
+			b = 0;
+			while(delim[b])
+				printf("delimitator: %d\n", delim[b++]);
 			return delim;
 		}
 		len--;
@@ -228,7 +236,7 @@ void replace_vars_heredoc(t_cmd *cmd, char *buffer, int i) /* parece tener algun
         j++;
     }
     var = malloc(var_length);
-    strncpy(var, &buffer[i], var_length);
+    ft_strncpy(var, &buffer[i], var_length);
     var[var_length] = '\0';
     path = ft_getenv(var, cmd->env);
     if (path != NULL)
@@ -242,8 +250,8 @@ void replace_vars_heredoc(t_cmd *cmd, char *buffer, int i) /* parece tener algun
         // Actualizar el buffer con el reemplazo
         char *start = &buffer[i - 1];
         char *end = &buffer[i - 1 + var_length];
-        memmove(start + replace_length, end + 1, strlen(end));
-        memcpy(start, replacement, replace_length);
+        ft_memmove(start + replace_length, end + 1, strlen(end));
+        ft_memcpy(start, replacement, replace_length);
         free(path);
         free(replacement);
     }

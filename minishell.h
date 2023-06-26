@@ -162,7 +162,6 @@ int		find_variables(char **token);
 /* utils.c */
 char	*ft_strtok(char *str, const char *delim);
 int 	is_number(const char *str);
-#endif
 
 /* output_redirects.c */
 void	output_redirect(t_cmd *cmd);
@@ -201,3 +200,5 @@ void    handle_ctrld_heredoc();
 void    handle_ctrlc_heredoc();
 
 extern int g_status;
+
+#endif

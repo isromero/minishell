@@ -202,7 +202,7 @@ void    handle_ctrlc_heredoc();
 
 /* try_access */
 void    execute_executable(t_cmd *cmd, char *command);
-void	try_execute(t_cmd *cmd, char *path);
+void 	try_execute(t_cmd *cmd, char *path, char *command);
 
 extern int g_status;
 

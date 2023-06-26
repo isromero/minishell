@@ -108,7 +108,6 @@ void execute(t_cmd *cmd)
                     execute_heredoc_redirects(cmd, com, exec_args);
                     execute_input_redirects(cmd, com, exec_args);
                     free(exec_args);
-                    perror("execve");
                     exit(1);
                 }
                 else if (!com && !is_executable(cmd->token[i][0]))
@@ -136,7 +135,6 @@ void execute(t_cmd *cmd)
             execute_builtin(cmd, i); // En principio funciona, aunque tal vez necesita pruebas(antes estaba metido todo directo el execute, con su i correspondiente)
             g_status = 0; /* Reinicializamos a 0 porque cuando se pone un echo $? necesitamos reestablecer el status después de haberse ejecutado para siguientes iteraciones */
         }
-           
         i++;
     }
 }
@@ -338,7 +336,6 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                     execute_output_redirects(cmd, com, exec_args);
                     execute_heredoc_redirects(cmd, com, exec_args);
                     execute_input_redirects(cmd, com, exec_args);
-                    perror("execve:");
                     exit(1);
                 }
                 else if (!com && !is_executable(cmd->token[i][0]))
@@ -410,7 +407,6 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                     execute_output_redirects(cmd[0], com, exec_args);
                     execute_heredoc_redirects(cmd[0], com, exec_args);
                     execute_input_redirects(cmd[0], com, exec_args);
-                    perror("execve:");
                     exit(1);
                 }
                 else if (!com && !is_executable(cmd[0]->token[i][0]))
@@ -479,7 +475,6 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                     execute_output_redirects(cmd, com, exec_args);
                     execute_heredoc_redirects(cmd, com, exec_args);
                     execute_input_redirects(cmd, com, exec_args);
-                    perror("execve:");
                     exit(1);
                 }
                 else if (!com && !is_executable(cmd->token[i][0]))
@@ -493,48 +488,6 @@ void    execute_first_pipes(t_cmd *cmd, int i)
     }
     free(exec_args); // aquí?
 }
-
-/* void    execute_pipes(t_cmd *cmd, int i)
-{
-    char    *com;
-    char    **exec_args;
-    int     j;
-
-    com = NULL;
-    exec_args = NULL;
-    j = 0;
-    cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
-    if(cmd->pid[cmd->count_pids] == 0)
-    {
-        if(is_builtin(cmd, i))
-            execute_builtin(cmd, i);
-        else
-        {
-            com = command_dir(cmd, cmd->token[i]);
-            if (com != NULL)
-            {
-                exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
-                j = i;
-                while(j < cmd->n_tokens - 1 && cmd->token[j][0] != '|' && cmd->token[j][0] != '>')
-                {
-                    exec_args[j - i] = cmd->token[j];
-                    j++;
-                }
-                exec_args[j - i] = NULL;
-                execve(com, exec_args, NULL);
-                perror("");
-                exit(0);
-            }
-            if (!com && !is_argument_extension(cmd, i)) 
-            {
-                perror("command not found");
-                exit(0);
-            }
-        }
-    }
-    free(exec_args); // aquí?
-    
-} */
 
 char  *command_dir(t_cmd *cmd, char *command) 
 {

@@ -21,7 +21,6 @@ int	main(int argc, char **argv, char **env)
 	(void)argv;
 	//print_minishell();
 	cmd.env = env;
-	
 	unlink("/tmp/heredocBURMITO");
 	/* signal(SIGQUIT, SIG_IGN); */
 	while(1)

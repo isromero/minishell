@@ -21,20 +21,26 @@ void    execute_executable(t_cmd *cmd, char *command)
     if (command[0] == '/') /* ruta absoluta */
     {
         path = ft_strdup(command);
-        try_execute(cmd, path);
+        try_execute(cmd, path, command);
     }
     else if(command[0] == '.') /* ruta no absoluta */
     {
         pwd = ft_getenv("PWD", cmd->env);
         path = ft_strjoin(pwd, command + 1);
-        try_execute(cmd, path);
+        try_execute(cmd, path, command);
     }
 }
 
-void try_execute(t_cmd *cmd, char *path)
+void try_execute(t_cmd *cmd, char *path, char *command)
 {
     if(access(path, F_OK) == 0)
-        execve(path, cmd->token, cmd->env);
+    {
+        if(execve(path, cmd->token, cmd->env) == -1)
+        {
+            g_status = 2;
+            exit(g_status);
+        }
+    }
     else if(access(path, F_OK) == -1)
-        printf("error:command not found");
+        printf("minishell: %s: No such file or directory\n", command);
 }

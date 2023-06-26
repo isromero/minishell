@@ -158,6 +158,7 @@ int 	check_len_special(t_cmd *cmd, int len);
 int 	prompt_token_len(t_cmd *cmd, int len);
 int		check_len_token(t_cmd *cmd, int len);
 int		find_variables(char **token);
+int		is_executable(char c);
 
 /* utils.c */
 char	*ft_strtok(char *str, const char *delim);
@@ -198,6 +199,10 @@ void    handle_ctrlc();
 void	handle_ctrlc2(int sig);
 void    handle_ctrld_heredoc();
 void    handle_ctrlc_heredoc();
+
+/* try_access */
+void    execute_executable(t_cmd *cmd, char *command);
+void	try_execute(t_cmd *cmd, char *path);
 
 extern int g_status;
 

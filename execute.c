@@ -538,30 +538,36 @@ char  *command_dir(t_cmd *cmd, char *command)
     char 	*dir;
 	size_t	dir_len;
 	
-	path = ft_getenv("PATH", cmd->env);
-	dir = ft_strtok(path, ":");
-    while (dir != NULL) 
-	{
-        // Construye la ruta completa al archivo ejecutable
-        char executable_path[PATH_MAX];
-        dir_len = ft_strlen(dir);
+    path = ft_getenv("PATH", cmd->env);
+    dir = ft_strtok(path, ":");
+    if(is_executable(command[0]))
+        execute_executable(cmd, command);
+    else
+    {
+        while (dir != NULL) 
+        {
+            // Construye la ruta completa al archivo ejecutable
+            char executable_path[PATH_MAX];
+            dir_len = ft_strlen(dir);
 
-		ft_strcpy(executable_path, dir);
-        executable_path[dir_len] = '/';
-        ft_strcpy(executable_path + dir_len + 1, command);
-		
-        // Verifica si el archivo ejecutable existe y es ejecutable
-        if (access(executable_path, F_OK) == 0) 
-		{
-			// El archivo ejecutable existe
-			ft_strcat(dir, "/");
-			ft_strcat(dir, command);
-            return (dir);
+            ft_strcpy(executable_path, dir);
+            executable_path[dir_len] = '/';
+            ft_strcpy(executable_path + dir_len + 1, command);
+            
+            // Verifica si el archivo ejecutable existe y es ejecutable
+            if (access(executable_path, F_OK) == 0) 
+            {
+                // El archivo ejecutable existe
+                ft_strcat(dir, "/");
+                ft_strcat(dir, command);
+                return (dir);
+            }
+            else if(access(executable_path, F_OK) == -1)
+                g_status = 126; /* ?????? */
+            dir = ft_strtok(NULL, ":");
         }
-        else if(access(executable_path, F_OK) == -1)
-            g_status = 126; /* ?????? */
-        dir = ft_strtok(NULL, ":");
     }
+	
     // El archivo ejecutable no existe en ningún directorio del PATH
     return (0);
 }

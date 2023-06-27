@@ -142,10 +142,9 @@ int is_double_quote(t_cmd *cmd, int len)
 
 	i = 1;
 	if(!ft_strchr(&cmd->line[1], DOUBLE_QUOTE))
-			return (-1);
-	while(cmd->line[i + len] != '\0' && cmd->line[i + len] != DOUBLE_QUOTE)
+		return (-1);
+	while (cmd->line[i + len] == DOUBLE_QUOTE || (cmd->line[i + len] != '\0' && cmd->line[i + len] != DOUBLE_QUOTE))
 		i++;
-	i++;
 	return (i);
 }
 
@@ -156,9 +155,8 @@ int is_single_quote(t_cmd *cmd, int len)
 	i = 1;
 	if(!ft_strchr(&cmd->line[1], SINGLE_QUOTE))
 		return (-1);
-	while(cmd->line[i + len] != '\0' && cmd->line[i + len] != SINGLE_QUOTE)
+	while (cmd->line[i + len] == SINGLE_QUOTE || (cmd->line[i + len] != '\0' && cmd->line[i + len] != SINGLE_QUOTE))
 		i++;
-	i++;
 	return (i);
 }
 

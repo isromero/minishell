@@ -41,7 +41,7 @@ int	main(int argc, char **argv, char **env)
 		count_pipes(&cmd);
 		executor(&cmd);
 		clean_tokens(&cmd);
-		free(cmd.line);
+		/* free(cmd.line); */ // NO ESTÁ ALOCADA LA MEMORIA, NO ES NECESARIO HACER FREE
 		free(cmd.prompt);
 	}
 	rl_clear_history();

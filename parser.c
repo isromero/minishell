@@ -12,21 +12,26 @@
 
 #include "minishell.h"
 
- // $USER$PATH NO FUNCIONA EL PARSEO ENTRE VARIABLES JUNTAS /////////////////////////////////////////////////////////////////////
+// $USER$PATH NO FUNCIONA EL PARSEO ENTRE VARIABLES JUNTAS /////////////////////////////////////////////////////////////////////
+
 void parse_args(t_cmd *cmd)
 {
     int len = 0;
     int i = 0;
     cmd->n_tokens = 0;
     cmd->token = NULL;
-
     // Cálculo del número de tokens y almacenamiento de los tokens
     while (cmd->line[i] != '\0')
     {
         while (cmd->line[i] == ' ')
             i++;
         len = check_len_token(cmd, i);
-        if (len > 0)
+        if(len == -1)
+        {
+            printf("-minishell: no closing quote\n");
+            break;
+        }
+        else if(len > 0)
         {
             char *token = (char *)malloc((len + 1) * sizeof(char));
             if (token == NULL)
@@ -35,7 +40,7 @@ void parse_args(t_cmd *cmd)
                 clean_tokens(cmd);
                 return;
             }
-            strncpy(token, cmd->line + i, len);
+            ft_strncpy(token, cmd->line + i, len);
             token[len] = '\0';
             save_token(cmd, token);
             i += len;

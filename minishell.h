@@ -27,6 +27,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "libft/libft.h"
+#include "gnl/get_next_line.h"
 
 #define READ_END 0
 #define WRITE_END 1
@@ -101,8 +102,8 @@ void	ft_exit(t_cmd *cmd, int exit_token);
 
 /* env.c */
 char	*ft_getenv(const char *name, char **env);
-void 	get_default_env(t_cmd *cmd, char **env);
-void	init_ms_env(t_cmd *cmd, char **env);
+void 	get_default_env(t_cmd *cmd);
+void 	init_env(t_cmd *cmd, char **env);
 // int 	ft_setenv(const char *name, const char *value, int overwrite);
 
 /* execute.c */
@@ -140,6 +141,8 @@ void 	count_pipes(t_cmd *cmd);
 /* prompt.c */
 char	*get_prompt(t_cmd *custom_prompt);
 void	print_minishell();
+char	*exec_custom(t_cmd *cmd, char *full, char *args);
+char	*update_output(int fd);
 
 /* token_utils.c */
 void 	clean_tokens(t_cmd *cmd);

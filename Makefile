@@ -14,9 +14,11 @@ NAME		=	minishell
 CC			=	gcc
 SRCS		=	builtins.c env.c execute.c expander.c minishell.c parser.c \
 				prompt.c token_utils.c pipes_utils.c utils.c output_redirects.c \
-				input_redirects.c signals.c try_access.c
+				input_redirects.c signals.c try_access.c gnl/get_next_line.c \
+				gnl/get_next_line_utils.c
 
 LIBFT		=	libft/libft.a
+
 
 CFLAGS		=	-Wall  -Wextra -lreadline #-g -fsanitize=address,undefined
 RM			=	rm -f

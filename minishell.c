@@ -14,21 +14,15 @@
 
 int g_status;
 
-void	init_ms_env(t_cmd *cmd, char **env)
-{
-	if (env[0] == NULL)
-		get_default_env(cmd, env);
-	else
-		cmd->env = env;
-}
-
-
 int	main(int argc, char **argv, char **env)
 {
 	t_cmd	cmd;
-
+	/* DENTRO DE LA MINISHEL env -i??????????????????????? */
 	//print_minishell();
-	init_ms_env(&cmd, env);
+	(void)argc;
+	(void)argv;
+	cmd.env = NULL;
+	init_env(&cmd, env);
 	unlink("/tmp/heredocBURMITO");
 	/* signal(SIGQUIT, SIG_IGN); */
 	while(1)

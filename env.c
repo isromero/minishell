@@ -45,41 +45,38 @@ char *ft_getenv(const char *name, char **env)
     return NULL;
 }
 
-void get_default_env(t_cmd *cmd, char **env)
+void init_env(t_cmd *cmd, char **env) 
 {
-    char pwd[1024];
-    char *pwd_command;
-
-    getcwd(pwd, sizeof(pwd));
-    int env_index = 0;
-    while (env[env_index] != NULL)
-    {
-        if (strncmp(env[env_index], "PWD=", 4) == 0)
-        {
-            free(env[env_index]);
-            env[env_index] = malloc(strlen(pwd) + 5);
-            sprintf(env[env_index], "PWD=%s", pwd);
-        }
-        else if (strncmp(env[env_index], "SHLVL=", 6) == 0)
-        {
-            free(env[env_index]);
-            env[env_index] = strdup("SHLVL=1");
-        }
-        else if (strncmp(env[env_index], "OLDPWD=", 7) == 0)
-        {
-            free(env[env_index]);
-            env[env_index] = strdup("OLDPWD=");
-        }
-        else if (strncmp(env[env_index], "_=", 2) == 0)
-        {
-            free(env[env_index]);
-            env[env_index] = malloc(strlen(pwd) + 14);
-            sprintf(env[env_index], "_=%s/minishell", pwd);
-        }
-        env_index++;
-    }
-    cmd->env = env;
+    if (env[0] == NULL) /* if env is NULL */
+        get_default_env(cmd);
+    else
+        cmd->env = env;
 }
+
+void get_default_env(t_cmd *cmd)
+{
+    char pwd[4096];
+    int env_count = 5; // Número de variables de entorno predeterminadas
+    int env_index = 0;
+    int i = 0;
+    char **default_env = malloc((env_count + 1) * sizeof(char *));
+
+    default_env[env_index++] = ft_strjoin("PWD=", getcwd(pwd, sizeof(pwd)));
+    default_env[env_index++] = ft_strdup("SHLVL=1");
+    default_env[env_index++] = ft_strdup("PATH=/usr/local/sbin:/usr/local/bin:/usr/bin:/bin");
+    default_env[env_index++] = ft_strjoin("_=", "./minishell");
+    default_env[env_index] = NULL;
+
+    cmd->env = malloc((env_count + 1) * sizeof(char *));
+    while (i < env_count)
+    {
+        cmd->env[i] = default_env[i];
+        i++;
+    }
+    cmd->env[env_count] = NULL;
+    free(default_env);
+}
+
 
 ////////////////////////////////////// FUNCIÓN QUE HAY QUE ARREGLAR ////////////////////////////////////////////////////////////////////////////
 

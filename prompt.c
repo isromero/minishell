@@ -14,14 +14,13 @@
 
 char *get_prompt(t_cmd *custom_prompt)
 {
-    char *username = getenv("USER"); // Obtener el nombre de usuario desde la variable de entorno USER
+    char *username = exec_custom(custom_prompt, "/usr/bin/whoami", "whoami"); // Obtener el nombre de usuario desde whoami
     char cwd[1024];
     getcwd(cwd, sizeof(cwd)); // Obtener la ubicación actual de la terminal
     
     size_t prompt_length = ft_strlen(username) + ft_strlen(cwd) + ft_strlen(COLOR_GREEN) \
 	+ ft_strlen(COLOR_MAGENTA) + ft_strlen(COLOR_YELLOW) + ft_strlen(COLOR_CYAN) + ft_strlen(COLOR_WHITE) + 16; // Longitud total del prompt personalizado
     custom_prompt->prompt = (char *)malloc(prompt_length * sizeof(char));
-
 	ft_strcpy(custom_prompt->prompt, COLOR_GREEN);
     ft_strcat(custom_prompt->prompt, username);
     ft_strcat(custom_prompt->prompt, COLOR_MAGENTA);
@@ -33,6 +32,44 @@ char *get_prompt(t_cmd *custom_prompt)
     ft_strcat(custom_prompt->prompt, COLOR_WHITE);
     ft_strcat(custom_prompt->prompt, "$ ");
     return (custom_prompt->prompt);
+}
+
+char	*update_output(int fd)
+{
+	char	*line;
+
+	line = get_next_line(fd);
+	line[ft_strlen(line) - 1] = 0; // Eliminar el salto de línea al final de la línea
+	if (!line)
+		return (0);
+	return(line);
+}
+
+char	*exec_custom(t_cmd *cmd, char *full, char *args)
+{
+	//full es la ruta absoluta, args solo whoami, out el user
+	pid_t	pid;
+	int		fd[2];
+	char	**matrix;
+	char	*out;
+
+	pipe(fd);
+	pid = fork();
+	if (pid == 0)
+	{
+		close(fd[READ_END]);
+		matrix = ft_split(args, ' ');
+		dup2(fd[WRITE_END], STDOUT_FILENO);
+		close(fd[WRITE_END]);
+		if (access(full, F_OK) == 0)
+			execve(full, matrix, cmd->env);
+		exit (1);
+	}
+	close(fd[WRITE_END]);
+	waitpid(pid, NULL, 0);
+	out = update_output(fd[READ_END]);
+	close(fd[READ_END]);
+	return (out);
 }
 
 void	print_minishell()

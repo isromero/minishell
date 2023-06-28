@@ -125,7 +125,7 @@ void 	execute_heredoc_redirects(t_cmd *cmd, char *com, char **exec_args);
 void 	execute_vars(t_cmd *cmd, int i);
 
 /* expander.c */
-void	replace_vars(t_cmd *cmd, int i);
+void	replace_vars(char **token);
 int		special_for_vars(char c);
 void	print_vars(t_cmd *cmd, int i);
 
@@ -165,7 +165,7 @@ int 	is_double_quote(t_cmd *cmd, int len);
 int 	is_single_quote(t_cmd *cmd, int len);
 void 	error_special(); // Meter perror mejor?
 int 	check_len_special(t_cmd *cmd, int len);
-int 	prompt_token_len(t_cmd *cmd, int len);
+int 	cmd_token_len(t_cmd *cmd, int len);
 int		check_len_token(t_cmd *cmd, int len);
 int		find_variables(char **token);
 int		is_executable(char c);

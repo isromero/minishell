@@ -97,7 +97,7 @@ int count_left_single_quotes(char *token)
     i = 0;
     while (token[i] != DOUBLE_QUOTE && token[i] == SINGLE_QUOTE && token[i] != '\0')
         i++;
-    if(i % 2 == 0) /* Si las dobles comillas son un numero par tiene que borrar las comillas simples también */
+    if(i % 2 == 0) /* Si las dobles comillas son un numero par en un lado tiene que borrar las comillas simples también */
     {
         while(token[i] != SINGLE_QUOTE && token[i] == DOUBLE_QUOTE && token[i] != '\0')
             i++;
@@ -112,7 +112,7 @@ int count_left_double_quotes(char *token)
     i = 0;
     while (token[i] != SINGLE_QUOTE && token[i] == DOUBLE_QUOTE && token[i] != '\0')
         i++;
-    if(i % 2 == 0) /* Si las dobles comillas son un numero par tiene que borrar las comillas simples también */
+    if(i % 2 == 0) /* Si las dobles comillas son un numero par en un lado tiene que borrar las comillas simples también */
     {
         while(token[i]!= DOUBLE_QUOTE && token[i] == SINGLE_QUOTE && token[i] != '\0')
             i++;
@@ -138,5 +138,5 @@ int remove_quotes(t_cmd *cmd)
             cmd->token[i] = ft_substr(cmd->token[i], count_left_single_quotes(cmd->token[i]), ft_strlen(cmd->token[i]) - (count_left_single_quotes(cmd->token[i]) * 2));
         i++;
     }
-    return(single_quotes + double_quotes); // Si devuelve un número impar de comillas es que hay un error
+    return(single_quotes + double_quotes); // Devuelve el número para checkear posteriormente si es impar y ver si es un error
 }

@@ -180,7 +180,7 @@ int check_len_special(t_cmd *cmd, int len)
 	return (-1);
 }
 
-int prompt_token_len(t_cmd *cmd, int len)
+int cmd_token_len(t_cmd *cmd, int len)
 {
     int i = 0;
 	/* en principio no hace falta checkear los appends y heredocs ya que los detectará este */
@@ -188,6 +188,14 @@ int prompt_token_len(t_cmd *cmd, int len)
         i++;
     return i;
 }
+
+/* int variable_token_len(t_cmd *cmd, int len)
+{
+    int i = 1;
+    while (cmd->line[i + len] != '\0' && cmd->line[i + len] != ' ' && !is_special2(cmd->line[i + len]) && cmd->line[i + len] != VARIABLE)
+        i++;
+    return i;
+} */
 
 int	check_len_token(t_cmd *cmd, int len)
 {
@@ -197,7 +205,7 @@ int	check_len_token(t_cmd *cmd, int len)
 		while(cmd->line[i + len] != '\0' && cmd->line[i + len] != ' ')
 			i++;
 		if(cmd->line[len] == VARIABLE)
-			return(prompt_token_len(cmd, len));
+			return(cmd_token_len(cmd, len));
 		else if(cmd->line[len] == SINGLE_QUOTE)
 			return(is_single_quote(cmd, len));
 		else if(cmd->line[len] == DOUBLE_QUOTE)
@@ -205,7 +213,7 @@ int	check_len_token(t_cmd *cmd, int len)
 		else if(is_special2(cmd->line[len] )) // << < > >> | 
 			return(check_len_special(cmd, len));
 		else if(cmd->line[len] != '\0')
-			return(prompt_token_len(cmd, len));
+			return(cmd_token_len(cmd, len));
 	}
 	return i;
 }

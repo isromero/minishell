@@ -37,10 +37,12 @@ int	main(int argc, char **argv, char **env)
         }
 		if(ft_strncmp(cmd.line, "", 1) > 0) 
 			add_history(cmd.line);
-		parse_args(&cmd);
-		count_pipes(&cmd);
-		executor(&cmd);
-		clean_tokens(&cmd);
+		if(parse_args(&cmd) == 0)
+		{
+			count_pipes(&cmd);
+			executor(&cmd);
+			clean_tokens(&cmd);
+		}
 		/* free(cmd.line); */ // NO ESTÁ ALOCADA LA MEMORIA, NO ES NECESARIO HACER FREE
 		free(cmd.prompt);
 	}

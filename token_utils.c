@@ -141,8 +141,7 @@ int is_double_quote(t_cmd *cmd, int len)
 	int i;
 
 	i = 1;
-	if(!ft_strchr(&cmd->line[1], DOUBLE_QUOTE))
-		return (-1);
+	/* Si tiene comillas como ''ls más de una, esta cerrada, pero falla por no parsearse bien */
 	while (cmd->line[i + len] == DOUBLE_QUOTE || (cmd->line[i + len] != '\0' && cmd->line[i + len] != DOUBLE_QUOTE))
 		i++;
 	return (i);
@@ -153,8 +152,7 @@ int is_single_quote(t_cmd *cmd, int len)
 	int	i;
 
 	i = 1;
-	if(!ft_strchr(&cmd->line[1], SINGLE_QUOTE))
-		return (-1);
+	/* Si tiene comillas como ''ls más de una, esta cerrada, pero falla por no parsearse bien */
 	while (cmd->line[i + len] == SINGLE_QUOTE || (cmd->line[i + len] != '\0' && cmd->line[i + len] != SINGLE_QUOTE))
 		i++;
 	return (i);

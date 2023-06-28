@@ -130,7 +130,12 @@ int		special_for_vars(char c);
 void	print_vars(t_cmd *cmd, int i);
 
 /* parser.c */
-void	parse_args(t_cmd *cmd);
+int		parse_args(t_cmd *cmd);
+int		count_single_quotes(char *token);
+int		count_double_quotes(char *token);
+int		count_left_single_quotes(char *token);
+int		count_left_double_quotes(char *token);
+int		remove_quotes(t_cmd *cmd);
 
 /* pipes_utils.c */
 void    init_pipes(t_cmd *cmd);

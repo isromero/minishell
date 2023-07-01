@@ -99,10 +99,10 @@ int	is_argument_extension(t_cmd *cmd, int i)
 	 || is_redirects(cmd->token[i - 1][0]) || is_redirects_double_char(cmd->token[i - 1])))
 	/* Realmente son solo los redirects */
 		return 1;
-	else if(cmd->token[i][0] == DOUBLE_QUOTE && cmd->token[i][ft_strlen(cmd->token[i]) - 1] == DOUBLE_QUOTE)
+	/* else if(cmd->token[i][0] == DOUBLE_QUOTE && cmd->token[i][ft_strlen(cmd->token[i]) - 1] == DOUBLE_QUOTE)
 		return 1;
 	else if(cmd->token[i][0] == SINGLE_QUOTE && cmd->token[i][ft_strlen(cmd->token[i]) - 1] == SINGLE_QUOTE)
-		return 1;
+		return 1; */
 	else if(i >= 2 && ft_strcmp("echo", cmd->token[i - 2]) == 0 && ft_strcmp("-n", cmd->token[i - 1]) == 0)
 		return 1;
 	else if(i >= 1 && ft_strcmp("echo", cmd->token[i - 1]) == 0 && ft_strcmp("-n", cmd->token[i]) == 0)
@@ -135,15 +135,22 @@ int	is_special2(char c)
 	return(c == INPUT_REDIRECT || c == PIPE || c == OUTPUT_REDIRECT);
 }
 
-// ARREGLAR COMILLAS AL FINAL SOLO, NO DETECTA
 int is_double_quote(t_cmd *cmd, int len)
 {
 	int i;
 
-	i = 1;
-	/* Si tiene comillas como ''ls más de una, esta cerrada, pero falla por no parsearse bien */
-	while (cmd->line[i + len] == DOUBLE_QUOTE || (cmd->line[i + len] != '\0' && cmd->line[i + len] != DOUBLE_QUOTE))
+	cmd->in_double_quote = !cmd->in_double_quote;
+	i = 0;
+	while (cmd->line[i + len] != '\0')
+	{
+		if (cmd->line[i + len] == DOUBLE_QUOTE && cmd->line[i + len + 1] == ' ')
+		{
+			i++;
+			break ;
+		}
 		i++;
+	}
+	cmd->in_double_quote = false;
 	return (i);
 }
 
@@ -151,10 +158,18 @@ int is_single_quote(t_cmd *cmd, int len)
 {
 	int	i;
 
+	cmd->in_single_quote = !cmd->in_single_quote;
 	i = 1;
-	/* Si tiene comillas como ''ls más de una, esta cerrada, pero falla por no parsearse bien */
-	while (cmd->line[i + len] == SINGLE_QUOTE || (cmd->line[i + len] != '\0' && cmd->line[i + len] != SINGLE_QUOTE))
+	while (cmd->line[i + len] != '\0')
+	{
+		if (cmd->line[i + len] == SINGLE_QUOTE && cmd->line[i + len + 1] == ' ')
+		{
+			i++;
+			break ;
+		}
 		i++;
+	}
+	cmd->in_single_quote = false;
 	return (i);
 }
 
@@ -189,33 +204,25 @@ int cmd_token_len(t_cmd *cmd, int len)
     return i;
 }
 
-/* int variable_token_len(t_cmd *cmd, int len)
-{
-    int i = 1;
-    while (cmd->line[i + len] != '\0' && cmd->line[i + len] != ' ' && !is_special2(cmd->line[i + len]) && cmd->line[i + len] != VARIABLE)
-        i++;
-    return i;
-} */
-
 int	check_len_token(t_cmd *cmd, int len)
 {
-	int i = 0;
 	while(cmd->line[len] != '\0')
 	{
-		while(cmd->line[i + len] != '\0' && cmd->line[i + len] != ' ')
-			i++;
-		if(cmd->line[len] == VARIABLE)
+		// No necesario en principio
+		/* while(cmd->line[i + len] != '\0' && cmd->line[i + len] != ' ')
+			i++; */
+		if(cmd->line[len] == VARIABLE && cmd->in_single_quote == 0 && cmd->in_double_quote == 0)
 			return(cmd_token_len(cmd, len));
-		else if(cmd->line[len] == SINGLE_QUOTE)
+		else if(cmd->line[len] == SINGLE_QUOTE && cmd->in_single_quote == 0 && cmd->in_double_quote == 0)
 			return(is_single_quote(cmd, len));
-		else if(cmd->line[len] == DOUBLE_QUOTE)
+		else if(cmd->line[len] == DOUBLE_QUOTE && cmd->in_single_quote == 0 && cmd->in_double_quote == 0)
 			return(is_double_quote(cmd, len));
-		else if(is_special2(cmd->line[len] )) // << < > >> | 
+		else if(is_special2(cmd->line[len] && cmd->in_single_quote == 0 && cmd->in_double_quote == 0)) // << < > >> | 
 			return(check_len_special(cmd, len));
-		else if(cmd->line[len] != '\0')
+		else if(cmd->line[len] != '\0' && cmd->in_single_quote == 0 && cmd->in_double_quote == 0)
 			return(cmd_token_len(cmd, len));
 	}
-	return i;
+	return (0);
 }
 
 int	find_variables(char **token)

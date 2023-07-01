@@ -75,6 +75,9 @@ typedef struct cmd
 	int 	stdin;
 	char	**save_lines;
 	int		in_quote_heredoc;
+	bool	in_single_quote;
+	bool	in_double_quote;
+	bool	quotes_null;
 } t_cmd;
 
 #define HEREDOC_REDIRECT "<<"
@@ -136,6 +139,9 @@ int		count_double_quotes(char *token);
 int		count_left_single_quotes(char *token);
 int		count_left_double_quotes(char *token);
 int		remove_quotes(t_cmd *cmd);
+void	remove_double_quotes(t_cmd *cmd);
+void	remove_single_quotes(t_cmd *cmd);
+int		count_quotes(char *line);
 
 /* pipes_utils.c */
 void    init_pipes(t_cmd *cmd);

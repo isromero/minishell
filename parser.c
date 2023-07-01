@@ -12,18 +12,24 @@
 
 #include "minishell.h"
 
-// $USER$PATH NO FUNCIONA EL PARSEO ENTRE VARIABLES JUNTAS /////////////////////////////////////////////////////////////////////
-
 int parse_args(t_cmd *cmd)
 {
     int len = 0;
     int i = 0;
     cmd->n_tokens = 0;
     cmd->token = NULL;
+    cmd->in_single_quote = false;
+    cmd->in_double_quote = false;
+    cmd->quotes_null = false;
+    if(count_quotes(cmd->line) % 2 != 0)
+    {
+        printf("-minishell: no closing quote\n");
+        return(-1);
+    }
     // Cálculo del número de tokens y almacenamiento de los tokens
     while (cmd->line[i] != '\0')
     {
-        while (cmd->line[i] == ' ')
+        while (cmd->line[i] == ' ' && cmd->in_single_quote == false && cmd->in_double_quote == false) // Si hay espacios y no está en comillas las saltamos, sino las guardamos
             i++;
         len = check_len_token(cmd, i);
         if(len > 0)
@@ -31,7 +37,7 @@ int parse_args(t_cmd *cmd)
             char *token = (char *)malloc((len + 1) * sizeof(char));
             if (token == NULL)
             {
-                perror("Error: No se pudo asignar memoria para el token");
+                printf("malloc error\n");
                 clean_tokens(cmd);
                 return (-1);
             }
@@ -40,7 +46,12 @@ int parse_args(t_cmd *cmd)
             save_token(cmd, token);
             i += len;
         }
-        /* En principio esto no hace falta */
+        else
+            i++;
+        // En principio esto no hace falta
+       /*  else if(len == 0) // En el caso de encontrar comillas seguidas para borrarlas:
+            i += 2; */
+        // En principio esto no hace falta
         /*   else
         {
             perror("Error: introducir token válido");
@@ -49,13 +60,26 @@ int parse_args(t_cmd *cmd)
     }
     // Asegurarse de que el último elemento del arreglo sea NULL
     save_token(cmd, NULL);
-    if(remove_quotes(cmd) % 2 != 0)
-    {
-        printf("-minishell: no closing quote\n");
-        return (-1);
-    }
+    if(remove_quotes(cmd) == -1)
+        return(-1);
     print_tokens(cmd);
     return (0);
+}
+
+int count_quotes(char *line)
+{
+    int i;
+    int count;
+
+    i = 0;
+    count = 0;
+    while(line[i] != '\0')
+    {
+        if(line[i] == DOUBLE_QUOTE || line[i] == SINGLE_QUOTE)
+            count++;
+        i++;
+    }
+    return(count);
 }
 
 int count_double_quotes(char *token)
@@ -68,7 +92,7 @@ int count_double_quotes(char *token)
     while(token[i] != '\0')
     {
         if(token[i] == DOUBLE_QUOTE)
-            count++;
+            count++;    
         i++;
     }
     return(count);
@@ -97,11 +121,6 @@ int count_left_single_quotes(char *token)
     i = 0;
     while (token[i] != DOUBLE_QUOTE && token[i] == SINGLE_QUOTE && token[i] != '\0')
         i++;
-    if(i % 2 == 0) /* Si las dobles comillas son un numero par en un lado tiene que borrar las comillas simples también */
-    {
-        while(token[i] != SINGLE_QUOTE && token[i] == DOUBLE_QUOTE && token[i] != '\0')
-            i++;
-    }
     return (i);
 }
 
@@ -112,31 +131,84 @@ int count_left_double_quotes(char *token)
     i = 0;
     while (token[i] != SINGLE_QUOTE && token[i] == DOUBLE_QUOTE && token[i] != '\0')
         i++;
-    if(i % 2 == 0) /* Si las dobles comillas son un numero par en un lado tiene que borrar las comillas simples también */
-    {
-        while(token[i]!= DOUBLE_QUOTE && token[i] == SINGLE_QUOTE && token[i] != '\0')
-            i++;
-    }
     return (i);
 }
 
+void remove_double_quotes(t_cmd *cmd) 
+{
+    int len = strlen(*cmd->token);
+    int i = 0, j = 0;
+    
+    while (i < len) 
+    {
+        if ((*cmd->token)[i] != DOUBLE_QUOTE)
+        {
+            (*cmd->token)[j] = (*cmd->token)[i];
+            j++;
+        }
+        i++;
+    }
+    (*cmd->token)[j] = '\0';
+}
+
+void remove_single_quotes(t_cmd *cmd) 
+{
+    int len = strlen(*cmd->token);
+    int i = 0, j = 0;
+    
+    while (i < len)
+    {
+        if ((*cmd->token)[i] != SINGLE_QUOTE)
+        {
+            (*cmd->token)[j] = (*cmd->token)[i];
+            j++;
+        }
+        i++;
+    }
+    (*cmd->token)[j] = '\0';
+}
 
 int remove_quotes(t_cmd *cmd)
 {
     int i;
-    int double_quotes;
-    int single_quotes;
+    size_t double_quotes;
+    size_t single_quotes;
+    int left_double_quotes;
+    int left_single_quotes;
+    size_t len_token;
 
     i = 0;
     while(cmd->token[i] != NULL)
     {
         single_quotes = count_single_quotes(cmd->token[i]);
         double_quotes = count_double_quotes(cmd->token[i]);
+        len_token = ft_strlen(cmd->token[i]);
+        left_double_quotes = count_left_double_quotes(cmd->token[i]);
+        left_single_quotes = count_left_single_quotes(cmd->token[i]);
         if(cmd->token[i][0] == DOUBLE_QUOTE && double_quotes >= 2)
-            cmd->token[i] = ft_substr(cmd->token[i], count_left_double_quotes(cmd->token[i]), ft_strlen(cmd->token[i]) - (count_left_double_quotes(cmd->token[i]) * 2));
+        {
+            remove_double_quotes(cmd);
+            // Se ejecutará solo cuando sea par en la izquierda y no te pasen comillas distintas sin nada dentro
+            // Ejemplo ""''""
+            if(left_double_quotes % 2 == 0 && single_quotes + double_quotes != len_token)
+                remove_single_quotes(cmd);
+        }
         else if(cmd->token[i][0] == SINGLE_QUOTE && single_quotes >= 2)
-            cmd->token[i] = ft_substr(cmd->token[i], count_left_single_quotes(cmd->token[i]), ft_strlen(cmd->token[i]) - (count_left_single_quotes(cmd->token[i]) * 2));
+        {
+            remove_single_quotes(cmd);
+            // Se ejecutará solo cuando sea par en la izquierda y no te pasen comillas distintas sin nada dentro
+            // Ejemplo ""''""
+            if(left_single_quotes % 2 == 0 && single_quotes + double_quotes != len_token)
+                remove_double_quotes(cmd);
+        }
         i++;
     }
-    return(single_quotes + double_quotes); // Devuelve el número para checkear posteriormente si es impar y ver si es un error
+    // Gestión de comillas token vacío con comillas después de borrarlas
+    // Ejemplo: """"
+    if(cmd->token[0] != NULL && ft_strlen(cmd->token[0]) == 0)
+        printf("-minishell: command not found\n");
+    return (0);
 }
+// No gestionado
+// ejemplo: "'hola"'
+/* printf("-minishell: error while looking for matching quote\n"); */

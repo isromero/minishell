@@ -59,15 +59,15 @@ void replace_vars(char **token)
             while ((*token)[j + 1 + var_len] != VARIABLE && (*token)[j + 1 + var_len] != '\0')
                 var_len++;
             char *var = malloc(var_len + 1);
-            strncpy(var, *token + var_start, var_len);
+            ft_strncpy(var, *token + var_start, var_len);
             var[var_len] = '\0';
             char *value = getenv(var);
             if (value != NULL)
             {
                 size_t value_len = strlen(value);
                 char *new_replaced_token = malloc(replaced_len + value_len + 1);
-                memcpy(new_replaced_token, replaced_token, replaced_len);
-                memcpy(new_replaced_token + replaced_len, value, value_len);
+                ft_memcpy(new_replaced_token, replaced_token, replaced_len);
+                ft_memcpy(new_replaced_token + replaced_len, value, value_len);
                 new_replaced_token[replaced_len + value_len] = '\0';
                 free(replaced_token);
                 replaced_token = new_replaced_token;

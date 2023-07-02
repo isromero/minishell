@@ -35,11 +35,9 @@ int ft_echo(t_cmd *cmd, int echo_token)
 {
     int first_echo_token;
 	int	first_iteration;
-	int	check_error;
 
     first_echo_token = echo_token;
 	first_iteration = 0;
-	check_error = 0;
     echo_token++; // Avanzar a la posición después de "echo"
 	if (ft_strcmp(cmd->token[0], "echo") == 0 && ft_strcmp(cmd->token[1], "$?") == 0) 
 	{
@@ -47,21 +45,9 @@ int ft_echo(t_cmd *cmd, int echo_token)
 		ft_putchar_fd('\n', STDOUT_FILENO);
 		return (0);
 	}
-	/* el -n falla  */
 	if(ft_strcmp(cmd->token[first_echo_token + 1], "-n") == 0)
 		echo_token++;
-	check_error = echo_token;
-	while(cmd->token[check_error])
-	{
-		if(cmd->token[check_error][0] == '|')
-		{
-			if(cmd->token[check_error + 1] == NULL)
-				printf("-minishell: error: syntax error near unexpected token `|'\n");
-			return (check_error);
-		}
-		check_error++;
-	}
-	while (cmd->token[echo_token])
+	while (cmd->token[echo_token] && !is_special(cmd->token[echo_token][0]))
 	{
 		replace_vars(&cmd->token[echo_token]);
 		if(first_iteration != 0)
@@ -73,7 +59,6 @@ int ft_echo(t_cmd *cmd, int echo_token)
 		}
 		echo_token++;
 	}
-	
 	if (ft_strcmp(cmd->token[first_echo_token + 1], "-n") != 0)
 		printf("\n");
     return (echo_token);

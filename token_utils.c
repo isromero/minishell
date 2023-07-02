@@ -177,14 +177,30 @@ int is_single_quote(t_cmd *cmd, int len)
 int check_len_special(t_cmd *cmd, int len)
 {
 	int i;
+	int	j;
+	int	inputs;
+	int	outputs;
 
 	i = 0;
+	j = 0;
+	inputs = 0;
+	outputs = 0;
 	while(cmd->line[i + len] != ' ' && is_special(cmd->line[i + len])) /* cmd->line[i + len] != '\0' hay que meterlo?*/
 		i++;
-	// Gestión de errores
+	while(cmd->line[inputs + len] != ' ' && cmd->line[inputs + len] == INPUT_REDIRECT)
+		inputs++;
+	while(cmd->line[outputs + len] != ' ' && cmd->line[outputs + len] == OUTPUT_REDIRECT)
+		outputs++;
+	// Gestión de errores similares a bash
 	if(i > 2)
 	{
-		printf("-minishell: syntax error near unexpected token\n");
+		printf("-minishell: syntax error near unexpected token '");
+		while(j < 2) // No queremos que printee más de 2 '<<' o '>>'
+		{
+			printf("%c", cmd->line[j + len]);
+			j++;
+		}
+		printf("'\n");
 		return (-1);
 	}
 	else if(i == 1)

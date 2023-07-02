@@ -177,12 +177,10 @@ int is_single_quote(t_cmd *cmd, int len)
 int check_len_special(t_cmd *cmd, int len)
 {
 	int i;
-	int	j;
 	int	inputs;
 	int	outputs;
 
 	i = 0;
-	j = 0;
 	inputs = 0;
 	outputs = 0;
 	while(cmd->line[i + len] != ' ' && is_special(cmd->line[i + len])) /* cmd->line[i + len] != '\0' hay que meterlo?*/
@@ -195,10 +193,11 @@ int check_len_special(t_cmd *cmd, int len)
 	if(i > 2)
 	{
 		printf("-minishell: syntax error near unexpected token '");
-		while(j < 2) // No queremos que printee más de 2 '<<' o '>>'
+		i = 0;
+		while(i < 2) // No queremos que printee más de 2 '<<' o '>>'
 		{
-			printf("%c", cmd->line[j + len]);
-			j++;
+			printf("%c", cmd->line[i + len + 2]);
+			i++;
 		}
 		printf("'\n");
 		return (-1);

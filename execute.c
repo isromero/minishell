@@ -33,6 +33,11 @@ void executor(t_cmd *cmd)
     {
         if(cmd->token[i][0] == '|')
         {
+            if(cmd->token[0][0] == '|') // Si hay un pipe de primer token
+            {
+                printf("minishell: syntax error near unexpected token `%s'\n", cmd->token[i]);
+                return ;
+            }
             redirecting_pipes(cmd);
             return ;
         }

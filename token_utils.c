@@ -99,11 +99,12 @@ int	is_argument_extension(t_cmd *cmd, int i)
 	 || is_redirects(cmd->token[i - 1][0]) || is_redirects_double_char(cmd->token[i - 1])))
 	/* Realmente son solo los redirects */
 		return 1;
+	// TODO ESTO DE BUILTINS NO ES NECESARIO EN PRINCIPIO
 	/* else if(cmd->token[i][0] == DOUBLE_QUOTE && cmd->token[i][ft_strlen(cmd->token[i]) - 1] == DOUBLE_QUOTE)
 		return 1;
 	else if(cmd->token[i][0] == SINGLE_QUOTE && cmd->token[i][ft_strlen(cmd->token[i]) - 1] == SINGLE_QUOTE)
 		return 1; */
-	else if(i >= 2 && ft_strcmp("echo", cmd->token[i - 2]) == 0 && ft_strcmp("-n", cmd->token[i - 1]) == 0)
+	/* else if(i >= 2 && ft_strcmp("echo", cmd->token[i - 2]) == 0 && ft_strcmp("-n", cmd->token[i - 1]) == 0)
 		return 1;
 	else if(i >= 1 && ft_strcmp("echo", cmd->token[i - 1]) == 0 && ft_strcmp("-n", cmd->token[i]) == 0)
 		return 1;
@@ -121,7 +122,7 @@ int	is_argument_extension(t_cmd *cmd, int i)
 	else if(i >= 1 && ft_strcmp("pwd", cmd->token[i - 1]) == 0)
 		return 1;
 	else if(i >= 1 && ft_strcmp("cd", cmd->token[i - 1]) == 0)
-		return 1;
+		return 1; */
 	return(0);
 }
 

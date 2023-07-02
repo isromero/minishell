@@ -284,7 +284,6 @@ void execute_heredoc_redirects(t_cmd *cmd, char *com, char **exec_args)
     } */ 
 }
 
-
 void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
 {
     char    *com;
@@ -300,56 +299,57 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
         cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
         if(cmd->pid[cmd->count_pids] == 0)
         {
-            if(is_builtin(cmd, i))
+            if(is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0] && !is_redirects_double_char(cmd->token[i])))
             {
+                close(cmd->fd[cmd->count_pipes][WRITE_END]);
+                dup2(cmd->fd[cmd->count_pipes][READ_END], STDIN_FILENO);
+                close(cmd->fd[cmd->count_pipes][READ_END]);
+                dup2(stdout, STDOUT_FILENO);
+                close(stdout);
                 execute_builtin(cmd, i);
-                g_status = 0;
+                exit(0);
+            }
+            com = command_dir(cmd, cmd->token[i]);
+            if (com != NULL || is_executable(cmd->token[i][0]))
+            {
+                exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
+                j = i;
+                while(j < cmd->n_tokens - 1 && !is_special(cmd->token[j][0]) && !is_redirects(cmd->token[j][0]))
+                {
+                    exec_args[j - i] = cmd->token[j];
+                    j++;
+                }
+                exec_args[j - i] = NULL;
+                close(cmd->fd[cmd->count_pipes][WRITE_END]);
+                dup2(cmd->fd[cmd->count_pipes][READ_END], STDIN_FILENO);
+                close(cmd->fd[cmd->count_pipes][READ_END]);
+                dup2(stdout, STDOUT_FILENO);
+                close(stdout);
+                if(!is_output_redirect(cmd) && !is_input_redirect(cmd) && \
+                    !is_append_redirect(cmd) && !is_heredoc_redirect(cmd) && !is_executable(cmd->token[i][0]))
+                {
+                    if(execve(com, exec_args, cmd->env) == -1)
+                    {
+                        g_status = 2;
+                        exit(g_status);
+                    }
+                }
+                /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
+                execute_executable(cmd, cmd->token[i]);
+                execute_appends(cmd, com, exec_args);
+                execute_output_redirects(cmd, com, exec_args);
+                execute_heredoc_redirects(cmd, com, exec_args);
+                execute_input_redirects(cmd, com, exec_args);
+                exit(1);
+            }
+            else if (!com && !is_executable(cmd->token[i][0]))
+            {
+                g_status = 127;
+                printf("-minishell: %s: command not found\n", cmd->token[i]);
                 exit(g_status);
             }
-            else
-            {
-                com = command_dir(cmd, cmd->token[i]);
-                if (com != NULL || is_executable(cmd->token[i][0]))
-                {
-                    exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
-                    j = i;
-                    while(j < cmd->n_tokens - 1 && !is_special(cmd->token[j][0]) && !is_redirects(cmd->token[j][0]))
-                    {
-                        exec_args[j - i] = cmd->token[j];
-                        j++;
-                    }
-                    exec_args[j - i] = NULL;
-                    close(cmd->fd[cmd->count_pipes][WRITE_END]);
-                    dup2(cmd->fd[cmd->count_pipes][READ_END], STDIN_FILENO);
-                    close(cmd->fd[cmd->count_pipes][READ_END]);
-                    dup2(stdout, STDOUT_FILENO);
-                    close(stdout);
-                    if(!is_output_redirect(cmd) && !is_input_redirect(cmd) && \
-                        !is_append_redirect(cmd) && !is_heredoc_redirect(cmd) && !is_executable(cmd->token[i][0]))
-                    {
-                        if(execve(com, exec_args, cmd->env) == -1)
-                        {
-                            g_status = 2;
-                            exit(g_status);
-                        }
-                    }
-                    /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
-                    execute_executable(cmd, cmd->token[i]);
-                    execute_appends(cmd, com, exec_args);
-                    execute_output_redirects(cmd, com, exec_args);
-                    execute_heredoc_redirects(cmd, com, exec_args);
-                    execute_input_redirects(cmd, com, exec_args);
-                    exit(1);
-                }
-                else if (!com && !is_executable(cmd->token[i][0]))
-                {
-                    g_status = 127;
-                    printf("-minishell: %s: command not found\n", cmd->token[i]);
-                    exit(g_status);
-                }
-            }
         }
-    } 
+    }
     free(exec_args); // aquí?
 }
 
@@ -368,57 +368,60 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
         cmd[0]->pid[cmd[0]->count_pids] = fork(); //Checkear error de fork
         if(cmd[0]->pid[cmd[0]->count_pids] == 0)
         {
-            if(is_builtin(cmd[0], i))
+            if(is_builtin(cmd[0], i) && !is_argument_extension(cmd[0], i) && !is_redirects(cmd[0]->token[i][0] && !is_redirects_double_char(cmd[0]->token[i])))
             {
-                execute_builtin(cmd[0], i);
-                g_status = 0;
-                exit(g_status);
-            }     
-            else
+                close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
+                dup2(cmd[0]->fd[cmd[0]->count_pipes][READ_END], STDIN_FILENO);
+                close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
+                cmd[0]->count_pipes++;
+                close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
+                dup2(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END], STDOUT_FILENO);
+                close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
+                execute_builtin(cmd[0], i); 
+                exit(0);
+            }
+            com = command_dir(cmd[0], cmd[0]->token[i]);
+            if (com != NULL && is_executable(cmd[0]->token[i][0]))
             {
-                com = command_dir(cmd[0], cmd[0]->token[i]);
-                if (com != NULL && is_executable(cmd[0]->token[i][0]))
+                exec_args = (char **)malloc(sizeof(char *) * (cmd[0]->n_tokens - i + 1));
+                j = i;
+                while(j < cmd[0]->n_tokens - 1 && !is_special(cmd[0]->token[j][0]) && !is_redirects(cmd[0]->token[j][0]))
                 {
-                    exec_args = (char **)malloc(sizeof(char *) * (cmd[0]->n_tokens - i + 1));
-                    j = i;
-                    while(j < cmd[0]->n_tokens - 1 && !is_special(cmd[0]->token[j][0]) && !is_redirects(cmd[0]->token[j][0]))
+                    exec_args[j - i] = cmd[0]->token[j];
+                    j++;
+                }
+                exec_args[j - i] = NULL;
+                //recibe entrada
+                close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
+                dup2(cmd[0]->fd[cmd[0]->count_pipes][READ_END], STDIN_FILENO);
+                close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
+                cmd[0]->count_pipes++;
+                // envía salida
+                close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
+                dup2(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END], STDOUT_FILENO);
+                close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
+                if(!is_output_redirect(cmd[0]) && !is_input_redirect(cmd[0]) && \
+                    !is_append_redirect(cmd[0]) && !is_heredoc_redirect(cmd[0]) && !is_executable(cmd[0]->token[i][0]))
                     {
-                        exec_args[j - i] = cmd[0]->token[j];
-                        j++;
+                    if(execve(com, exec_args, cmd[0]->env) == -1)
+                    {
+                        g_status = 2;
+                        exit(g_status);
                     }
-                    exec_args[j - i] = NULL;
-                    //recibe entrada
-                    close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
-                    dup2(cmd[0]->fd[cmd[0]->count_pipes][READ_END], STDIN_FILENO);
-                    close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
-                    cmd[0]->count_pipes++;
-                    // envía salida
-                    close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
-                    dup2(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END], STDOUT_FILENO);
-                    close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
-                    if(!is_output_redirect(cmd[0]) && !is_input_redirect(cmd[0]) && \
-                        !is_append_redirect(cmd[0]) && !is_heredoc_redirect(cmd[0]) && !is_executable(cmd[0]->token[i][0]))
-                     {
-                        if(execve(com, exec_args, cmd[0]->env) == -1)
-                        {
-                            g_status = 2;
-                            exit(g_status);
-                        }
-                    }
-                    /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
-                    execute_executable(cmd[0], cmd[0]->token[i]);
-                    execute_appends(cmd[0], com, exec_args);
-                    execute_output_redirects(cmd[0], com, exec_args);
-                    execute_heredoc_redirects(cmd[0], com, exec_args);
-                    execute_input_redirects(cmd[0], com, exec_args);
-                    exit(1);
                 }
-                else if (!com && !is_executable(cmd[0]->token[i][0]))
-                {
-                    g_status = 127;
-                    printf("-minishell: %s: command not found\n", cmd[0]->token[i]);
-                    exit(g_status);
-                }
+                /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
+                execute_executable(cmd[0], cmd[0]->token[i]);
+                execute_appends(cmd[0], com, exec_args);
+                execute_output_redirects(cmd[0], com, exec_args);
+                execute_heredoc_redirects(cmd[0], com, exec_args);
+                execute_input_redirects(cmd[0], com, exec_args);
+                exit(1);
+            }
+            else if (!com && !is_executable(cmd[0]->token[i][0]))
+            {
+                g_status = 127;
+                printf("-minishell: %s: command not found\n", cmd[0]->token[i]);
+                exit(g_status);
             }
         }
         else
@@ -443,51 +446,50 @@ void    execute_first_pipes(t_cmd *cmd, int i)
         cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
         if(cmd->pid[cmd->count_pids] == 0)
         {
-            if(is_builtin(cmd, i))
+            if(is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0] && !is_redirects_double_char(cmd->token[i])))
             {
+                close(cmd->fd[cmd->count_pipes][READ_END]);
+                dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
+                close(cmd->fd[cmd->count_pipes][WRITE_END]);
                 execute_builtin(cmd, i);
-                g_status = 0;
-                exit(g_status);
-            }
-            else
+                exit(0);
+            }   
+            com = command_dir(cmd, cmd->token[i]);
+            if (com != NULL || is_executable(cmd->token[i][0]))
             {
-                com = command_dir(cmd, cmd->token[i]);
-                if (com != NULL || is_executable(cmd->token[i][0]))
+                exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
+                j = i;
+                while(j < cmd->n_tokens - 1 && !is_special(cmd->token[j][0]) && !is_redirects(cmd->token[j][0]))
                 {
-                    exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
-                    j = i;
-                    while(j < cmd->n_tokens - 1 && !is_special(cmd->token[j][0]) && !is_redirects(cmd->token[j][0]))
-                    {
-                        exec_args[j - i] = cmd->token[j];
-                        j++;
-                    }
-                    exec_args[j - i] = NULL;
-                    close(cmd->fd[cmd->count_pipes][READ_END]);
-                    dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
-                    close(cmd->fd[cmd->count_pipes][WRITE_END]);
-                    if(!is_output_redirect(cmd) && !is_input_redirect(cmd) && \
-                        !is_append_redirect(cmd) && !is_heredoc_redirect(cmd) && !is_executable(cmd->token[i][0]))
-                    {
-                        if(execve(com, exec_args, cmd->env) == -1)
-                        {
-                            g_status = 2;
-                            exit(g_status);
-                        }
-                    }
-                    /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
-                    execute_executable(cmd, cmd->token[i]);
-                    execute_appends(cmd, com, exec_args);
-                    execute_output_redirects(cmd, com, exec_args);
-                    execute_heredoc_redirects(cmd, com, exec_args);
-                    execute_input_redirects(cmd, com, exec_args);
-                    exit(1);
+                    exec_args[j - i] = cmd->token[j];
+                    j++;
                 }
-                else if (!com && !is_executable(cmd->token[i][0]))
+                exec_args[j - i] = NULL;
+                close(cmd->fd[cmd->count_pipes][READ_END]);
+                dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
+                close(cmd->fd[cmd->count_pipes][WRITE_END]);
+                if(!is_output_redirect(cmd) && !is_input_redirect(cmd) && \
+                    !is_append_redirect(cmd) && !is_heredoc_redirect(cmd) && !is_executable(cmd->token[i][0]))
                 {
-                    g_status = 127;
-                    printf("-minishell: %s: command not found\n", cmd->token[i]);
-                    exit(g_status);
+                    if(execve(com, exec_args, cmd->env) == -1)
+                    {
+                        g_status = 2;
+                        exit(g_status);
+                    }
                 }
+                /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
+                execute_executable(cmd, cmd->token[i]);
+                execute_appends(cmd, com, exec_args);
+                execute_output_redirects(cmd, com, exec_args);
+                execute_heredoc_redirects(cmd, com, exec_args);
+                execute_input_redirects(cmd, com, exec_args);
+                exit(1);
+            }
+            else if (!com && !is_executable(cmd->token[i][0]))
+            {
+                g_status = 127;
+                printf("-minishell: %s: command not found\n", cmd->token[i]);
+                exit(g_status);
             }
         }
     }

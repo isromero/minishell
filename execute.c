@@ -139,7 +139,7 @@ void execute(t_cmd *cmd)
         if (is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_special(cmd->token[i][0] && !is_redirects(cmd->token[i][0])))
         {
             if(!is_output_redirect(cmd) && !is_input_redirect(cmd) \
-                && !is_append_redirect(cmd) && !is_heredoc_redirect(cmd) && !is_executable(cmd->token[i][0]))
+                && !is_append_redirect(cmd) && !is_heredoc_redirect(cmd))
             {
                 execute_builtin(cmd, i);
                 return ;
@@ -334,7 +334,8 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
         cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
         if(cmd->pid[cmd->count_pids] == 0)
         {
-            if(is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0] && !is_redirects_double_char(cmd->token[i])))
+            com = command_dir(cmd, cmd->token[i]);
+            if(is_builtin(cmd, i))
             {
                 close(cmd->fd[cmd->count_pipes][WRITE_END]);
                 dup2(cmd->fd[cmd->count_pipes][READ_END], STDIN_FILENO);
@@ -342,10 +343,11 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                 dup2(stdout, STDOUT_FILENO);
                 close(stdout);
                 if(!is_output_redirect(cmd) && !is_input_redirect(cmd) \
-                && !is_append_redirect(cmd) && !is_heredoc_redirect(cmd) && !is_executable(cmd->token[i][0]))
+                && !is_append_redirect(cmd) && !is_heredoc_redirect(cmd))
                 {
                     execute_builtin(cmd, i);
-                    return ;
+                    g_status = 0;
+                    exit(g_status);
                 }
                 execute_appends(cmd, com, exec_args, i);
                 execute_output_redirects(cmd, com, exec_args, i);
@@ -354,8 +356,7 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                 g_status = 0;
                 exit(g_status);
             }
-            com = command_dir(cmd, cmd->token[i]);
-            if (com != NULL || is_executable(cmd->token[i][0]))
+            else if (com != NULL || is_executable(cmd->token[i][0]))
             {
                 exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
                 j = i;
@@ -410,10 +411,11 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
     replace_vars(&cmd[0]->token[i]);
     if (!is_argument_extension(cmd[0], i) && !is_redirects(cmd[0]->token[i][0] && !is_redirects_double_char(cmd[0]->token[i])))
     {
+        com = command_dir(cmd[0], cmd[0]->token[i]);
         cmd[0]->pid[cmd[0]->count_pids] = fork(); //Checkear error de fork
         if(cmd[0]->pid[cmd[0]->count_pids] == 0)
         {
-            if(is_builtin(cmd[0], i) && !is_argument_extension(cmd[0], i) && !is_redirects(cmd[0]->token[i][0] && !is_redirects_double_char(cmd[0]->token[i])))
+            if(is_builtin(cmd[0], i))
             {
                 close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
                 dup2(cmd[0]->fd[cmd[0]->count_pipes][READ_END], STDIN_FILENO);
@@ -423,10 +425,11 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                 dup2(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END], STDOUT_FILENO);
                 close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
                 if(!is_output_redirect(cmd[0]) && !is_input_redirect(cmd[0]) \
-                && !is_append_redirect(cmd[0]) && !is_heredoc_redirect(cmd[0]) && !is_executable(cmd[0]->token[i][0]))
+                && !is_append_redirect(cmd[0]) && !is_heredoc_redirect(cmd[0]))
                 {
                     execute_builtin(cmd[0], i);
-                    return ;
+                    g_status = 0;
+                    exit(g_status);
                 }
                 execute_appends(cmd[0], com, exec_args, i);
                 execute_output_redirects(cmd[0], com, exec_args, i);
@@ -435,8 +438,7 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                 g_status = 0;
                 exit(g_status);
             }
-            com = command_dir(cmd[0], cmd[0]->token[i]);
-            if (com != NULL && is_executable(cmd[0]->token[i][0]))
+            else if (com != NULL && is_executable(cmd[0]->token[i][0]))
             {
                 exec_args = (char **)malloc(sizeof(char *) * (cmd[0]->n_tokens - i + 1));
                 j = i;
@@ -501,16 +503,18 @@ void    execute_first_pipes(t_cmd *cmd, int i)
         cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
         if(cmd->pid[cmd->count_pids] == 0)
         {
-            if(is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0] && !is_redirects_double_char(cmd->token[i])))
+            com = command_dir(cmd, cmd->token[i]);
+            if(is_builtin(cmd, i))
             {
                 close(cmd->fd[cmd->count_pipes][READ_END]);
                 dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
                 close(cmd->fd[cmd->count_pipes][WRITE_END]);
                 if(!is_output_redirect(cmd) && !is_input_redirect(cmd) \
-                && !is_append_redirect(cmd) && !is_heredoc_redirect(cmd) && !is_executable(cmd->token[i][0]))
+                && !is_append_redirect(cmd) && !is_heredoc_redirect(cmd))
                 {
                     execute_builtin(cmd, i);
-                    return ;
+                    g_status = 0;
+                    exit(g_status);
                 }
                 execute_appends(cmd, com, exec_args, i);
                 execute_output_redirects(cmd, com, exec_args, i);
@@ -518,9 +522,8 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                 execute_input_redirects(cmd, com, exec_args, i);
                 g_status = 0;
                 exit(g_status);
-            }   
-            com = command_dir(cmd, cmd->token[i]);
-            if (com != NULL || is_executable(cmd->token[i][0]))
+            }
+            else if (com != NULL || is_executable(cmd->token[i][0]))
             {
                 exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
                 j = i;

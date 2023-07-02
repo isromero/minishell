@@ -49,6 +49,8 @@ int parse_args(t_cmd *cmd)
             n_tokens++;
             i += len;
         }
+        else if(len == -1)
+            return(-1);
         else
             i++;
         // En principio esto no hace falta

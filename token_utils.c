@@ -174,11 +174,6 @@ int is_single_quote(t_cmd *cmd, int len)
 	return (i);
 }
 
-void error_special()
-{
-	printf("syntax error near unexpected token\n");
-}
-
 int check_len_special(t_cmd *cmd, int len)
 {
 	int i;
@@ -188,7 +183,10 @@ int check_len_special(t_cmd *cmd, int len)
 		i++;
 	// Gestión de errores
 	if(i > 2)
-		error_special();
+	{
+		printf("-minishell: syntax error near unexpected token\n");
+		return (-1);
+	}
 	else if(i == 1)
 		return(1);
 	else if (i == 2)

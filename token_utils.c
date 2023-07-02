@@ -139,7 +139,7 @@ int is_double_quote(t_cmd *cmd, int len)
 {
 	int i;
 
-	cmd->in_double_quote = !cmd->in_double_quote;
+	cmd->in_double_quote = true;
 	i = 0;
 	while (cmd->line[i + len] != '\0')
 	{
@@ -157,8 +157,8 @@ int is_double_quote(t_cmd *cmd, int len)
 int is_single_quote(t_cmd *cmd, int len)
 {
 	int	i;
-
-	cmd->in_single_quote = !cmd->in_single_quote;
+	/* h"hola" */
+	cmd->in_single_quote = true;
 	i = 1;
 	while (cmd->line[i + len] != '\0')
 	{
@@ -211,15 +211,15 @@ int	check_len_token(t_cmd *cmd, int len)
 		// No necesario en principio
 		/* while(cmd->line[i + len] != '\0' && cmd->line[i + len] != ' ')
 			i++; */
-		if(cmd->line[len] == VARIABLE && cmd->in_single_quote == 0 && cmd->in_double_quote == 0)
+		if(cmd->line[len] == VARIABLE)
 			return(cmd_token_len(cmd, len));
-		else if(cmd->line[len] == SINGLE_QUOTE && cmd->in_single_quote == 0 && cmd->in_double_quote == 0)
+		else if(cmd->line[len] == SINGLE_QUOTE)
 			return(is_single_quote(cmd, len));
-		else if(cmd->line[len] == DOUBLE_QUOTE && cmd->in_single_quote == 0 && cmd->in_double_quote == 0)
+		else if(cmd->line[len] == DOUBLE_QUOTE)
 			return(is_double_quote(cmd, len));
-		else if(is_special2(cmd->line[len] && cmd->in_single_quote == 0 && cmd->in_double_quote == 0)) // << < > >> | 
+		else if(is_special2(cmd->line[len])) // << < > >> | 
 			return(check_len_special(cmd, len));
-		else if(cmd->line[len] != '\0' && cmd->in_single_quote == 0 && cmd->in_double_quote == 0)
+		else if(cmd->line[len] != '\0')
 			return(cmd_token_len(cmd, len));
 	}
 	return (0);

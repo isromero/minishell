@@ -31,29 +31,38 @@ int	is_builtin(t_cmd *cmd, int n_token)
 	return (0);
 }
 
-int ft_echo(t_cmd *cmd, int echo_token)
+void ft_echo(t_cmd *cmd, int echo_token)
 {
     int first_echo_token;
+	int	first_iteration;
 
     first_echo_token = echo_token;
+	first_iteration = 0;
     echo_token++; // Avanzar a la posición después de "echo"
 	if (ft_strcmp(cmd->token[0], "echo") == 0 && ft_strcmp(cmd->token[1], "$?") == 0) 
 	{
     	ft_putnbr_fd(g_status, STDOUT_FILENO);
 		ft_putchar_fd('\n', STDOUT_FILENO);
-		return (0);
+		return ;
 	}
 	/* el -n falla  */
-    while (cmd->token[echo_token])
-    {
-        if (strcmp(cmd->token[first_echo_token + 1], "-n") == 0)
-            echo_token++;
-        printf("%s ", cmd->token[echo_token]);
-        echo_token++;
-    }
-    if (strcmp(cmd->token[first_echo_token + 1], "-n") != 0)
-        printf("\n");
-    return echo_token;
+	if(ft_strcmp(cmd->token[first_echo_token + 1], "-n") == 0)
+		echo_token++;
+	while (cmd->token[echo_token])
+	{
+		replace_vars(&cmd->token[echo_token]);
+		if(first_iteration != 0)
+			printf(" %s", cmd->token[echo_token]);
+		else if(first_iteration == 0)
+		{
+			printf("%s", cmd->token[echo_token]);
+			first_iteration++;
+		}
+		echo_token++;
+	}
+	
+	if (ft_strcmp(cmd->token[first_echo_token + 1], "-n") != 0)
+		printf("\n");
 }
 
 void	ft_cd(t_cmd *cmd, int cd_token)
@@ -72,16 +81,14 @@ void	ft_cd(t_cmd *cmd, int cd_token)
 	setenv(oldpwd, cwd, 1);
 }
 
-int ft_env(t_cmd *cmd)
+void ft_env(t_cmd *cmd)
 {
-    int status = 0;
     int i;
     int size;
 
     i = 0;
-    status = 0;
     if (!cmd->env || !cmd->env[0])
-        return -1;
+        return ;
 
     /* if (cmd->n_tokens > 2) // Hace falta gestionarlo????????????????????????????????
     {
@@ -99,29 +106,22 @@ int ft_env(t_cmd *cmd)
         i++;
     }
 	//comprobacion de si hay pipes despues
-    return (status);
 }
 
-int	ft_pwd(t_cmd *cmd)
+void	ft_pwd(t_cmd *cmd)
 {
 	char	dir[1024];
-	int		s;
 	char	*pwd;
 
-	s = 1;
 	pwd = ft_getenv("$PWD", cmd->env);
 	if (getcwd(dir, sizeof(dir)) != NULL)
-	{
 		printf("%s\n", dir);
-		s = 0;
-	}
 	else if (pwd)
 		printf("%s\n", pwd);
 	else
 		perror("");
 	free (pwd);
 	//comprobacion pipe
-	return (s);
 }
 
 void ft_export(t_cmd *cmd, int export_token) // CHECKEAR SI HAY UN '=' PARA EXPORT

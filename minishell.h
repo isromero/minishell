@@ -77,7 +77,6 @@ typedef struct cmd
 	int		in_quote_heredoc;
 	bool	in_single_quote;
 	bool	in_double_quote;
-	bool	quotes_null;
 } t_cmd;
 
 #define HEREDOC_REDIRECT "<<"
@@ -93,10 +92,10 @@ typedef struct cmd
 
 /* builtins.c */
 int		is_builtin(t_cmd *cmd, int n_token);
-int 	ft_echo(t_cmd *cmd, int echo_token);
+void 	ft_echo(t_cmd *cmd, int echo_token);
 void	ft_cd(t_cmd *cmd, int cd_token);
-int		ft_env(t_cmd *cmd);
-int		ft_pwd(t_cmd *cmd);
+void	ft_env(t_cmd *cmd);
+void	ft_pwd(t_cmd *cmd);
 void 	ft_export(t_cmd *cmd, int export_token);
 bool 	compareVariableName(const char* variable, const char* name);
 void 	ft_unset(t_cmd *cmd, int unset_token);
@@ -138,9 +137,9 @@ int		count_single_quotes(char *token);
 int		count_double_quotes(char *token);
 int		count_left_single_quotes(char *token);
 int		count_left_double_quotes(char *token);
-int		remove_quotes(t_cmd *cmd);
-void	remove_double_quotes(t_cmd *cmd);
-void	remove_single_quotes(t_cmd *cmd);
+int		remove_quotes(t_cmd *cmd, int i);
+void	remove_double_quotes(char **token);
+void	remove_single_quotes(char **token);
 int		count_quotes(char *line);
 
 /* pipes_utils.c */

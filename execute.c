@@ -33,6 +33,7 @@ void executor(t_cmd *cmd)
     {
         if(cmd->token[i][0] == '|')
         {
+            printf("hola\n");
             redirecting_pipes(cmd);
             return ;
         }
@@ -58,7 +59,6 @@ void execute(t_cmd *cmd)
     
     while (i < cmd->n_tokens - 1)
     {
-       
         if(is_variable(cmd->token[i][0]) && first_variable == 0)
             first_variable = 1; // Para que solo se ejecute una vez las variables
         replace_vars(&cmd->token[i]);
@@ -136,6 +136,7 @@ void execute(t_cmd *cmd)
         {
             execute_builtin(cmd, i); // En principio funciona, aunque tal vez necesita pruebas(antes estaba metido todo directo el execute, con su i correspondiente)
             g_status = 0; /* Reinicializamos a 0 porque cuando se pone un echo $? necesitamos reestablecer el status después de haberse ejecutado para siguientes iteraciones */
+            return ;
         }
         i++;
     }

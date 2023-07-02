@@ -33,7 +33,6 @@ void executor(t_cmd *cmd)
     {
         if(cmd->token[i][0] == '|')
         {
-            printf("hola\n");
             redirecting_pipes(cmd);
             return ;
         }

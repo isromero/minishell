@@ -92,7 +92,7 @@ typedef struct cmd
 
 /* builtins.c */
 int		is_builtin(t_cmd *cmd, int n_token);
-void 	ft_echo(t_cmd *cmd, int echo_token);
+int 	ft_echo(t_cmd *cmd, int echo_token);
 void	ft_cd(t_cmd *cmd, int cd_token);
 void	ft_env(t_cmd *cmd);
 void	ft_pwd(t_cmd *cmd);

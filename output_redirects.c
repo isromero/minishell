@@ -181,7 +181,6 @@ void	output_multiple_redirect(t_cmd *cmd)
     close(fd);
 }
 
-
 void	append_redirect(t_cmd *cmd)
 {
 	int	fd;

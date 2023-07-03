@@ -48,8 +48,14 @@ int ft_echo(t_cmd *cmd, int echo_token)
 	if(ft_strcmp(cmd->token[first_echo_token + 1], "-n") == 0)
 		echo_token++;
 	// Checkear ""
-	while (cmd->token[echo_token] && !is_special(cmd->token[echo_token][0]))
+	while (cmd->token[echo_token])
 	{
+		if(cmd->token[echo_token][0] == DOUBLE_QUOTE)
+			cmd->in_double_quote = 1;
+		else if(cmd->token[echo_token][0] == SINGLE_QUOTE)
+			cmd->in_single_quote = 1;
+		if(is_special(cmd->token[echo_token][0]) && (cmd->in_single_quote == 0 || cmd->in_double_quote == 0))
+			break ;
 		replace_vars(&cmd->token[echo_token]);
 		if(first_iteration != 0)
 			printf(" %s", cmd->token[echo_token]);

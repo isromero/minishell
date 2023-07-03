@@ -329,7 +329,6 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
     exec_args = NULL;
     j = 0;
     replace_vars(&cmd->token[i]);
-    
     if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0] && !is_redirects_double_char(cmd->token[i])))
     {
         cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
@@ -387,7 +386,7 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                 execute_output_redirects(cmd, com, exec_args, i);
                 execute_heredoc_redirects(cmd, com, exec_args, i);
                 execute_input_redirects(cmd, com, exec_args, i);
-                exit(1);
+                exit(0);
             }
             else if (!com && !is_executable(cmd->token[i][0]))
             {
@@ -395,8 +394,6 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                 printf("-minishell: %s: command not found\n", cmd->token[i]);
                 exit(g_status);
             }
-            else
-                exit(0);
         }
     }
     free(exec_args); // aquí?
@@ -441,7 +438,7 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                 g_status = 0;
                 exit(g_status);
             }
-            else if (com != NULL && is_executable(cmd[0]->token[i][0]))
+            else if (com != NULL || is_executable(cmd[0]->token[i][0]))
             {
                 exec_args = (char **)malloc(sizeof(char *) * (cmd[0]->n_tokens - i + 1));
                 j = i;
@@ -462,7 +459,7 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                 close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
                 if(!is_output_redirect(cmd[0], i) && !is_input_redirect(cmd[0], i) && \
                     !is_append_redirect(cmd[0], i) && !is_heredoc_redirect(cmd[0], i) && !is_executable(cmd[0]->token[i][0]))
-                    {
+                {
                     if(execve(com, exec_args, cmd[0]->env) == -1)
                     {
                         g_status = 2;
@@ -475,23 +472,20 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                 execute_output_redirects(cmd[0], com, exec_args, i);
                 execute_heredoc_redirects(cmd[0], com, exec_args, i);
                 execute_input_redirects(cmd[0], com, exec_args, i);
-                exit(1);
+                exit(0);
             }
             else if (!com && !is_executable(cmd[0]->token[i][0]))
             {
                 g_status = 127;
                 printf("-minishell: %s: command not found\n", cmd[0]->token[i]);
                 exit(g_status);
-            }
-            else
-                exit(0);
+            }    
         }
         else
             cmd[0]->count_pipes++;
     }
     free(exec_args); // aquí?
 }
-
 
 void    execute_first_pipes(t_cmd *cmd, int i)
 {
@@ -556,7 +550,7 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                 execute_output_redirects(cmd, com, exec_args, i);
                 execute_heredoc_redirects(cmd, com, exec_args, i);
                 execute_input_redirects(cmd, com, exec_args, i);
-                exit(1);
+                exit(0);
             }
             else if (!com && !is_executable(cmd->token[i][0]))
             {
@@ -564,8 +558,6 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                 printf("-minishell: %s: command not found\n", cmd->token[i]);
                 exit(g_status);
             }
-            else
-                exit(0);
         }
     }
     free(exec_args); // aquí?

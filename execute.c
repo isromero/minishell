@@ -97,8 +97,8 @@ void execute(t_cmd *cmd)
                         j++;
                     }
                     exec_args[j - i] = NULL;
-                    if(!is_output_redirect(cmd) && !is_input_redirect(cmd) \
-                     && !is_append_redirect(cmd) && !is_heredoc_redirect(cmd) && !is_executable(cmd->token[i][0]))
+                    if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
+                     && !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i) && !is_executable(cmd->token[i][0]))
                     {
                         if(execve(com, exec_args, cmd->env) == -1)
                         {
@@ -138,8 +138,8 @@ void execute(t_cmd *cmd)
         }
         if (is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_special(cmd->token[i][0] && !is_redirects(cmd->token[i][0])))
         {
-            if(!is_output_redirect(cmd) && !is_input_redirect(cmd) \
-                && !is_append_redirect(cmd) && !is_heredoc_redirect(cmd))
+            if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
+                && !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
             {
                 execute_builtin(cmd, i);
                 return ;
@@ -235,7 +235,7 @@ void redirecting_pipes(t_cmd *cmd) /* dobles comandos como grep y cat se quedan 
 
 void execute_appends(t_cmd *cmd, char *com, char **exec_args, int i)
 {
-    if(is_append_redirect(cmd) == 1)
+    if(is_append_redirect(cmd, i) == 1)
     {
         append_redirect(cmd);
         if(!is_builtin(cmd, i))
@@ -244,7 +244,7 @@ void execute_appends(t_cmd *cmd, char *com, char **exec_args, int i)
             execute_builtin(cmd, i);
         close_output_redirect(cmd);
     }
-    else if(is_append_redirect(cmd) > 1)
+    else if(is_append_redirect(cmd, i) > 1)
     {
         append_multiple_redirect(cmd);
         if(!is_builtin(cmd, i))
@@ -257,7 +257,7 @@ void execute_appends(t_cmd *cmd, char *com, char **exec_args, int i)
 
 void execute_output_redirects(t_cmd *cmd, char *com, char **exec_args, int i)
 {
-    if(is_output_redirect(cmd) == 1)
+    if(is_output_redirect(cmd, i) == 1)
     {
         output_redirect(cmd);
         if(!is_builtin(cmd, i))
@@ -266,7 +266,7 @@ void execute_output_redirects(t_cmd *cmd, char *com, char **exec_args, int i)
             execute_builtin(cmd, i);
         close_output_redirect(cmd);
     }
-    else if(is_output_redirect(cmd) > 1)
+    else if(is_output_redirect(cmd, i) > 1)
     {
         output_multiple_redirect(cmd);
         if(!is_builtin(cmd, i))
@@ -279,7 +279,7 @@ void execute_output_redirects(t_cmd *cmd, char *com, char **exec_args, int i)
 
 void execute_input_redirects(t_cmd *cmd, char *com, char **exec_args, int i)
 {
-    if(is_input_redirect(cmd) == 1)
+    if(is_input_redirect(cmd, i) == 1)
     {
         input_redirect(cmd);
         if(!is_builtin(cmd, i))
@@ -288,7 +288,7 @@ void execute_input_redirects(t_cmd *cmd, char *com, char **exec_args, int i)
             execute_builtin(cmd, i);
         close_input_redirect(cmd);
     }
-    else if(is_input_redirect(cmd) > 1)
+    else if(is_input_redirect(cmd, i) > 1)
     {
         input_multiple_redirect(cmd);
         if(!is_builtin(cmd, i))
@@ -301,7 +301,7 @@ void execute_input_redirects(t_cmd *cmd, char *com, char **exec_args, int i)
 
 void execute_heredoc_redirects(t_cmd *cmd, char *com, char **exec_args, int i)
 {
-    if(is_heredoc_redirect(cmd) == 1)
+    if(is_heredoc_redirect(cmd, i) == 1)
     {
         heredoc_redirect(&cmd);
         if(!is_builtin(cmd, i))
@@ -329,6 +329,7 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
     exec_args = NULL;
     j = 0;
     replace_vars(&cmd->token[i]);
+    
     if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0] && !is_redirects_double_char(cmd->token[i])))
     {
         cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
@@ -342,8 +343,8 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                 close(cmd->fd[cmd->count_pipes][READ_END]);
                 dup2(stdout, STDOUT_FILENO);
                 close(stdout);
-                if(!is_output_redirect(cmd) && !is_input_redirect(cmd) \
-                && !is_append_redirect(cmd) && !is_heredoc_redirect(cmd))
+                if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
+                && !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
                 {
                     execute_builtin(cmd, i);
                     g_status = 0;
@@ -366,14 +367,17 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                     j++;
                 }
                 exec_args[j - i] = NULL;
+                
                 close(cmd->fd[cmd->count_pipes][WRITE_END]);
                 dup2(cmd->fd[cmd->count_pipes][READ_END], STDIN_FILENO);
                 close(cmd->fd[cmd->count_pipes][READ_END]);
                 dup2(stdout, STDOUT_FILENO);
                 close(stdout);
-                if(!is_output_redirect(cmd) && !is_input_redirect(cmd) && \
-                    !is_append_redirect(cmd) && !is_heredoc_redirect(cmd) && !is_executable(cmd->token[i][0]))
+                write(2, "hola\n", 5);
+                if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) && \
+                    !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i) && !is_executable(cmd->token[i][0]))
                 {
+                    
                     if(execve(com, exec_args, cmd->env) == -1)
                     {
                         g_status = 2;
@@ -424,8 +428,8 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                 close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
                 dup2(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END], STDOUT_FILENO);
                 close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
-                if(!is_output_redirect(cmd[0]) && !is_input_redirect(cmd[0]) \
-                && !is_append_redirect(cmd[0]) && !is_heredoc_redirect(cmd[0]))
+                if(!is_output_redirect(cmd[0], i) && !is_input_redirect(cmd[0], i) \
+                && !is_append_redirect(cmd[0], i) && !is_heredoc_redirect(cmd[0], i))
                 {
                     execute_builtin(cmd[0], i);
                     g_status = 0;
@@ -457,8 +461,8 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                 close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
                 dup2(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END], STDOUT_FILENO);
                 close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
-                if(!is_output_redirect(cmd[0]) && !is_input_redirect(cmd[0]) && \
-                    !is_append_redirect(cmd[0]) && !is_heredoc_redirect(cmd[0]) && !is_executable(cmd[0]->token[i][0]))
+                if(!is_output_redirect(cmd[0], i) && !is_input_redirect(cmd[0], i) && \
+                    !is_append_redirect(cmd[0], i) && !is_heredoc_redirect(cmd[0], i) && !is_executable(cmd[0]->token[i][0]))
                     {
                     if(execve(com, exec_args, cmd[0]->env) == -1)
                     {
@@ -509,8 +513,8 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                 close(cmd->fd[cmd->count_pipes][READ_END]);
                 dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
                 close(cmd->fd[cmd->count_pipes][WRITE_END]);
-                if(!is_output_redirect(cmd) && !is_input_redirect(cmd) \
-                && !is_append_redirect(cmd) && !is_heredoc_redirect(cmd))
+                if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
+                && !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
                 {
                     execute_builtin(cmd, i);
                     g_status = 0;
@@ -536,8 +540,8 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                 close(cmd->fd[cmd->count_pipes][READ_END]);
                 dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
                 close(cmd->fd[cmd->count_pipes][WRITE_END]);
-                if(!is_output_redirect(cmd) && !is_input_redirect(cmd) && \
-                    !is_append_redirect(cmd) && !is_heredoc_redirect(cmd) && !is_executable(cmd->token[i][0]))
+                if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) && \
+                    !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i) && !is_executable(cmd->token[i][0]))
                 {
                     if(execve(com, exec_args, cmd->env) == -1)
                     {

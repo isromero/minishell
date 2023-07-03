@@ -47,6 +47,7 @@ int ft_echo(t_cmd *cmd, int echo_token)
 	}
 	if(ft_strcmp(cmd->token[first_echo_token + 1], "-n") == 0)
 		echo_token++;
+	// Checkear ""
 	while (cmd->token[echo_token] && !is_special(cmd->token[echo_token][0]))
 	{
 		replace_vars(&cmd->token[echo_token]);

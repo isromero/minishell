@@ -80,13 +80,10 @@ int find_last_append_redirect(t_cmd *cmd)
 	return(0);
 }
 
-int is_output_redirect(t_cmd *cmd)
+int is_output_redirect(t_cmd *cmd, int len)
 {
-	int len;
 	int n_redirects;
-	
 
-	len = 0;
 	n_redirects = 0;
 	while(cmd->token[len] != NULL)
 	{
@@ -101,12 +98,10 @@ int is_output_redirect(t_cmd *cmd)
 	return(0);
 }
 
-int is_append_redirect(t_cmd *cmd)
+int is_append_redirect(t_cmd *cmd, int len)
 {
-	int len;
 	int n_redirects;
 
-	len = 0;
 	n_redirects = 0;
 	while(cmd->token[len] != NULL)
 	{

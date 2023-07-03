@@ -182,24 +182,24 @@ int 	is_number(const char *str);
 /* output_redirects.c */
 void	output_redirect(t_cmd *cmd);
 void 	close_output_redirect(t_cmd *cmd);
-int 	is_output_redirect(t_cmd *cmd);
+int 	is_output_redirect(t_cmd *cmd, int len);
 void	output_multiple_redirect(t_cmd *cmd);
 int 	is_redirect_pipes(t_cmd *cmd, int i);
 void	append_redirect(t_cmd *cmd);
 void	append_multiple_redirect(t_cmd *cmd);
-int 	is_append_redirect(t_cmd *cmd);
+int 	is_append_redirect(t_cmd *cmd, int len);
 int		find_first_output_redirect(t_cmd *cmd);
 int		find_last_output_redirect(t_cmd *cmd);
 int 	find_first_append_redirect(t_cmd *cmd);
 int 	find_last_append_redirect(t_cmd *cmd);
 
 /*input_redirects.c*/
-int 	is_input_redirect(t_cmd *cmd);
+int 	is_input_redirect(t_cmd *cmd, int len);
 int 	find_first_input_redirect(t_cmd *cmd);
 int 	find_last_input_redirect(t_cmd *cmd);
 void    input_redirect(t_cmd *cmd);
 void	input_multiple_redirect(t_cmd *cmd);
-int     is_heredoc_redirect(t_cmd *cmd);
+int     is_heredoc_redirect(t_cmd *cmd, int len);
 int     find_first_heredoc_redirect(t_cmd *cmd);
 int		find_last_heredoc_redirect(t_cmd *cmd);
 char 	*find_heredoc_delim(t_cmd *cmd);

@@ -17,13 +17,10 @@
 //La redirección < hola.txt intenta redirigir la entrada estándar del comando ls desde el archivo "hola.txt". 
 //Sin embargo, como el comando ls no está diseñado para leer datos de entrada estándar, no se producirá ningún cambio en el comportamiento del comando.
 
-int     is_input_redirect(t_cmd *cmd)
+int     is_input_redirect(t_cmd *cmd, int len)
 {
-	int len;
 	int n_redirects;
 	
-
-	len = 0;
 	n_redirects = 0;
 	while(cmd->token[len] != NULL)
 	{
@@ -108,13 +105,11 @@ void	input_multiple_redirect(t_cmd *cmd)
     close(fd);
 }
 
-int     is_heredoc_redirect(t_cmd *cmd)
+int     is_heredoc_redirect(t_cmd *cmd, int len)
 {
-	int len;
 	int n_redirects;
 	
 
-	len = 0;
 	n_redirects = 0;
 	while(cmd->token[len] != NULL)
 	{

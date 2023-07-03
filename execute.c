@@ -123,7 +123,7 @@ void execute(t_cmd *cmd)
                     exit(g_status);
                 }
                 else
-                    exit(1);
+                    exit(0);
             }
             else
             {
@@ -367,17 +367,14 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                     j++;
                 }
                 exec_args[j - i] = NULL;
-                
                 close(cmd->fd[cmd->count_pipes][WRITE_END]);
                 dup2(cmd->fd[cmd->count_pipes][READ_END], STDIN_FILENO);
                 close(cmd->fd[cmd->count_pipes][READ_END]);
                 dup2(stdout, STDOUT_FILENO);
                 close(stdout);
-                write(2, "hola\n", 5);
                 if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) && \
                     !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i) && !is_executable(cmd->token[i][0]))
                 {
-                    
                     if(execve(com, exec_args, cmd->env) == -1)
                     {
                         g_status = 2;
@@ -398,6 +395,8 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                 printf("-minishell: %s: command not found\n", cmd->token[i]);
                 exit(g_status);
             }
+            else
+                exit(0);
         }
     }
     free(exec_args); // aquí?
@@ -484,6 +483,8 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                 printf("-minishell: %s: command not found\n", cmd[0]->token[i]);
                 exit(g_status);
             }
+            else
+                exit(0);
         }
         else
             cmd[0]->count_pipes++;
@@ -563,6 +564,8 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                 printf("-minishell: %s: command not found\n", cmd->token[i]);
                 exit(g_status);
             }
+            else
+                exit(0);
         }
     }
     free(exec_args); // aquí?

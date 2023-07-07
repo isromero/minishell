@@ -12,6 +12,7 @@
 
 #include "minishell.h"
 
+// /bin/comando inventado  echo $? devuelve 1
 int g_status;
 
 int	main(int argc, char **argv, char **env)

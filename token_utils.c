@@ -88,8 +88,8 @@ int	is_argument_extension(t_cmd *cmd, int i)
 		return 1;
 	else if(cmd->token[i][0] == '-')
 		return 1;
-	else if(cmd->token[i][0] == '$')
-		return 1;
+/* 	else if(cmd->token[i][0] == '$')
+		return 1; */
 	/* BASTANTE POSIBLE que esto tenga errores en ciertos comandos con 2 argumentos sin '-' etc? */
 	/* Esto checkea si el argumento anterior era comando y el actual es una letra, si es así es que es argumento
 	con esto se solucionan los cannot access 'argumento' y que no se ejecute de nuevo command not found*/
@@ -160,6 +160,7 @@ int is_single_quote(t_cmd *cmd, int len)
 	int	i;
 	/* h"hola" */
 	cmd->in_single_quote = true;
+	/* cmd->has_single_quote[0] = 1; */
 	i = 1;
 	while (cmd->line[i + len] != '\0')
 	{

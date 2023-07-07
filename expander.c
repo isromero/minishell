@@ -39,7 +39,7 @@ void print_vars(t_cmd *cmd, int i)
 }
 
 /* Le pasamos doble puntero porque podemos modificar directamente el valor dentro de la funcion y se verá actualizado en executes por pasarle la memoria */
-void replace_vars(char **token)
+void replace_vars(t_cmd *cmd, char **token)
 {
     size_t token_len;
     char *replaced_token;
@@ -61,10 +61,10 @@ void replace_vars(char **token)
             char *var = malloc(var_len + 1);
             ft_strncpy(var, *token + var_start, var_len);
             var[var_len] = '\0';
-            char *value = getenv(var);
+            char *value = ft_getenv(var, cmd->env);
             if (value != NULL)
             {
-                size_t value_len = strlen(value);
+                size_t value_len = ft_strlen(value);
                 char *new_replaced_token = malloc(replaced_len + value_len + 1);
                 ft_memcpy(new_replaced_token, replaced_token, replaced_len);
                 ft_memcpy(new_replaced_token + replaced_len, value, value_len);

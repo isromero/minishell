@@ -77,6 +77,8 @@ typedef struct cmd
 	int		in_quote_heredoc;
 	bool	in_single_quote;
 	bool	in_double_quote;
+	int		*has_single_quote;
+	int		*no_expand_vars;
 } t_cmd;
 
 #define HEREDOC_REDIRECT "<<"
@@ -127,7 +129,7 @@ void 	execute_heredoc_redirects(t_cmd *cmd, char *com, char **exec_args, int i);
 void 	execute_vars(t_cmd *cmd, int i);
 
 /* expander.c */
-void	replace_vars(char **token);
+void	replace_vars(t_cmd *cmd, char **token);
 int		special_for_vars(char c);
 void	print_vars(t_cmd *cmd, int i);
 
@@ -137,10 +139,11 @@ int		count_single_quotes(char *token);
 int		count_double_quotes(char *token);
 int		count_left_single_quotes(char *token);
 int		count_left_double_quotes(char *token);
-int		remove_quotes(t_cmd *cmd, int i);
+int		remove_quotes(t_cmd *cmd);
 void	remove_double_quotes(char **token);
 void	remove_single_quotes(char **token);
 int		count_quotes(char *line);
+void 	init_expand_vars(t_cmd *cmd);
 
 /* pipes_utils.c */
 void    init_pipes(t_cmd *cmd);

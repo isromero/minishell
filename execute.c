@@ -65,7 +65,8 @@ void execute(t_cmd *cmd)
     {
         if(is_variable(cmd->token[i][0]) && first_variable == 0)
             first_variable = 1; // Para que solo se ejecute una vez las variables
-        replace_vars(&cmd->token[i]);
+        if(cmd->no_expand_vars[i] == 0)
+            replace_vars(cmd, &cmd->token[i]);
         if (!is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_special(cmd->token[i][0] && !is_redirects(cmd->token[j][0])))/* Pendiente introducir is_special con todo */ 
         {
             // HACER UN INT QUE DEVUELVA ERROR Y NO ENTRAR
@@ -328,7 +329,8 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
     com = NULL;
     exec_args = NULL;
     j = 0;
-    replace_vars(&cmd->token[i]);
+    if(cmd->no_expand_vars[i] == 0)
+        replace_vars(cmd, &cmd->token[i]);
     if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0] && !is_redirects_double_char(cmd->token[i])))
     {
         cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
@@ -408,7 +410,8 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
     com = NULL;
     exec_args = NULL;
     j = 0;
-    replace_vars(&cmd[0]->token[i]);
+    if(cmd[0]->no_expand_vars[i] == 0)
+        replace_vars(cmd[0], &cmd[0]->token[i]);
     if (!is_argument_extension(cmd[0], i) && !is_redirects(cmd[0]->token[i][0] && !is_redirects_double_char(cmd[0]->token[i])))
     {
         com = command_dir(cmd[0], cmd[0]->token[i]);
@@ -496,7 +499,8 @@ void    execute_first_pipes(t_cmd *cmd, int i)
     com = NULL;
     exec_args = NULL;
     j = 0;
-    replace_vars(&cmd->token[i]);
+    if(cmd->no_expand_vars[i] == 0)
+        replace_vars(cmd, &cmd->token[i]);
     if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0] && !is_redirects_double_char(cmd->token[i])))
     {
         cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork

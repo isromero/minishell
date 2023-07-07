@@ -45,6 +45,7 @@ void replace_vars(t_cmd *cmd, char **token)
     char *replaced_token;
     size_t replaced_len;
     size_t j;
+    int count_single_quote;
 
     token_len = ft_strlen(*token);
     replaced_token = malloc(token_len + 1);
@@ -56,7 +57,7 @@ void replace_vars(t_cmd *cmd, char **token)
         {
             size_t var_start = j + 1;
             size_t var_len = 0;
-            while ((*token)[j + 1 + var_len] != VARIABLE && (*token)[j + 1 + var_len] != '\0')
+            while ((*token)[j + 1 + var_len] != VARIABLE && (*token)[j + 1 + var_len] != '\0' && (*token)[j + 1 + var_len] != SINGLE_QUOTE)
                 var_len++;
             char *var = malloc(var_len + 1);
             ft_strncpy(var, *token + var_start, var_len);
@@ -84,8 +85,3 @@ void replace_vars(t_cmd *cmd, char **token)
     free(*token);
     *token = replaced_token;
 }
-
-
-
-
-

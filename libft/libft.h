@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/22 15:38:24 by isromero          #+#    #+#             */
-/*   Updated: 2023/05/26 18:10:40 by isromero         ###   ########.fr       */
+/*   Updated: 2023/07/08 22:03:12 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ int		ft_memcmp(const void *s1, const void *s2, size_t n);
 void	*ft_memmove(void *dst, const void *src, size_t len);
 void	*ft_memset(void *b, int c, size_t n);
 char	*ft_strchr(const char *s, int c);
+char	*ft_strreplace(char *str, char *search, char *replace);
 char	*ft_strdup(const char *s1);
 size_t	ft_strlcpy(char *dst, const char *src, size_t size);
 char	*ft_strcpy(char *dest, char *src);

@@ -169,14 +169,22 @@ void ft_export(t_cmd *cmd, int export_token)
 	}
 	// Añadir la nueva variable al nuevo entorno
 	if(var_exists(cmd, cmd->token[export_token + 1]) == 1)
-		new_env[len_var_in_env(cmd, cmd->token[export_token + 1])] = ft_strdup(cmd->token[export_token + 1]);
+	{
+		remove_line_from_env(cmd, len_var_in_env(cmd, cmd->token[export_token + 1]));
+		ft_export(cmd, export_token);
+		return ;
+	}
 	else if(var_exists(cmd, cmd->token[export_token + 1]) == 0)
-		new_env[len_of_env] = ft_strdup(cmd->token[export_token + 1]);
+	{
+		if(len_var_in_env(cmd, cmd->token[export_token + 1]) == 0)
+			new_env[len_of_env] = ft_strdup(cmd->token[export_token + 1]);
+		else
+			new_env[len_var_in_env(cmd, cmd->token[export_token + 1])] = ft_strdup(cmd->token[export_token + 1]);
+	}
+		
 	if (new_env[len_of_env] == NULL)
 	{
-		// Error de asignación de memoria
 		j = 0;
-		// REOCRRO HASTA LA VARIABLE QUE EXISTE EN NEW ENV ,, BORRO EL STRING ENTERO YA QUE ** CON FREE Y ALOJO EL TOKEN CON STR DUP EN LA MISMA DISTANCIA
 		while (j < len_of_env)
 		{
 			free(new_env[j]);
@@ -191,21 +199,53 @@ void ft_export(t_cmd *cmd, int export_token)
 	cmd->env = new_env;
 }
 
+void remove_line_from_env(t_cmd *cmd, int line_index)
+{
+    while (cmd->env[line_index] != NULL)
+    {
+        cmd->env[line_index] = cmd->env[line_index + 1];
+        line_index++;
+    }
+}
+
 int len_var_in_env(t_cmd *cmd, char *token)
 {
-	int i = 0;
-	int len = 0;
+	int i;
+	int	j;
+	char *aux;
+	char *aux_token;
 
+	i = 0;
+	aux = NULL;
+	aux_token = NULL;
+	aux_token = malloc(ft_strlen(token) + 1);
+	ft_strcpy(aux_token, token);
+    while (aux_token[i] != '=')
+        i++;
+    aux_token[i] = '\0';
+	i = 0;
 	while (cmd->env[i] != NULL)
 	{
-		if (strncmp(cmd->env[i], token, strlen(token)) == 0)
-			return len;
-
-		len += strlen(cmd->env[i]);
+		j = 0;
+		aux = malloc(ft_strlen(cmd->env[i]) + 1);
+		while(cmd->env[i][j] != '=')
+		{
+			aux[j] = cmd->env[i][j];
+			j++;
+		}
+		aux[j] = '\0';
+        if (ft_strcmp(aux, aux_token) == 0)
+        {
+            free(aux);
+			free(aux_token);
+            return i;
+        }
+        free(aux);
 		i++;
 	}
-	return len;
-}
+	free(aux_token);
+	return 0;
+} 
 
 int var_exists(t_cmd *cmd, char *token)
 {

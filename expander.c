@@ -45,7 +45,6 @@ void replace_vars(t_cmd *cmd, char **token)
     char *replaced_token;
     size_t replaced_len;
     size_t j;
-    int count_single_quote;
 
     token_len = ft_strlen(*token);
     replaced_token = malloc(token_len + 1);

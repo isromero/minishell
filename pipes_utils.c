@@ -44,7 +44,7 @@ void    wait_close_pipes(t_cmd *cmd)
     while (i < cmd->n_processes)
     {
         int child_status;
-        wait(&child_status); // Esperar a que el proceso hijo termine
+        waitpid(cmd->pid[i], &child_status, 0); // Esperar a que el proceso hijo termine
         if (WIFEXITED(child_status) && WEXITSTATUS(child_status) >= 0) // Wexitstatus: Si el hijo terminó y cambió g_status
             g_status = WEXITSTATUS(child_status); // Obtener el estado de salida del proceso hijo
         i++;

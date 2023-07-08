@@ -126,7 +126,7 @@ void	ft_pwd(t_cmd *cmd)
 	//comprobacion pipe
 }
 
-void ft_export(t_cmd *cmd, int export_token) // CHECKEAR SI HAY UN '=' PARA EXPORT
+void ft_export(t_cmd *cmd, int export_token) 
 {
 	int i = 0, len_of_env = 0, len_of_export = 0;
 	char **new_env = NULL;
@@ -168,11 +168,15 @@ void ft_export(t_cmd *cmd, int export_token) // CHECKEAR SI HAY UN '=' PARA EXPO
 		i++;
 	}
 	// Añadir la nueva variable al nuevo entorno
-	new_env[len_of_env] = ft_strdup(cmd->token[export_token + 1]);
+	if(var_exists(cmd, cmd->token[export_token + 1]) == 1)
+		new_env[len_var_in_env(cmd, cmd->token[export_token + 1])] = ft_strdup(cmd->token[export_token + 1]);
+	else if(var_exists(cmd, cmd->token[export_token + 1]) == 0)
+		new_env[len_of_env] = ft_strdup(cmd->token[export_token + 1]);
 	if (new_env[len_of_env] == NULL)
 	{
 		// Error de asignación de memoria
 		j = 0;
+		// REOCRRO HASTA LA VARIABLE QUE EXISTE EN NEW ENV ,, BORRO EL STRING ENTERO YA QUE ** CON FREE Y ALOJO EL TOKEN CON STR DUP EN LA MISMA DISTANCIA
 		while (j < len_of_env)
 		{
 			free(new_env[j]);
@@ -186,6 +190,57 @@ void ft_export(t_cmd *cmd, int export_token) // CHECKEAR SI HAY UN '=' PARA EXPO
 	// Liberar el entorno anterior y asignar el nuevo entorno
 	cmd->env = new_env;
 }
+
+int len_var_in_env(t_cmd *cmd, char *token)
+{
+	int i = 0;
+	int len = 0;
+
+	while (cmd->env[i] != NULL)
+	{
+		if (strncmp(cmd->env[i], token, strlen(token)) == 0)
+			return len;
+
+		len += strlen(cmd->env[i]);
+		i++;
+	}
+	return len;
+}
+
+int var_exists(t_cmd *cmd, char *token)
+{
+    int i = 0;
+    char *aux_token = malloc(ft_strlen(token) + 1);
+    int token_idx = 0;
+
+    while (token[i] != '=')
+    {
+        aux_token[token_idx] = token[i];
+        i++;
+        token_idx++;
+    }
+    aux_token[token_idx] = '\0';
+    i = 0;
+    while (cmd->env[i] != NULL)
+    {
+        int j = 0;
+        while (cmd->env[i][j] != '=')
+        {
+            if (cmd->env[i][j] != aux_token[j])
+                break;
+            j++;
+        }
+        if (cmd->env[i][j] == '=' && aux_token[j] == '\0')
+        {
+            free(aux_token);
+            return 1;
+        }
+        i++;
+    }
+    free(aux_token);
+    return 0;
+}
+
 
 bool compareVariableName(const char* variable, const char* name)
 {

@@ -103,6 +103,8 @@ bool 	compareVariableName(const char* variable, const char* name);
 void 	ft_unset(t_cmd *cmd, int unset_token);
 void 	execute_builtin_exit(t_cmd *cmd, int exit_code);
 void	ft_exit(t_cmd *cmd, int exit_token);
+int		len_var_in_env(t_cmd *cmd, char *token);
+int		var_exists(t_cmd *cmd, char *token);
 
 /* env.c */
 char	*ft_getenv(const char *name, char **env);

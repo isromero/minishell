@@ -223,7 +223,6 @@ void redirecting_pipes(t_cmd *cmd) /* dobles comandos como grep y cat se quedan 
             first_time = 0;
             len = find_len_command_pipes(cmd, i);
             execute_last_pipes(cmd, len, stdout);
-            cmd->count_pids++; // no necesario
         }
         i++;
     }

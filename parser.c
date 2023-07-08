@@ -182,8 +182,6 @@ void init_expand_vars(t_cmd *cmd)
             cmd->no_expand_vars[i] = 1;
         else
             cmd->no_expand_vars[i] = 0;
-        printf("token : %s y tiene comillas: %d", cmd->token[i], cmd->no_expand_vars[i]);
-        printf("\n");
         i++;
     }
 }

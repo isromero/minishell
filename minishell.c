@@ -13,6 +13,8 @@
 #include "minishell.h"
 
 // /bin/comando inventado  echo $? devuelve 1
+/* SE DUPLICAN LAAS VARIABLES con export */
+/* ls > hola | ls -l > puta | ls -a > gorditaDIOS FALLA LA DEL MEDIO */
 int g_status;
 
 int	main(int argc, char **argv, char **env)

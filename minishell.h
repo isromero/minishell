@@ -98,7 +98,7 @@ int 	ft_echo(t_cmd *cmd, int echo_token);
 void	ft_cd(t_cmd *cmd, int cd_token);
 void	ft_env(t_cmd *cmd);
 void	ft_pwd(t_cmd *cmd);
-void 	ft_export(t_cmd *cmd, int export_token);
+void	ft_export(t_cmd *cmd, int export_token);
 bool 	compareVariableName(const char* variable, const char* name);
 void 	ft_unset(t_cmd *cmd, int unset_token);
 void 	execute_builtin_exit(t_cmd *cmd, int exit_code);

@@ -83,6 +83,8 @@ void	ft_cd(t_cmd *cmd, int cd_token)
 	setenv(oldpwd, cwd, 1);
 }
 
+
+/* CADA VEZ QUE SE LLAMA O CUANDO HACEMOS GETENV LA ULTIMA VARIABLE TIENE QUE CONTENER EL ULTIMO COMANDO ASI QUE: _=/usr/bin/env */
 void ft_env(t_cmd *cmd)
 {
     int i;
@@ -126,86 +128,43 @@ void	ft_pwd(t_cmd *cmd)
 	//comprobacion pipe
 }
 
+void free_env(char **env)
+{
+    if (env == NULL)
+        return;
+
+    for (int i = 0; env[i] != NULL; i++)
+        free(env[i]);
+
+    free(env);
+}
+
 void ft_export(t_cmd *cmd, int export_token) 
 {
-	int i = 0, len_of_env = 0, len_of_export = 0;
+	int i = 0, len_of_env = 0;
+	int	pos_var = 0;
 	char **new_env = NULL;
-	int j;
-
 	// Calcular la longitud del entorno existente
 	while (cmd->env[len_of_env] != NULL)
 		len_of_env++;
-	// Calcular la longitud del nuevo export
-	while (cmd->token[export_token + 1][len_of_export] != '\0')
-	{
-		// Aquí puedes realizar cualquier validación o modificación adicional
-		len_of_export++;
-	}
-	// Asignar memoria para el nuevo entorno
 	new_env = (char **)malloc(sizeof(char *) * (len_of_env + 2));
-	if (new_env == NULL)
-	{
-		// Error de asignación de memoria
-		return;
-	}
 	// Copiar el entorno existente al nuevo entorno
 	i = 0;
 	while (cmd->env[i] != NULL)
 	{
 		new_env[i] = ft_strdup(cmd->env[i]);
-		if (new_env[i] == NULL)
-		{
-			// Error de asignación de memoria
-			j = 0;
-			while (j < i)
-			{
-				free(new_env[j]);
-				j++;
-			}
-			free(new_env);
-			return;
-		}
 		i++;
 	}
 	// Añadir la nueva variable al nuevo entorno
 	if(var_exists(cmd, cmd->token[export_token + 1]) == 1)
 	{
-		remove_line_from_env(cmd, len_var_in_env(cmd, cmd->token[export_token + 1]));
-		ft_export(cmd, export_token);
-		return ;
+		pos_var = len_var_in_env(cmd, cmd->token[export_token + 1]);
+		new_env[pos_var] = ft_strdup(ft_strreplace(new_env[pos_var], new_env[pos_var], cmd->token[export_token + 1]));
 	}
 	else if(var_exists(cmd, cmd->token[export_token + 1]) == 0)
-	{
-		if(len_var_in_env(cmd, cmd->token[export_token + 1]) == 0)
-			new_env[len_of_env] = ft_strdup(cmd->token[export_token + 1]);
-		else
-			new_env[len_var_in_env(cmd, cmd->token[export_token + 1])] = ft_strdup(cmd->token[export_token + 1]);
-	}
-		
-	if (new_env[len_of_env] == NULL)
-	{
-		j = 0;
-		while (j < len_of_env)
-		{
-			free(new_env[j]);
-			j++;
-		}
-		free(new_env);
-		return;
-	}
-	// Establecer el último elemento del nuevo entorno como NULL
+		new_env[len_of_env] = ft_strdup(cmd->token[export_token + 1]);
 	new_env[len_of_env + 1] = NULL;
-	// Liberar el entorno anterior y asignar el nuevo entorno
 	cmd->env = new_env;
-}
-
-void remove_line_from_env(t_cmd *cmd, int line_index)
-{
-    while (cmd->env[line_index] != NULL)
-    {
-        cmd->env[line_index] = cmd->env[line_index + 1];
-        line_index++;
-    }
 }
 
 int len_var_in_env(t_cmd *cmd, char *token)

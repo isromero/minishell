@@ -27,7 +27,7 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "libft/libft.h"
-#include "gnl/get_next_line.h"
+#include "get_next_line/get_next_line.h"
 
 #define READ_END 0
 #define WRITE_END 1

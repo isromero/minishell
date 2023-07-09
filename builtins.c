@@ -132,30 +132,27 @@ void free_env(char **env)
 {
     if (env == NULL)
         return;
-
     for (int i = 0; env[i] != NULL; i++)
         free(env[i]);
-
     free(env);
 }
+
+/*	CHECKEAR GESTIÓN DE EXPORT SIN ARGUMENTOS */
 
 void ft_export(t_cmd *cmd, int export_token) 
 {
 	int i = 0, len_of_env = 0;
 	int	pos_var = 0;
 	char **new_env = NULL;
-	// Calcular la longitud del entorno existente
 	while (cmd->env[len_of_env] != NULL)
 		len_of_env++;
 	new_env = (char **)malloc(sizeof(char *) * (len_of_env + 2));
-	// Copiar el entorno existente al nuevo entorno
 	i = 0;
 	while (cmd->env[i] != NULL)
 	{
 		new_env[i] = ft_strdup(cmd->env[i]);
 		i++;
 	}
-	// Añadir la nueva variable al nuevo entorno
 	if(var_exists(cmd, cmd->token[export_token + 1]) == 1)
 	{
 		pos_var = len_var_in_env(cmd, cmd->token[export_token + 1]);
@@ -255,6 +252,8 @@ bool compareVariableName(const char* variable, const char* name)
     // que el nombre en el token
     return (variable[i] == '=' && name[i] == '\0');
 }
+
+/* CHECKEAR GESTIÓN DE UNSET SIN ARGUMENTOS */
 
 void ft_unset(t_cmd *cmd, int unset_token)
 {

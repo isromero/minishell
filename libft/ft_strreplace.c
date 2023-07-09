@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "libft.h"
-
 char	*ft_strreplace(char *str, char *search, char *replace)
 {
 	char	*result;
@@ -38,3 +37,4 @@ char	*ft_strreplace(char *str, char *search, char *replace)
 	*dest = '\0';
 	return (result);
 }
+

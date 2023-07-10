@@ -185,6 +185,7 @@ int		is_executable(char c);
 /* utils.c */
 char	*ft_strtok(char *str, const char *delim);
 int 	is_number(const char *str);
+void	free_matrix(char **matrix);
 
 /* output_redirects.c */
 void	output_redirect(t_cmd *cmd);

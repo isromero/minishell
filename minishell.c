@@ -44,11 +44,11 @@ int	main(int argc, char **argv, char **env)
 			executor(&cmd);
 			clean_tokens(&cmd);
 		}
-		/* free(cmd.line); */ // NO ESTÁ ALOCADA LA MEMORIA, NO ES NECESARIO HACER FREE
+		free(cmd.line);
 		free(cmd.prompt);
 		free(cmd.no_expand_vars);
 	}
 	rl_clear_history();
-	/* free(cmd.env); */
+/* 	free_matrix(cmd.env); */
     return (g_status);
 }

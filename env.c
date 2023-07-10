@@ -45,12 +45,29 @@ char *ft_getenv(const char *name, char **env)
     return NULL;
 }
 
+void malloc_env(t_cmd *cmd, char **env)
+{
+    int i;
+    int env_count;
+
+    i = 0;
+    env_count = 0;
+    while (env[i] != NULL)
+    {
+        env_count++;
+        i++;
+    }
+    cmd->env = malloc((env_count + 1) * sizeof(char *));
+    if (cmd->env == NULL)
+        return;
+}
+
 void init_env(t_cmd *cmd, char **env) 
 {
     if (env[0] == NULL) /* if env is NULL */
         get_default_env(cmd);
     else
-        cmd->env = env;
+        cmd->env = env; 
 }
 
 void get_default_env(t_cmd *cmd)
@@ -74,7 +91,7 @@ void get_default_env(t_cmd *cmd)
         i++;
     }
     cmd->env[env_count] = NULL;
-    free(default_env);
+    free_matrix(default_env);
 }
 
 

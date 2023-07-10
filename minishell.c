@@ -13,7 +13,6 @@
 #include "minishell.h"
 
 // /bin/comando inventado  echo $? devuelve 1
-/* SE DUPLICAN LAAS VARIABLES con export */
 /* ls > hola | ls -l > puta | ls -a > gorditaDIOS FALLA LA DEL MEDIO */
 int g_status;
 
@@ -47,6 +46,7 @@ int	main(int argc, char **argv, char **env)
 		}
 		/* free(cmd.line); */ // NO ESTÁ ALOCADA LA MEMORIA, NO ES NECESARIO HACER FREE
 		free(cmd.prompt);
+
 	}
 	rl_clear_history();
 	/* free(cmd.env); */

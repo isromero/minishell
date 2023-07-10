@@ -138,12 +138,13 @@ void free_env(char **env)
 }
 
 /*	CHECKEAR GESTIÓN DE EXPORT SIN ARGUMENTOS */
-
+/* LEAK EXPORT */
 void ft_export(t_cmd *cmd, int export_token) 
 {
 	int i = 0, len_of_env = 0;
 	int	pos_var = 0;
 	char **new_env = NULL;
+	int	j;
 	while (cmd->env[len_of_env] != NULL)
 		len_of_env++;
 	new_env = (char **)malloc(sizeof(char *) * (len_of_env + 2));
@@ -151,6 +152,18 @@ void ft_export(t_cmd *cmd, int export_token)
 	while (cmd->env[i] != NULL)
 	{
 		new_env[i] = ft_strdup(cmd->env[i]);
+		if (new_env[i] == NULL)
+		{
+			// Error de asignación de memoria
+			j = 0;
+			while (j < i)
+			{
+				free(new_env[j]);
+				j++;
+			}
+			free(new_env);
+			return;
+		}
 		i++;
 	}
 	if(var_exists(cmd, cmd->token[export_token + 1]) == 1)
@@ -160,6 +173,17 @@ void ft_export(t_cmd *cmd, int export_token)
 	}
 	else if(var_exists(cmd, cmd->token[export_token + 1]) == 0)
 		new_env[len_of_env] = ft_strdup(cmd->token[export_token + 1]);
+	if (new_env[len_of_env] == NULL)
+	{
+		j = 0;
+		while (j < len_of_env)
+		{
+			free(new_env[j]);
+			j++;
+		}
+		free(new_env);
+		return;
+	}
 	new_env[len_of_env + 1] = NULL;
 	cmd->env = new_env;
 }

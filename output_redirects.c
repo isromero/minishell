@@ -10,19 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-/// MIRAR BACKUS-naur.... 
-
 #include "minishell.h"
-/* 									gsg	> hhdfhd.txt          ls -l | grep u > hola.txt > pepe.txt > rtewkig.txt > sfsf.txt
-															me los ejecutas todo hasta > el nombre lo pillas hasta que encuentres un pipe un NULL */
-														
-
-/* 1. Me ejecutas todos los comandos hasta el redirect.
-2. El stdout se mete en un archivo X nuevo.
-3. Seguimos recorriendo hasta | o NULL
-4. PERO si te meten otro redirect se crean archivos pero finaliza todo en el último */
-
-/* echo hello | <hola.txt cat GESTIONAR??????????*/ 
 
 int find_first_output_redirect(t_cmd *cmd)
 {
@@ -31,7 +19,7 @@ int find_first_output_redirect(t_cmd *cmd)
 	len = 0;
 	while(cmd->token[len] != NULL)
 	{
-		if(cmd->token[len][0] == OUTPUT_REDIRECT) /* Meter más tipos de redirects */
+		if(cmd->token[len][0] == OUTPUT_REDIRECT)
 			return (len);
 		len++;
 	}
@@ -45,7 +33,7 @@ int find_last_output_redirect(t_cmd *cmd)
 	len = cmd->n_tokens - 2;
 	while(len >= 0)
 	{
-		if(cmd->token[len][0] == '>') /* Meter más tipos de redirects */
+		if(cmd->token[len][0] == OUTPUT_REDIRECT)
 			return (len);
 		len--;
 	}
@@ -59,7 +47,7 @@ int find_first_append_redirect(t_cmd *cmd)
 	len = 0;
 	while(cmd->token[len] != NULL)
 	{
-		if(ft_strcmp(cmd->token[len], APPEND_REDIRECT) == 0) /* Meter más tipos de redirects */
+		if(ft_strcmp(cmd->token[len], APPEND_REDIRECT) == 0)
 			return (len);
 		len++;
 	}
@@ -73,7 +61,7 @@ int find_last_append_redirect(t_cmd *cmd)
 	len = cmd->n_tokens - 2;
 	while(len >= 0)
 	{
-		if(ft_strcmp(cmd->token[len], APPEND_REDIRECT) == 0) /* Meter más tipos de redirects */
+		if(ft_strcmp(cmd->token[len], APPEND_REDIRECT) == 0)
 			return (len);
 		len--;
 	}
@@ -85,9 +73,9 @@ int is_output_redirect(t_cmd *cmd, int len)
 	int n_redirects;
 
 	n_redirects = 0;
-	while(cmd->token[len] != NULL)
+	while(cmd->token[len] != NULL/*  && cmd->token[len][0] != '|' */)
 	{
-		if(cmd->token[len][0] == OUTPUT_REDIRECT) /* Meter más tipos de redirects */
+		if(cmd->token[len][0] == OUTPUT_REDIRECT)
 			n_redirects++;
 		len++;
 	}
@@ -105,7 +93,7 @@ int is_append_redirect(t_cmd *cmd, int len)
 	n_redirects = 0;
 	while(cmd->token[len] != NULL)
 	{
-		if(ft_strcmp(cmd->token[len], APPEND_REDIRECT) == 0) /* Meter más tipos de redirects */
+		if(ft_strcmp(cmd->token[len], APPEND_REDIRECT) == 0)
 			n_redirects++;
 		len++;
 	}
@@ -121,7 +109,7 @@ int is_redirect_pipes(t_cmd *cmd, int i)
 	int	n_redirects;
 
 	n_redirects = 0;
-	while(cmd->token[i] != NULL && cmd->token[i][0] != '|')
+	while(cmd->token[i] != NULL /* && cmd->token[i][0] != '|' */)
 	{
 		if(cmd->token[i][0] == OUTPUT_REDIRECT)
 			n_redirects++;
@@ -228,4 +216,3 @@ void close_output_redirect(t_cmd *cmd)
 	dup2(cmd->stdout, STDOUT_FILENO);
     close(cmd->stdout);
 }
-

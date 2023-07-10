@@ -44,6 +44,8 @@ void executor(t_cmd *cmd)
         i++;
     }
     execute(cmd);
+    free(cmd->fd);
+    free(cmd->pid);
 }
 
 void execute(t_cmd *cmd)
@@ -257,6 +259,7 @@ void execute_appends(t_cmd *cmd, char *com, char **exec_args, int i)
 
 void execute_output_redirects(t_cmd *cmd, char *com, char **exec_args, int i)
 {
+    fprintf(stderr, "TORRENT: %s\n", cmd->token[i]);
     if(is_output_redirect(cmd, i) == 1)
     {
         output_redirect(cmd);
@@ -330,12 +333,12 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
     j = 0;
     if(cmd->no_expand_vars[i] == 0)
         replace_vars(cmd, &cmd->token[i]);
-    if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0] && !is_redirects_double_char(cmd->token[i])))
+    if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0]) && !is_redirects_double_char(cmd->token[i])) //Double char redirects no hace falta?
     {
+        com = command_dir(cmd, cmd->token[i]);
         cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
         if(cmd->pid[cmd->count_pids] == 0)
         {
-            com = command_dir(cmd, cmd->token[i]);
             if(is_builtin(cmd, i))
             {
                 close(cmd->fd[cmd->count_pipes][WRITE_END]);
@@ -411,7 +414,7 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
     j = 0;
     if(cmd[0]->no_expand_vars[i] == 0)
         replace_vars(cmd[0], &cmd[0]->token[i]);
-    if (!is_argument_extension(cmd[0], i) && !is_redirects(cmd[0]->token[i][0] && !is_redirects_double_char(cmd[0]->token[i])))
+    if (!is_argument_extension(cmd[0], i) && !is_redirects(cmd[0]->token[i][0]) && !is_redirects_double_char(cmd[0]->token[i]))  //Double char redirects no hace falta?
     {
         com = command_dir(cmd[0], cmd[0]->token[i]);
         cmd[0]->pid[cmd[0]->count_pids] = fork(); //Checkear error de fork
@@ -500,12 +503,12 @@ void    execute_first_pipes(t_cmd *cmd, int i)
     j = 0;
     if(cmd->no_expand_vars[i] == 0)
         replace_vars(cmd, &cmd->token[i]);
-    if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0] && !is_redirects_double_char(cmd->token[i])))
+    if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0]) && !is_redirects_double_char(cmd->token[i]))  //Double char redirects no hace falta?
     {
+        com = command_dir(cmd, cmd->token[i]);
         cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
         if(cmd->pid[cmd->count_pids] == 0)
         {
-            com = command_dir(cmd, cmd->token[i]);
             if(is_builtin(cmd, i))
             {
                 close(cmd->fd[cmd->count_pipes][READ_END]);

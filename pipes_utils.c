@@ -39,7 +39,6 @@ void    wait_close_pipes(t_cmd *cmd)
         close(cmd->fd[i][WRITE_END]);
         i++;
     }
-    /* CHECKEAR: en principio no es necesario estos waits desde que hicimos waitexited... pero funciona con estos waits tambien */
     i = 0; 
     while (i < cmd->n_processes)
     {

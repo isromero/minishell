@@ -53,6 +53,8 @@ char	*exec_custom(t_cmd *cmd, char *full, char *args)
 	char	**matrix;
 	char	*out;
 
+	matrix = NULL;
+	out = NULL;
 	pipe(fd);
 	pid = fork();
 	if (pid == 0)
@@ -63,9 +65,10 @@ char	*exec_custom(t_cmd *cmd, char *full, char *args)
 		close(fd[WRITE_END]);
 		if (access(full, F_OK) == 0)
 			execve(full, matrix, cmd->env);
-		exit (1);
+		exit(0);
 	}
 	close(fd[WRITE_END]);
+	free(matrix);
 	waitpid(pid, NULL, 0);
 	out = update_output(fd[READ_END]);
 	close(fd[READ_END]);

@@ -311,8 +311,7 @@ void execute_builtin_exit(t_cmd *cmd, int exit_code)
 	// Esto vale?????????????????????????????
 	clean_tokens(cmd);
 	free(cmd->line);
-	free(cmd->prompt); 
-	
+	free(cmd->prompt);
     // Salir del programa con el código de salida especificado
     exit(exit_code);
 }

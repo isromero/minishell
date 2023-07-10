@@ -31,6 +31,7 @@ char *get_prompt(t_cmd *custom_prompt)
     ft_strcat(custom_prompt->prompt, cwd);
     ft_strcat(custom_prompt->prompt, COLOR_WHITE);
     ft_strcat(custom_prompt->prompt, "$ ");
+	free(username);
     return (custom_prompt->prompt);
 }
 
@@ -38,6 +39,7 @@ char	*update_output(int fd)
 {
 	char	*line;
 
+	
 	line = get_next_line(fd);
 	line[ft_strlen(line) - 1] = 0; // Eliminar el salto de línea al final de la línea
 	if (!line)

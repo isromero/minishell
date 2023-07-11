@@ -48,9 +48,6 @@ void    wait_close_pipes(t_cmd *cmd)
             g_status = WEXITSTATUS(child_status); // Obtener el estado de salida del proceso hijo
         i++;
     }
-    // Tal vez bucle de liberación de fd's
-    free(cmd->fd);
-    free(cmd->pid);
 }
 
 void count_pipes(t_cmd *cmd)

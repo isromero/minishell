@@ -12,6 +12,20 @@
 
 #include "minishell.h"
 
+void free_pipes(t_cmd *cmd)
+{
+    int i;
+
+    i = 0;
+    while(i < cmd->n_pipes)
+    {
+        free(cmd->fd[i]);
+        i++;
+    }
+    free(cmd->fd);
+    free(cmd->pid);
+}
+
 void executor(t_cmd *cmd)
 {
     int i;
@@ -36,16 +50,17 @@ void executor(t_cmd *cmd)
             if(cmd->token[0][0] == '|') // Si hay un pipe de primer token
             {
                 printf("minishell: syntax error near unexpected token `%s'\n", cmd->token[i]);
+                free_pipes(cmd);
                 return ;
             }
             redirecting_pipes(cmd);
+            free_pipes(cmd);
             return ;
         }
         i++;
     }
     execute(cmd);
-    free(cmd->fd);
-    free(cmd->pid);
+    free_pipes(cmd);
 }
 
 void execute(t_cmd *cmd)
@@ -399,8 +414,9 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                 exit(g_status);
             }
         }
+        else
+            free(exec_args); 
     }
-    free(exec_args); // aquí?
 }
 
 void    execute_middle_pipes(t_cmd **cmd, int i)
@@ -487,9 +503,12 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
             }    
         }
         else
+        {
             cmd[0]->count_pipes++;
+            free(exec_args); 
+        }
+            
     }
-    free(exec_args); // aquí?
 }
 
 void    execute_first_pipes(t_cmd *cmd, int i)
@@ -565,8 +584,9 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                 exit(g_status);
             }
         }
+        else
+            free(exec_args); 
     }
-    free(exec_args); // aquí?
 }
 
 char  *command_dir(t_cmd *cmd, char *command) 
@@ -574,10 +594,9 @@ char  *command_dir(t_cmd *cmd, char *command)
     char 	*path;
     char 	*dir;
 	size_t	dir_len;
-	
+
     path = ft_getenv("PATH", cmd->env);
     dir = ft_strtok(path, ":");
-   
     if(!is_executable(command[0]))
     {
         while (dir != NULL) 
@@ -596,6 +615,7 @@ char  *command_dir(t_cmd *cmd, char *command)
                 // El archivo ejecutable existe
                 ft_strcat(dir, "/");
                 ft_strcat(dir, command);
+                free(path); // ESTO CAUSA LEAKS EN VALGRIND
                 return (dir);
             }
             else if(access(executable_path, F_OK) == -1)
@@ -637,10 +657,11 @@ int is_command_exists(t_cmd *cmd, char *command)
     }
 
     char *path = ft_getenv("PATH", cmd->env);
-    if (path != NULL) {
+    if (path != NULL)
+    {
         char *path_copy = ft_strdup(path);
+        free(path);
         char *token = ft_strtok(path_copy, ":");
-
         while (token != NULL) {
             char *command_path = build_command_path(token, command);
             if (access(command_path, F_OK) == 0) {

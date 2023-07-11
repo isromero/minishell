@@ -14,6 +14,7 @@
 
 // /bin/comando inventado  echo $? devuelve 1
 /* ls > hola | ls -l > puta | ls -a > gorditaDIOS FALLA LA DEL MEDIO */
+// CHECKEO NO QUITA COMILLAS POR NO ESTAR AL PRINCIPIO echo esto es" una "prueba
 int g_status;
 
 int	main(int argc, char **argv, char **env)
@@ -33,6 +34,7 @@ int	main(int argc, char **argv, char **env)
 		cmd.line = readline(cmd.prompt);
 		if (cmd.line == NULL)
 		{
+			free(cmd.prompt);
             handle_ctrld();
             break;
         }
@@ -43,10 +45,10 @@ int	main(int argc, char **argv, char **env)
 			count_pipes(&cmd);
 			executor(&cmd);
 			clean_tokens(&cmd);
+			free(cmd.no_expand_vars);
 		}
 		free(cmd.line);
 		free(cmd.prompt);
-		free(cmd.no_expand_vars);
 	}
 	rl_clear_history();
 /* 	free_matrix(cmd.env); */

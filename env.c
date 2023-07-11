@@ -32,12 +32,12 @@ char *ft_getenv(const char *name, char **env)
             char *value = (char *)malloc((value_len + 1) * sizeof(char));
             if (value == NULL)
             {
-                // Manejo de error por falta de memoria
+                free(value);
                 return NULL;
-            }
+           }
             ft_strncpy(value, value_start, value_len);
             value[value_len] = '\0';
-            return value;
+            return (value);
         }
         i++;
     }

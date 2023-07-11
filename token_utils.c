@@ -213,9 +213,22 @@ int check_len_special(t_cmd *cmd, int len)
 int cmd_token_len(t_cmd *cmd, int len)
 {
     int i = 0;
+	int	is_double_quote;
+	int is_single_quote;
 	/* en principio no hace falta checkear los appends y heredocs ya que los detectará este */
-    while (cmd->line[i + len] != '\0' && cmd->line[i + len] != ' ' && !is_special2(cmd->line[i + len]))
-        i++;
+	is_double_quote = 0;
+	is_single_quote = 0;
+    while (cmd->line[i + len] != '\0')
+	{
+		if((cmd->line[i + len] == ' ' || is_special2(cmd->line[i + len])) && is_double_quote % 2 == 0 && is_single_quote % 2 == 0)
+			break;
+		else if(cmd->line[i + len] == DOUBLE_QUOTE)
+			is_double_quote++;
+		else if(cmd->line[i + len] == SINGLE_QUOTE)
+			is_single_quote++;
+ 		i++;
+	}
+       
     return i;
 }
 

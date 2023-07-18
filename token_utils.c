@@ -228,7 +228,6 @@ int cmd_token_len(t_cmd *cmd, int len)
 			is_single_quote++;
  		i++;
 	}
-       printf("iiiiiiiiiii:%d\n", i);
     return i;
 }
 

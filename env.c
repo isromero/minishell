@@ -15,26 +15,30 @@
 char *ft_getenv(const char *name, char **env) 
 {
     size_t name_len = ft_strlen(name);
+    char *value;
+    char *value_start;
+    char *value_end;
     int i;
 
+    value = NULL;
     i = 0;
     while (env[i] != NULL && env[i][0] != ' ')
     {
         if (ft_strncmp(name, env[i], name_len) == 0 && env[i][name_len] == '=')
         {
-            char *value_start = env[i] + name_len + 1;  // Puntero al inicio del valor después del '='
+            value_start = env[i] + name_len + 1;  // Puntero al inicio del valor después del '='
             // Buscar el primer carácter de tubería '|' o el final de línea '\0'
-            char *value_end = ft_strchr(value_start, '|');
+            value_end = ft_strchr(value_start, '|');
             if (value_end == NULL)
                 value_end = ft_strchr(value_start, '\0');
             // Calcular la longitud del valor y copiarlo en una nueva cadena
             size_t value_len = value_end - value_start + 1;
-            char *value = (char *)malloc((value_len + 1) * sizeof(char));
+            value = (char *)malloc((value_len + 1) * sizeof(char));
             if (value == NULL)
             {
                 free(value);
                 return NULL;
-           }
+            }
             ft_strncpy(value, value_start, value_len);
             value[value_len] = '\0';
             return (value);

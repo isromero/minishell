@@ -77,7 +77,6 @@ void execute(t_cmd *cmd)
     exec_args = NULL;
     first_variable = 0;
     signal(SIGINT, &handle_ctrlc2);
-    
     while (i < cmd->n_tokens - 1)
     {
         if(is_variable(cmd->token[i][0]) && first_variable == 0)
@@ -131,8 +130,7 @@ void execute(t_cmd *cmd)
                     execute_output_redirects(cmd, com, exec_args, i);
                     execute_heredoc_redirects(cmd, com, exec_args, i);
                     execute_input_redirects(cmd, com, exec_args, i);
-                    free(exec_args);
-                    exit(1);
+                    exit(0);
                 }
                 else if (!com && !is_executable(cmd->token[i][0]))
                 {
@@ -145,6 +143,8 @@ void execute(t_cmd *cmd)
             }
             else
             {
+                free(com);
+                free(exec_args);
                 int child_status;
                 wait(&child_status); // Esperar a que el proceso hijo termine
                 if (WIFEXITED(child_status) && WEXITSTATUS(child_status) >= 0) // Wexitstatus: Si el hijo terminó y cambió g_status
@@ -159,6 +159,7 @@ void execute(t_cmd *cmd)
             if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
                 && !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
             {
+                free(com);
                 execute_builtin(cmd, i);
                 return ;
             }
@@ -167,6 +168,7 @@ void execute(t_cmd *cmd)
             execute_heredoc_redirects(cmd, com, exec_args, i);
             execute_input_redirects(cmd, com, exec_args, i);
             g_status = 0; /* Reinicializamos a 0 porque cuando se pone un echo $? necesitamos reestablecer el status después de haberse ejecutado para siguientes iteraciones */
+            free(com);
             return ;
         }
         i++;
@@ -415,7 +417,10 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
             }
         }
         else
+        {
             free(exec_args); 
+            free(com);
+        }  
     }
 }
 
@@ -505,7 +510,8 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
         else
         {
             cmd[0]->count_pipes++;
-            free(exec_args); 
+            free(exec_args);
+            free(com);
         }
             
     }
@@ -585,7 +591,11 @@ void    execute_first_pipes(t_cmd *cmd, int i)
             }
         }
         else
-            free(exec_args); 
+        {
+            free(exec_args);
+            free(com);
+        }
+            
     }
 }
 
@@ -610,20 +620,25 @@ char  *command_dir(t_cmd *cmd, char *command)
             ft_strcpy(executable_path + dir_len + 1, command);
             
             // Verifica si el archivo ejecutable existe y es ejecutable
-            if (access(executable_path, F_OK) == 0) 
+            if (access(executable_path, F_OK) == 0)
             {
-                // El archivo ejecutable existe
-                ft_strcat(dir, "/");
-                ft_strcat(dir, command);
-                free(path); // ESTO CAUSA LEAKS EN VALGRIND
-                return (dir);
+                char *result = (char *)malloc((dir_len + ft_strlen(command) + 2) * sizeof(char)); // +2 para '/' y '\0'
+                if (result == NULL)
+                {
+                    free(path);
+                    return NULL;
+                }
+                ft_strcpy(result, dir);
+                ft_strcat(result, "/");
+                ft_strcat(result, command);
+                free(path);
+                return (result);
             }
             else if(access(executable_path, F_OK) == -1)
                 g_status = 126; /* ?????? */
             dir = ft_strtok(NULL, ":");
         }
     }
-	
     // El archivo ejecutable no existe en ningún directorio del PATH
     return (0);
 }

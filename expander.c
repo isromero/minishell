@@ -54,6 +54,7 @@ void replace_vars(t_cmd *cmd, char **token)
     {
         if ((*token)[j] == VARIABLE && (*token)[j + 1] != '\0')
         {
+            cmd->replaced_var = 1;
             size_t var_start = j + 1;
             size_t var_len = 0;
             while ((*token)[j + 1 + var_len] != VARIABLE && (*token)[j + 1 + var_len] != '\0' && (*token)[j + 1 + var_len] != SINGLE_QUOTE)

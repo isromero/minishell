@@ -20,7 +20,7 @@ SRCS		=	builtins.c env.c execute.c expander.c minishell.c parser.c \
 LIBFT		=	libft/libft.a
 
 
-CFLAGS		=	-Wall -Wextra -lreadline -g #-fsanitize=address,undefined
+CFLAGS		=	-Wall  -Wextra -lreadline -g #-fsanitize=address,undefined
 RM			=	rm -f
 #PONER LAS FLAGS NECESARIAS PARA LOS MACS DE 42
 #INCREIBLE, CON EL SANITIZER FUNCIONA LS A LA PRIMERA

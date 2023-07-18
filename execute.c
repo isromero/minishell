@@ -74,6 +74,7 @@ void execute(t_cmd *cmd)
 	i = 0;
 	j = 0;
     com = NULL;
+    cmd->replaced_var = 0;
     exec_args = NULL;
     first_variable = 0;
     signal(SIGINT, &handle_ctrlc2);
@@ -96,7 +97,7 @@ void execute(t_cmd *cmd)
             {
                 com = command_dir(cmd, cmd->token[i]);
 				/* Si se obtuvo una ruta válida (com != NULL), se crea un nuevo arreglo exec_args para almacenar los argumentos que se pasarán a execve. */
-                if (com != NULL || is_executable(cmd->token[i][0]))
+                if (com != NULL || is_executable(cmd, cmd->token[i][0]))
                 {
 					/* Se asigna memoria dinámicamente para exec_args con un tamaño igual al número de tokens 
 					restantes en cmd desde la posición i, más 1 para el elemento NULL que se agrega al final del arreglo. */
@@ -115,7 +116,7 @@ void execute(t_cmd *cmd)
                     }
                     exec_args[j - i] = NULL;
                     if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
-                     && !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i) && !is_executable(cmd->token[i][0]))
+                     && !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i) && !is_executable(cmd, cmd->token[i][0]))
                     {
                         if(execve(com, exec_args, cmd->env) == -1)
                         {
@@ -132,10 +133,11 @@ void execute(t_cmd *cmd)
                     execute_input_redirects(cmd, com, exec_args, i);
                     exit(0);
                 }
-                else if (!com && !is_executable(cmd->token[i][0]))
+                else if (!com && !is_executable(cmd, cmd->token[i][0]))
                 {
                     g_status = 127;
-                    printf("-minishell: %s: command not found\n", cmd->token[i]);
+                    printf(cmd->token[i][0] == '/' ? "-minishell: %s: No such file or directory\n" \
+                    : "-minishell: %s: command not found\n", cmd->token[i]);
                     exit(g_status);
                 }
                 else
@@ -276,7 +278,6 @@ void execute_appends(t_cmd *cmd, char *com, char **exec_args, int i)
 
 void execute_output_redirects(t_cmd *cmd, char *com, char **exec_args, int i)
 {
-    fprintf(stderr, "TORRENT: %s\n", cmd->token[i]);
     if(is_output_redirect(cmd, i) == 1)
     {
         output_redirect(cmd);
@@ -377,7 +378,7 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                 g_status = 0;
                 exit(g_status);
             }
-            else if (com != NULL || is_executable(cmd->token[i][0]))
+            else if (com != NULL || is_executable(cmd, cmd->token[i][0]))
             {
                 exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
                 j = i;
@@ -393,7 +394,7 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                 dup2(stdout, STDOUT_FILENO);
                 close(stdout);
                 if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) && \
-                    !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i) && !is_executable(cmd->token[i][0]))
+                    !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i) && !is_executable(cmd, cmd->token[i][0]))
                 {
                     if(execve(com, exec_args, cmd->env) == -1)
                     {
@@ -409,10 +410,11 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                 execute_input_redirects(cmd, com, exec_args, i);
                 exit(0);
             }
-            else if (!com && !is_executable(cmd->token[i][0]))
+            else if (!com && !is_executable(cmd, cmd->token[i][0]))
             {
                 g_status = 127;
-                printf("-minishell: %s: command not found\n", cmd->token[i]);
+                printf(cmd->token[i][0] == '/' ? "-minishell: %s: No such file or directory\n" \
+                : "-minishell: %s: command not found\n", cmd->token[i]);
                 exit(g_status);
             }
         }
@@ -464,7 +466,7 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                 g_status = 0;
                 exit(g_status);
             }
-            else if (com != NULL || is_executable(cmd[0]->token[i][0]))
+            else if (com != NULL || is_executable(cmd[0], cmd[0]->token[i][0]))
             {
                 exec_args = (char **)malloc(sizeof(char *) * (cmd[0]->n_tokens - i + 1));
                 j = i;
@@ -484,7 +486,7 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                 dup2(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END], STDOUT_FILENO);
                 close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
                 if(!is_output_redirect(cmd[0], i) && !is_input_redirect(cmd[0], i) && \
-                    !is_append_redirect(cmd[0], i) && !is_heredoc_redirect(cmd[0], i) && !is_executable(cmd[0]->token[i][0]))
+                    !is_append_redirect(cmd[0], i) && !is_heredoc_redirect(cmd[0], i) && !is_executable(cmd[0], cmd[0]->token[i][0]))
                 {
                     if(execve(com, exec_args, cmd[0]->env) == -1)
                     {
@@ -500,10 +502,11 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                 execute_input_redirects(cmd[0], com, exec_args, i);
                 exit(0);
             }
-            else if (!com && !is_executable(cmd[0]->token[i][0]))
+            else if (!com && !is_executable(cmd[0], cmd[0]->token[i][0]))
             {
                 g_status = 127;
-                printf("-minishell: %s: command not found\n", cmd[0]->token[i]);
+                printf(cmd[0]->token[i][0] == '/' ? "-minishell: %s: No such file or directory\n" \
+                : "-minishell: %s: command not found\n", cmd[0]->token[i]);
                 exit(g_status);
             }    
         }
@@ -553,7 +556,7 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                 g_status = 0;
                 exit(g_status);
             }
-            else if (com != NULL || is_executable(cmd->token[i][0]))
+            else if (com != NULL || is_executable(cmd, cmd->token[i][0]))
             {
                 exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
                 j = i;
@@ -567,7 +570,7 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                 dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
                 close(cmd->fd[cmd->count_pipes][WRITE_END]);
                 if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) && \
-                    !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i) && !is_executable(cmd->token[i][0]))
+                    !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i) && !is_executable(cmd, cmd->token[i][0]))
                 {
                     if(execve(com, exec_args, cmd->env) == -1)
                     {
@@ -583,10 +586,11 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                 execute_input_redirects(cmd, com, exec_args, i);
                 exit(0);
             }
-            else if (!com && !is_executable(cmd->token[i][0]))
+            else if (!com && !is_executable(cmd, cmd->token[i][0]))
             {
-                g_status = 127;
-                printf("-minishell: %s: command not found\n", cmd->token[i]);
+               g_status = 127;
+                printf(cmd->token[i][0] == '/' ? "-minishell: %s: No such file or directory\n" \
+                : "-minishell: %s: command not found\n", cmd->token[i]);
                 exit(g_status);
             }
         }
@@ -607,7 +611,7 @@ char  *command_dir(t_cmd *cmd, char *command)
 
     path = ft_getenv("PATH", cmd->env);
     dir = ft_strtok(path, ":");
-    if(!is_executable(command[0]))
+    if(!is_executable(cmd, command[0]))
     {
         while (dir != NULL) 
         {

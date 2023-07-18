@@ -79,6 +79,7 @@ typedef struct cmd
 	bool	in_double_quote;
 	int		*has_single_quote;
 	int		*no_expand_vars;
+	int		replaced_var;
 } t_cmd;
 
 #define HEREDOC_REDIRECT "<<"
@@ -180,7 +181,7 @@ int 	check_len_special(t_cmd *cmd, int len);
 int 	cmd_token_len(t_cmd *cmd, int len);
 int		check_len_token(t_cmd *cmd, int len);
 int		find_variables(char **token);
-int		is_executable(char c);
+int		is_executable(t_cmd *cmd, char c);
 
 /* utils.c */
 char	*ft_strtok(char *str, const char *delim);

@@ -76,8 +76,10 @@ int	is_argument(char c)
 	return(c == ARGUMENT);
 }
 
-int	is_executable(char c)
+int	is_executable(t_cmd *cmd, char c)
 {
+	if(cmd->replaced_var == 1)
+		return (0);
 	return(c == '/' || c == '.');
 }
 

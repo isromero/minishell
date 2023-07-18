@@ -22,12 +22,15 @@ void    execute_executable(t_cmd *cmd, char *command)
     {
         path = ft_strdup(command);
         try_execute(cmd, path, command);
+        free(path);
     }
     else if(command[0] == '.') /* ruta no absoluta */
     {
         pwd = ft_getenv("PWD", cmd->env);
         path = ft_strjoin(pwd, command + 1);
         try_execute(cmd, path, command);
+        free(pwd);
+        free(path);
     }
 }
 

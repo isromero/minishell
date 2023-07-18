@@ -96,14 +96,19 @@ void execute(t_cmd *cmd)
             else if (pid == 0)
             {
                 com = command_dir(cmd, cmd->token[i]);
+                printf("com: %s\n", com);
 				/* Si se obtuvo una ruta válida (com != NULL), se crea un nuevo arreglo exec_args para almacenar los argumentos que se pasarán a execve. */
                 if (com != NULL || is_executable(cmd, cmd->token[i][0]))
                 {
+                    
 					/* Se asigna memoria dinámicamente para exec_args con un tamaño igual al número de tokens 
 					restantes en cmd desde la posición i, más 1 para el elemento NULL que se agrega al final del arreglo. */
                     exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
                     if (!exec_args)
+                    {
+                        free(exec_args);
                         return ;
+                    }
 					j = i; // Así guardamos la distancia ya recorrida
                     while(j < cmd->n_tokens - 1 && !is_special(cmd->token[j][0]) && !is_redirects(cmd->token[j][0]))
                     {
@@ -638,15 +643,12 @@ char  *command_dir(t_cmd *cmd, char *command)
                 free(path);
                 return (result);
             }
-            else if(access(executable_path, F_OK) == -1)
-            {
-                free(path);
-                g_status = 126; /* ?????? */
-                return (NULL);
-            }
-               
             dir = ft_strtok(NULL, ":");
         }
+        // Para lo demás significa que no existe
+        free(path);
+        // g_status = 126; ??? Es cuando el archivo no existe? pero esto está bien?
+        return (NULL);
     }
     // El archivo ejecutable no existe en ningún directorio del PATH
     return (0);

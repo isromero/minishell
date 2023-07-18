@@ -234,6 +234,7 @@ void replace_vars_heredoc(t_cmd *cmd, char *buffer, int i) /* parece tener algun
     ft_strncpy(var, &buffer[i], var_length);
     var[var_length] = '\0';
     path = ft_getenv(var, cmd->env);
+	free(var);
     if (path != NULL)
     {
         // Crear una nueva cadena con el reemplazo
@@ -280,7 +281,7 @@ void    heredoc_redirect(t_cmd **cmd)
 	}
 	else if (pid == 0)
 	{
-		printf("delimitator: %s\n", find_heredoc_delim(cmd[0]));
+		// printf("delimitator: %s\n", find_heredoc_delim(cmd[0]));
 		/* preguntar a pacheco sobre archivos temporales */
 		/* tal vez hacer unlink al abrir y al cerrar */
 		fd = open("/tmp/heredocBURMITO", O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);

@@ -639,7 +639,12 @@ char  *command_dir(t_cmd *cmd, char *command)
                 return (result);
             }
             else if(access(executable_path, F_OK) == -1)
+            {
+                free(path);
                 g_status = 126; /* ?????? */
+                return (NULL);
+            }
+               
             dir = ft_strtok(NULL, ":");
         }
     }

@@ -45,11 +45,13 @@ void replace_vars(t_cmd *cmd, char **token)
     char *replaced_token;
     size_t replaced_len;
     size_t j;
+    char *value;
 
     token_len = ft_strlen(*token);
     replaced_token = malloc(token_len + 1);
     replaced_len = 0;
     j = 0;
+    value = NULL;
     while (j < token_len)
     {
         if ((*token)[j] == VARIABLE && (*token)[j + 1] != '\0')
@@ -62,17 +64,24 @@ void replace_vars(t_cmd *cmd, char **token)
             char *var = malloc(var_len + 1);
             ft_strncpy(var, *token + var_start, var_len);
             var[var_len] = '\0';
-            char *value = ft_getenv(var, cmd->env);
+            value = ft_getenv(var, cmd->env);
             if (value != NULL)
             {
                 size_t value_len = ft_strlen(value);
                 char *new_replaced_token = malloc(replaced_len + value_len + 1);
-                ft_memcpy(new_replaced_token, replaced_token, replaced_len);
-                ft_memcpy(new_replaced_token + replaced_len, value, value_len);
+                if (new_replaced_token == NULL) 
+                {
+                    free(replaced_token);
+                    free(value);
+                    return;
+                }
+                ft_strncpy(new_replaced_token, replaced_token, replaced_len);
+                ft_strncpy(new_replaced_token + replaced_len, value, value_len);
                 new_replaced_token[replaced_len + value_len] = '\0';
                 free(replaced_token);
                 replaced_token = new_replaced_token;
                 replaced_len += value_len;
+                free(value);
             }
             free(var);
             j += var_len; // Saltar al siguiente símbolo de variable

@@ -35,6 +35,7 @@ int	main(int argc, char **argv, char **env)
 		if (cmd.line == NULL)
 		{
 			free(cmd.prompt);
+			free(cmd.env);
             handle_ctrld();
             break;
         }

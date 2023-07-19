@@ -115,6 +115,7 @@ int		len_to_equal(char *str);
 char	*ft_getenv(const char *name, char **env);
 void 	get_default_env(t_cmd *cmd);
 void 	init_env(t_cmd *cmd, char **env);
+void	free_env(char **env);
 // int 	ft_setenv(const char *name, const char *value, int overwrite);
 
 /* execute.c */

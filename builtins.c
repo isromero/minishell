@@ -88,29 +88,26 @@ void	ft_cd(t_cmd *cmd, int cd_token)
 /* CADA VEZ QUE SE LLAMA O CUANDO HACEMOS GETENV LA ULTIMA VARIABLE TIENE QUE CONTENER EL ULTIMO COMANDO ASI QUE: _=/usr/bin/env */
 void ft_env(t_cmd *cmd)
 {
+	int pos_var;
     int i;
     int size;
 
     i = 0;
+	size = 0;
+	pos_var = len_var_in_env(cmd, "_=./minishell");
     if (!cmd->env || !cmd->env[0])
-        return ;
-
-    /* if (cmd->n_tokens > 2) // Hace falta gestionarlo????????????????????????????????
-    {
-		printf("%d\n", cmd->n_tokens);
-        printf("minishell: env: Demasiados argumentos\n"); // Cambiar error
-        return 127;
-    } */
+		return ;
+	cmd->env[pos_var] = ft_strreplace(cmd->env[pos_var], cmd->env[pos_var], "_=/usr/bin/env");
     while (cmd->env[i] != NULL)
     {
         size = ft_strlen(cmd->env[i]);
-        if (strcmp(cmd->env[i] + size - 2, "''") != 0)
-        {
+		// Este strcmp evita imprimir variables de entorno que tengan un valor de dos comillas simples consecutivas (''), ya que generalmente 
+		// se considera que estas no contienen información útil y podrían ser resultado de algún error o incoherencia en el sistema
+        if (ft_strcmp(cmd->env[i] + size - 2, "''") != 0)
             printf("%s\n", cmd->env[i]);
-        }
         i++;
     }
-	//comprobacion de si hay pipes despues
+	
 }
 
 void	ft_pwd(t_cmd *cmd)
@@ -128,20 +125,11 @@ void	ft_pwd(t_cmd *cmd)
 	free (pwd);
 }
 
-void free_env(char **env)
-{
-    if (env == NULL)
-        return;
-    for (int i = 0; env[i] != NULL; i++)
-        free(env[i]);
-    free(env);
-}
-
 /*	CHECKEAR GESTIÓN DE EXPORT SIN ARGUMENTOS */
-/* LEAK EXPORT */
 void ft_export(t_cmd *cmd, int export_token) 
 {
-	int i = 0, len_of_env = 0;
+	int i = 0;
+	int len_of_env = 0;
 	int	pos_var = 0;
 	char **new_env = NULL;
 	int	j;
@@ -151,7 +139,7 @@ void ft_export(t_cmd *cmd, int export_token)
 	i = 0;
 	while (cmd->env[i] != NULL)
 	{
-		new_env[i] = ft_strdup(cmd->env[i]);
+		new_env[i] = ft_strdup(cmd->env[i]); // HACER FT_STRDUP CAUSA LEAKS, NO HACERLO NO, pero habría que hacerlo no????
 		if (new_env[i] == NULL)
 		{
 			// Error de asignación de memoria

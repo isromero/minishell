@@ -81,6 +81,7 @@ void	ft_cd(t_cmd *cmd, int cd_token)
 		printf("-minishell: cd: %s: Not a directory\n", path);
 	getcwd(cwd, sizeof(cwd));
 	setenv(oldpwd, cwd, 1);
+	free(oldpwd);
 }
 
 

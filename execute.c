@@ -35,6 +35,7 @@ void executor(t_cmd *cmd)
     j = 0;
     cmd->count_pipes = 0;
     cmd->count_pids = 0;
+    cmd->replaced_var = 0;
     cmd->pid = (int *)malloc(sizeof(int) * cmd->n_processes);
     cmd->fd = (int **)malloc(sizeof(int *) * cmd->n_pipes); // Proteger mallocs + liberaciones?
     while(j < cmd->n_pipes)
@@ -74,7 +75,6 @@ void execute(t_cmd *cmd)
 	i = 0;
 	j = 0;
     com = NULL;
-    cmd->replaced_var = 0;
     exec_args = NULL;
     first_variable = 0;
     signal(SIGINT, &handle_ctrlc2);

@@ -78,7 +78,7 @@ void	ft_cd(t_cmd *cmd, int cd_token)
 
 	//chdir falla al cambiar al directorio especificado, no devuelve 0 
 	if (chdir(path) != 0)
-		perror("");
+		printf("-minishell: cd: %s: Not a directory\n", path);
 	getcwd(cwd, sizeof(cwd));
 	setenv(oldpwd, cwd, 1);
 }

@@ -95,12 +95,11 @@ void execute(t_cmd *cmd)
             }
             else if (pid == 0)
             {
-                com = command_dir(cmd, cmd->token[i]);
-                printf("com: %s\n", com);
+                if(!is_executable(cmd, cmd->token[i][0])) // Soluciona un leak a la hora de pasarle una ruta absoluta que es un directorio
+                    com = command_dir(cmd, cmd->token[i]);
 				/* Si se obtuvo una ruta válida (com != NULL), se crea un nuevo arreglo exec_args para almacenar los argumentos que se pasarán a execve. */
                 if (com != NULL || is_executable(cmd, cmd->token[i][0]))
                 {
-                    
 					/* Se asigna memoria dinámicamente para exec_args con un tamaño igual al número de tokens 
 					restantes en cmd desde la posición i, más 1 para el elemento NULL que se agrega al final del arreglo. */
                     exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
@@ -147,6 +146,7 @@ void execute(t_cmd *cmd)
                 }
                 else
                     exit(0);
+                    
             }
             else
             {
@@ -166,7 +166,6 @@ void execute(t_cmd *cmd)
             if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
                 && !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
             {
-                free(com);
                 execute_builtin(cmd, i);
                 return ;
             }
@@ -175,7 +174,6 @@ void execute(t_cmd *cmd)
             execute_heredoc_redirects(cmd, com, exec_args, i);
             execute_input_redirects(cmd, com, exec_args, i);
             g_status = 0; /* Reinicializamos a 0 porque cuando se pone un echo $? necesitamos reestablecer el status después de haberse ejecutado para siguientes iteraciones */
-            free(com);
             return ;
         }
         i++;
@@ -358,7 +356,8 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
         replace_vars(cmd, &cmd->token[i]);
     if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0]) && !is_redirects_double_char(cmd->token[i])) //Double char redirects no hace falta?
     {
-        com = command_dir(cmd, cmd->token[i]);
+        if(!is_executable(cmd, cmd->token[i][0])) // Soluciona un leak a la hora de pasarle una ruta absoluta que es un directorio
+            com = command_dir(cmd, cmd->token[i]);
         cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
         if(cmd->pid[cmd->count_pids] == 0)
         {
@@ -444,7 +443,8 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
         replace_vars(cmd[0], &cmd[0]->token[i]);
     if (!is_argument_extension(cmd[0], i) && !is_redirects(cmd[0]->token[i][0]) && !is_redirects_double_char(cmd[0]->token[i]))  //Double char redirects no hace falta?
     {
-        com = command_dir(cmd[0], cmd[0]->token[i]);
+        if(!is_executable(cmd[0], cmd[0]->token[i][0])) // Soluciona un leak a la hora de pasarle una ruta absoluta que es un directorio
+            com = command_dir(cmd[0], cmd[0]->token[i]);
         cmd[0]->pid[cmd[0]->count_pids] = fork(); //Checkear error de fork
         if(cmd[0]->pid[cmd[0]->count_pids] == 0)
         {
@@ -538,7 +538,8 @@ void    execute_first_pipes(t_cmd *cmd, int i)
         replace_vars(cmd, &cmd->token[i]);
     if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0]) && !is_redirects_double_char(cmd->token[i]))  //Double char redirects no hace falta?
     {
-        com = command_dir(cmd, cmd->token[i]);
+        if(!is_executable(cmd, cmd->token[i][0])) // Soluciona un leak a la hora de pasarle una ruta absoluta que es un directorio
+            com = command_dir(cmd, cmd->token[i]);
         cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
         if(cmd->pid[cmd->count_pids] == 0)
         {

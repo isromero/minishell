@@ -14,6 +14,7 @@
 
 void    execute_executable(t_cmd *cmd, char *command)
 {
+    
     char *pwd;
     char *path;
 
@@ -40,10 +41,11 @@ void try_execute(t_cmd *cmd, char *path, char *command)
     {
         if(execve(path, cmd->token, cmd->env) == -1)
         {
+            printf("-minishell: %s: Is a directory\n", command);
             g_status = 2;
             exit(g_status);
         }
     }
     else if(access(path, F_OK) == -1)
-        printf("minishell: %s: No such file or directory\n", command);
+        printf("-minishell: %s: No such file or directory\n", command);
 }

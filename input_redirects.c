@@ -168,13 +168,14 @@ char *find_heredoc_delim(t_cmd *cmd)
 		{
 			delim = cmd->token[len + 1];
 			delim_len = ft_strlen(delim);
-			if ((delim[0] == '\'' || delim[0] == '\"') && delim_len > 1 && delim[delim_len - 1] == delim[0]) /* Si delim_len > 1 significa que no es solo un carácter y que puede tener comillas */
+			// En principio no es necesario debido a la nueva lógica de remove quotes
+			/* if ((delim[0] == '\'' || delim[0] == '\"') && delim_len > 1 && delim[delim_len - 1] == delim[0]) // Si delim_len > 1 significa que no es solo un carácter y que puede tener comillas
 			{
 				cmd->in_quote_heredoc = 1;
 				memmove(delim, delim + 1, delim_len - 2);
 				delim[delim_len - 2] = '\0';
-			}
-			else if((delim[0] == '\'' || delim[0] == '\"') && delim_len > 1 && delim[delim_len - 1] != delim[0] && cmd->in_quote_heredoc == 0) /* En bash si no cierras comillas del delimitador no puedes cerrar el proceso con el delimitador */
+			} */
+			if((delim[0] == '\'' || delim[0] == '\"') && delim_len > 1 && delim[delim_len - 1] != delim[0] && cmd->in_quote_heredoc == 0) /* En bash si no cierras comillas del delimitador no puedes cerrar el proceso con el delimitador */
 				delim = "NOT DELIMITATORXXxXxxXXxxXXXXXX"; /* nombre inventado para no poder cerrar el proceso del heredoc */
 			return (delim);
 		}

@@ -185,9 +185,11 @@ int remove_quotes(t_cmd *cmd)
     int left_double_quotes; 
     int left_single_quotes; 
     size_t len_token;
-    int i; 
+    int i;
+    int j;
 
     i = 0;
+    j = 0;
     while(cmd->token[i])
     {
         single_quotes = count_single_quotes(cmd->token[i]); 
@@ -195,19 +197,27 @@ int remove_quotes(t_cmd *cmd)
         len_token = ft_strlen(cmd->token[i]); 
         left_double_quotes = count_left_double_quotes(cmd->token[i]); 
         left_single_quotes = count_left_single_quotes(cmd->token[i]);
-        if(cmd->token[i][0] == DOUBLE_QUOTE && double_quotes >= 2) 
+        if(double_quotes >= 2 || single_quotes >= 2) 
         { 
-            remove_double_quotes(&cmd->token[i]); 
+            j = 0;
+            while(cmd->token[i][j] != '\0')
+            {
+                if(cmd->token[i][j] == DOUBLE_QUOTE)
+                {
+                    remove_double_quotes(&cmd->token[i]);
+                    break ;
+                }
+                if(cmd->token[i][j] == SINGLE_QUOTE)
+                {
+                    remove_single_quotes(&cmd->token[i]);
+                    break ;
+                }
+                j++;
+            }  
             // Se ejecutará solo cuando sea par en la izquierda y no te pasen comillas distintas sin nada dentro 
             // Ejemplo ""''"" 
             if(left_double_quotes % 2 == 0 && single_quotes + double_quotes != len_token) 
                 remove_single_quotes(&cmd->token[i]); 
-        } 
-        else if(cmd->token[i][0] == SINGLE_QUOTE && single_quotes >= 2) 
-        {
-            remove_single_quotes(&cmd->token[i]); 
-            // Se ejecutará solo cuando sea par en la izquierda y no te pasen comillas distintas sin nada dentro 
-            // Ejemplo ""''"" 
             if(left_single_quotes % 2 == 0 && single_quotes + double_quotes != len_token) 
                 remove_double_quotes(&cmd->token[i]); 
         }

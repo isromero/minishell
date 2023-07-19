@@ -162,9 +162,7 @@ int is_double_quote(t_cmd *cmd, int len)
 int is_single_quote(t_cmd *cmd, int len)
 {
 	int	i;
-	/* h"hola" */
 	cmd->in_single_quote = true;
-	/* cmd->has_single_quote[0] = 1; */
 	i = 1;
 	while (cmd->line[i + len] != '\0')
 	{
@@ -178,7 +176,6 @@ int is_single_quote(t_cmd *cmd, int len)
 			break ;
 		i++;
 	}
-	cmd->in_single_quote = false;
 	return (i);
 }
 

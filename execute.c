@@ -132,8 +132,8 @@ void execute(t_cmd *cmd)
                     /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
                     //CAMBIAR LOS STATUS DE REDIRECTSSSSSSSSSSSSSSSSSSSSSSSSSSSS execve
                     execute_executable(cmd, cmd->token[i]);
-                    execute_appends(cmd, com, exec_args, i);
-                    execute_output_redirects(cmd, com, exec_args, i);
+                    execute_appends(cmd, com, exec_args, i); // ESTAMOS REVISANDO A PARTIR DE AQUI
+                    execute_output_redirects(cmd, com, exec_args, i); 
                     execute_heredoc_redirects(cmd, com, exec_args, i);
                     execute_input_redirects(cmd, com, exec_args, i);
                     exit(0);

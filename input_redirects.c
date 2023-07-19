@@ -175,16 +175,8 @@ char *find_heredoc_delim(t_cmd *cmd)
 				delim[delim_len - 2] = '\0';
 			}
 			else if((delim[0] == '\'' || delim[0] == '\"') && delim_len > 1 && delim[delim_len - 1] != delim[0] && cmd->in_quote_heredoc == 0) /* En bash si no cierras comillas del delimitador no puedes cerrar el proceso con el delimitador */
-			{
-				printf("MICOÑOGORDO=%c\n",delim[0]);
-				printf("MICOÑOGORDO=%d\n",delim[delim_len - 1]);
 				delim = "NOT DELIMITATORXXxXxxXXxxXXXXXX"; /* nombre inventado para no poder cerrar el proceso del heredoc */
-			}
-			int b;
-			b = 0;
-			while(delim[b])
-				printf("delimitator: %d\n", delim[b++]);
-			return delim;
+			return (delim);
 		}
 		len--;
 	}
@@ -230,7 +222,7 @@ void replace_vars_heredoc(t_cmd *cmd, char *buffer, int i) /* parece tener algun
         var_length++;
         j++;
     }
-    var = malloc(var_length);
+    var = malloc(sizeof(char) * (var_length + 1));
     ft_strncpy(var, &buffer[i], var_length);
     var[var_length] = '\0';
     path = ft_getenv(var, cmd->env);
@@ -239,14 +231,14 @@ void replace_vars_heredoc(t_cmd *cmd, char *buffer, int i) /* parece tener algun
     {
         // Crear una nueva cadena con el reemplazo
         size_t replace_length = ft_strlen(path);
-        char *replacement = malloc(replace_length);
+        char *replacement = malloc(sizeof(char) * (replace_length + 1));
         strncpy(replacement, path, replace_length);
         replacement[replace_length] = '\0';
 
         // Actualizar el buffer con el reemplazo
         char *start = &buffer[i - 1];
         char *end = &buffer[i - 1 + var_length];
-        ft_memmove(start + replace_length, end + 1, strlen(end));
+        ft_memmove(start + replace_length, end + 1, ft_strlen(end));
         ft_memcpy(start, replacement, replace_length);
         free(path);
         free(replacement);
@@ -300,14 +292,15 @@ void    heredoc_redirect(t_cmd **cmd)
 		}
 		close(fd);
 		fd = open("/tmp/heredocBURMITO", O_RDONLY); /* Lo abrimos de nuevo después de cerrar para empezar desde el principio del archivo */
-        char buffer[1024]; 
+        char buffer[1024];
         ssize_t bytes_read;
+		ft_memset(buffer, 0, sizeof(buffer)); // Inicializar todo el buffer a cero
         while ((bytes_read = read(fd, buffer, sizeof(buffer))) > 0) 
 		{
 			char *delim = find_heredoc_delim(cmd[0]);
 			if (delim && delim[0] != '\"' && delim[0] != '\'' && cmd[0]->in_quote_heredoc == 0) /* cosas como "'a" NO FUNCIONAN, gestionar??????*/
 				replace_env_vars(cmd[0], buffer);
-			write(1, buffer, strlen(buffer));
+			write(1, buffer, ft_strlen(buffer));
 		}
         close(fd);
         exit(0);

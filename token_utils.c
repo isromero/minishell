@@ -146,14 +146,16 @@ int is_double_quote(t_cmd *cmd, int len)
 	i = 0;
 	while (cmd->line[i + len] != '\0')
 	{
-		if (cmd->line[i + len] == DOUBLE_QUOTE && cmd->line[i + len + 1] == ' ')
+		if (cmd->line[i + len] == DOUBLE_QUOTE && cmd->line[i + len + 1] == ' ' && cmd->in_double_quote == true) // En el caso de estar dentro de comillas si el siguiente es un espacio directamente se vuelve false in_single_quote
+																												 // Esto se hace para poder detectar luego si existe otra comilla y un espacio después
 		{
+			cmd->in_double_quote = false;
 			i++;
-			break ;
 		}
+		if (cmd->line[i + len] == DOUBLE_QUOTE && cmd->line[i + len + 1] == ' ' && cmd->in_double_quote == false) // Se sale del bucle después de saber que es la última comilla y hay un espacio
+			break ;
 		i++;
 	}
-	cmd->in_double_quote = false;
 	return (i);
 }
 
@@ -166,11 +168,14 @@ int is_single_quote(t_cmd *cmd, int len)
 	i = 1;
 	while (cmd->line[i + len] != '\0')
 	{
-		if (cmd->line[i + len] == SINGLE_QUOTE && cmd->line[i + len + 1] == ' ')
+		if (cmd->line[i + len] == SINGLE_QUOTE && cmd->line[i + len + 1] == ' ' && cmd->in_single_quote == true) // En el caso de estar dentro de comillas si el siguiente es un espacio directamente se vuelve false in_single_quote
+																												 // Esto se hace para poder detectar luego si existe otra comilla y un espacio después
 		{
+			cmd->in_single_quote = false;
 			i++;
-			break ;
 		}
+		if (cmd->line[i + len] == SINGLE_QUOTE && cmd->line[i + len + 1] == ' ' && cmd->in_single_quote == false) // Se sale del bucle después de saber que es la última comilla y hay un espacio
+			break ;
 		i++;
 	}
 	cmd->in_single_quote = false;

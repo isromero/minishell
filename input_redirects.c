@@ -175,6 +175,7 @@ char *find_heredoc_delim(t_cmd *cmd)
 				memmove(delim, delim + 1, delim_len - 2);
 				delim[delim_len - 2] = '\0';
 			} */
+			// Esto tal vez tampoco sea necesario debido a la nueva lógica de remove_quotes ->
 			if((delim[0] == '\'' || delim[0] == '\"') && delim_len > 1 && delim[delim_len - 1] != delim[0] && cmd->in_quote_heredoc == 0) /* En bash si no cierras comillas del delimitador no puedes cerrar el proceso con el delimitador */
 				delim = "NOT DELIMITATORXXxXxxXXxxXXXXXX"; /* nombre inventado para no poder cerrar el proceso del heredoc */
 			return (delim);

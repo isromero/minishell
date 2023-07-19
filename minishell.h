@@ -26,6 +26,8 @@
 #include <errno.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <sys/types.h>
+#include <dirent.h>
 #include "libft/libft.h"
 #include "get_next_line/get_next_line.h"
 

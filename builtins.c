@@ -124,9 +124,8 @@ void	ft_pwd(t_cmd *cmd)
 	else if (pwd)
 		printf("%s\n", pwd);
 	else
-		perror("");
+		perror("-minishell: ");
 	free (pwd);
-	//comprobacion pipe
 }
 
 void free_env(char **env)

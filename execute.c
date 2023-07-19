@@ -140,8 +140,15 @@ void execute(t_cmd *cmd)
                 else if (!com && !is_executable(cmd, cmd->token[i][0]))
                 {
                     g_status = 127;
-                    printf(cmd->token[i][0] == '/' ? "-minishell: %s: No such file or directory\n" \
-                    : "-minishell: %s: command not found\n", cmd->token[i]);
+                    DIR* dir = opendir(cmd->token[i]);
+                    if(dir)
+                    {
+                        printf("-minishell: %s: Is a directory\n", cmd->token[i]);
+                        closedir(dir);
+                    }
+                    else
+                         printf(cmd->token[i][0] == '/' ? "-minishell: %s: No such file or directory\n" \
+                        : "-minishell: %s: command not found\n", cmd->token[i]);
                     exit(g_status);
                 }
                 else
@@ -417,8 +424,15 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
             else if (!com && !is_executable(cmd, cmd->token[i][0]))
             {
                 g_status = 127;
-                printf(cmd->token[i][0] == '/' ? "-minishell: %s: No such file or directory\n" \
-                : "-minishell: %s: command not found\n", cmd->token[i]);
+                DIR* dir = opendir(cmd->token[i]);
+                if(dir)
+                {
+                    printf("-minishell: %s: Is a directory\n", cmd->token[i]);
+                    closedir(dir);
+                }
+                else
+                        printf(cmd->token[i][0] == '/' ? "-minishell: %s: No such file or directory\n" \
+                    : "-minishell: %s: command not found\n", cmd->token[i]);
                 exit(g_status);
             }
         }
@@ -510,8 +524,15 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
             else if (!com && !is_executable(cmd[0], cmd[0]->token[i][0]))
             {
                 g_status = 127;
-                printf(cmd[0]->token[i][0] == '/' ? "-minishell: %s: No such file or directory\n" \
-                : "-minishell: %s: command not found\n", cmd[0]->token[i]);
+                DIR* dir = opendir(cmd[0]->token[i]);
+                if(dir)
+                {
+                    printf("-minishell: %s: Is a directory\n", cmd[0]->token[i]);
+                    closedir(dir);
+                }
+                else
+                        printf(cmd[0]->token[i][0] == '/' ? "-minishell: %s: No such file or directory\n" \
+                    : "-minishell: %s: command not found\n", cmd[0]->token[i]);
                 exit(g_status);
             }    
         }
@@ -594,9 +615,16 @@ void    execute_first_pipes(t_cmd *cmd, int i)
             }
             else if (!com && !is_executable(cmd, cmd->token[i][0]))
             {
-               g_status = 127;
-                printf(cmd->token[i][0] == '/' ? "-minishell: %s: No such file or directory\n" \
-                : "-minishell: %s: command not found\n", cmd->token[i]);
+                g_status = 127;
+                DIR* dir = opendir(cmd->token[i]);
+                if(dir)
+                {
+                    printf("-minishell: %s: Is a directory\n", cmd->token[i]);
+                    closedir(dir);
+                }
+                else
+                        printf(cmd->token[i][0] == '/' ? "-minishell: %s: No such file or directory\n" \
+                    : "-minishell: %s: command not found\n", cmd->token[i]);
                 exit(g_status);
             }
         }

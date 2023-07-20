@@ -245,6 +245,7 @@ void execute_builtin_exit(t_cmd *cmd, int exit_code)
 	free(cmd->line);
 	free(cmd->prompt);
 	free_matrix(cmd->env);
+	free(cmd->no_expand_vars);
 	/* HABRÍA QUE LIBERAR CMD->ENV */
     // Salir del programa con el código de salida especificado
     exit(exit_code);

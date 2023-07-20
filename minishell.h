@@ -126,7 +126,7 @@ void 	redirecting_pipes(t_cmd *cmd);
 void    execute_pipes(t_cmd *cmd, int i);
 void    execute_last_pipes(t_cmd *cmd, int len);
 void    execute_middle_pipes(t_cmd **cmd, int i);
-void    execute_first_pipes(t_cmd *cmd, int i);
+void    execute_first_pipes(t_cmd **cmd, int i);
 char	*command_dir(t_cmd *cmd, char *command);
 int 	is_command_exists(t_cmd *cmd, char *command);
 char 	*build_command_path(const char *base_path, const char *command);

@@ -97,6 +97,7 @@ void ft_env(t_cmd *cmd)
 	pos_var = len_var_in_env(cmd, "_=./minishell");
     if (!cmd->env || !cmd->env[0])
 		return ;
+	free(cmd->env[pos_var]);
 	cmd->env[pos_var] = ft_strreplace(cmd->env[pos_var], cmd->env[pos_var], "_=/usr/bin/env");
     while (cmd->env[i] != NULL)
     {
@@ -107,7 +108,6 @@ void ft_env(t_cmd *cmd)
             printf("%s\n", cmd->env[i]);
         i++;
     }
-	
 }
 
 void	ft_pwd(t_cmd *cmd)
@@ -132,121 +132,65 @@ void ft_export(t_cmd *cmd, int export_token)
 	int len_of_env = 0;
 	int	pos_var = 0;
 	char **new_env = NULL;
-	int	j;
+	
 	while (cmd->env[len_of_env] != NULL)
 		len_of_env++;
+	if(var_exists(cmd, cmd->token[export_token + 1]) == 1)
+		len_of_env--;
 	new_env = (char **)malloc(sizeof(char *) * (len_of_env + 2));
 	i = 0;
 	while (cmd->env[i] != NULL)
 	{
-		new_env[i] = ft_strdup(cmd->env[i]); // HACER FT_STRDUP CAUSA LEAKS, NO HACERLO NO, pero habría que hacerlo no????
-		if (new_env[i] == NULL)
-		{
-			// Error de asignación de memoria
-			j = 0;
-			while (j < i)
-			{
-				free(new_env[j]);
-				j++;
-			}
-			free(new_env);
-			return;
-		}
+		new_env[i] = cmd->env[i];
 		i++;
 	}
 	if(var_exists(cmd, cmd->token[export_token + 1]) == 1)
 	{
 		pos_var = len_var_in_env(cmd, cmd->token[export_token + 1]);
-		new_env[pos_var] = ft_strdup(ft_strreplace(new_env[pos_var], new_env[pos_var], cmd->token[export_token + 1]));
+		free(new_env[pos_var]);
+		new_env[pos_var] = ft_strdup(cmd->token[export_token + 1]);
 	}
 	else if(var_exists(cmd, cmd->token[export_token + 1]) == 0)
 		new_env[len_of_env] = ft_strdup(cmd->token[export_token + 1]);
-	if (new_env[len_of_env] == NULL)
-	{
-		j = 0;
-		while (j < len_of_env)
-		{
-			free(new_env[j]);
-			j++;
-		}
-		free(new_env);
-		return;
-	}
 	new_env[len_of_env + 1] = NULL;
+	free(cmd->env);
 	cmd->env = new_env;
 }
 
 int len_var_in_env(t_cmd *cmd, char *token)
 {
-	int i;
-	int	j;
-	char *aux;
-	char *aux_token;
+    int    i;
+    int    eqpos;
 
-	i = 0;
-	aux = NULL;
-	aux_token = NULL;
-	aux_token = malloc(ft_strlen(token) + 1);
-	ft_strcpy(aux_token, token);
-    while (aux_token[i] != '=')
+    i = 0;
+    eqpos = 0;
+    while (token[eqpos] != '=')
+        eqpos++;
+    while (cmd->env[i])
+    {
+        if (ft_memcmp(cmd->env[i], token, eqpos + 1) == 0)
+            return (i);
         i++;
-    aux_token[i] = '\0';
-	i = 0;
-	while (cmd->env[i] != NULL)
-	{
-		j = 0;
-		aux = malloc(ft_strlen(cmd->env[i]) + 1);
-		while(cmd->env[i][j] != '=')
-		{
-			aux[j] = cmd->env[i][j];
-			j++;
-		}
-		aux[j] = '\0';
-        if (ft_strcmp(aux, aux_token) == 0)
-        {
-            free(aux);
-			free(aux_token);
-            return i;
-        }
-        free(aux);
-		i++;
-	}
-	free(aux_token);
-	return 0;
-} 
+    }
+    return (0);
+}
 
 int var_exists(t_cmd *cmd, char *token)
 {
-    int i = 0;
-    char *aux_token = malloc(ft_strlen(token) + 1);
-    int token_idx = 0;
+    int    i;
+    int    eqpos;
 
-    while (token[i] != '=')
-    {
-        aux_token[token_idx] = token[i];
-        i++;
-        token_idx++;
-    }
-    aux_token[token_idx] = '\0';
     i = 0;
-    while (cmd->env[i] != NULL)
+    eqpos = 0;
+    while (token[eqpos] != '=')
+        eqpos++;
+    while (cmd->env[i])
     {
-        int j = 0;
-        while (cmd->env[i][j] != '=')
-        {
-            if (cmd->env[i][j] != aux_token[j])
-                break;
-            j++;
-        }
-        if (cmd->env[i][j] == '=' && aux_token[j] == '\0')
-        {
-            free(aux_token);
-            return 1;
-        }
+        if (ft_memcmp(cmd->env[i], token, eqpos + 1) == 0)
+            return (1);
         i++;
     }
-    free(aux_token);
-    return 0;
+    return (0);
 }
 
 
@@ -300,6 +244,8 @@ void execute_builtin_exit(t_cmd *cmd, int exit_code)
 	clean_tokens(cmd);
 	free(cmd->line);
 	free(cmd->prompt);
+	free_matrix(cmd->env);
+	/* HABRÍA QUE LIBERAR CMD->ENV */
     // Salir del programa con el código de salida especificado
     exit(exit_code);
 }

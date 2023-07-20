@@ -60,8 +60,8 @@ void executor(t_cmd *cmd)
         }
         i++;
     }
-    execute(cmd);
     free_pipes(cmd);
+    execute(cmd);
 }
 
 void execute(t_cmd *cmd)

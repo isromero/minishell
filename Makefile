@@ -28,9 +28,11 @@ OBJS		=	$(SRCS:%.c=%.o)
 
 all:		$(NAME)
 
-$(NAME):	$(OBJS)
+$(LIBFT):
 			@make -C libft >/dev/null 2>&1
 			@make clean -C libft >/dev/null 2>&1
+
+$(NAME):	$(OBJS) $(LIBFT)
 			$(CC) $(OBJS) $(LIBFT) $(CFLAGS) -o $(NAME) >/dev/null 2>&1
 
 %o:			%.c

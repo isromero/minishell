@@ -15,9 +15,7 @@
 void clean_tokens(t_cmd *cmd)
 {
     for (int i = 0; i < cmd->n_tokens; i++)
-    {
         free(cmd->token[i]);
-    }
     free(cmd->token);
     cmd->token = NULL;
     cmd->n_tokens = 0;

@@ -75,12 +75,32 @@ void malloc_env(t_cmd *cmd, char **env)
         return;
 }
 
+char    **ft_strstrdup(char **strstr)
+{
+    char **dup;
+
+    int j = 0;
+    while (strstr && strstr[j])
+        j++;
+    dup = malloc((j + 1) * sizeof(char *));
+    if (!dup)
+        return (NULL);
+    int i = 0;
+    while (strstr[i])
+    {
+        dup[i] = ft_strdup(strstr[i]);
+        i++;
+    }
+    dup[i] = NULL;
+    return (dup);
+}
+
 void init_env(t_cmd *cmd, char **env) 
 {
     if (env[0] == NULL) /* if env is NULL */
         get_default_env(cmd);
     else
-        cmd->env = env;
+        cmd->env = ft_strstrdup(env);
 }
 
 void get_default_env(t_cmd *cmd)

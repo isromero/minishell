@@ -124,7 +124,7 @@ void	execute(t_cmd *cmd);
 void	execute_builtin(t_cmd *cmd, int n_token);
 void 	redirecting_pipes(t_cmd *cmd);
 void    execute_pipes(t_cmd *cmd, int i);
-void    execute_last_pipes(t_cmd *cmd, int len, int stdout);
+void    execute_last_pipes(t_cmd *cmd, int len);
 void    execute_middle_pipes(t_cmd **cmd, int i);
 void    execute_first_pipes(t_cmd *cmd, int i);
 char	*command_dir(t_cmd *cmd, char *command);

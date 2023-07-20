@@ -37,7 +37,7 @@ void executor(t_cmd *cmd)
     cmd->count_pids = 0;
     cmd->replaced_var = 0;
     cmd->pid = (int *)malloc(sizeof(int) * cmd->n_processes);
-    cmd->fd = (int **)malloc(sizeof(int *) * cmd->n_pipes); // Proteger mallocs + liberaciones?
+    cmd->fd = (int **)malloc(sizeof(int *) * cmd->n_pipes);
     while(j < cmd->n_pipes)
     {
         cmd->fd[j] = (int *)malloc(sizeof(int) * 2);
@@ -226,8 +226,6 @@ void redirecting_pipes(t_cmd *cmd) /* dobles comandos como grep y cat se quedan 
     int i;
     int first_time;
     int len;
-    int stdin = dup(STDIN_FILENO);
-    int stdout = dup(STDOUT_FILENO);
 
     i = 0;
     len = 0;
@@ -253,14 +251,10 @@ void redirecting_pipes(t_cmd *cmd) /* dobles comandos como grep y cat se quedan 
         {
             first_time = 0;
             len = find_len_command_pipes(cmd, i);
-            execute_last_pipes(cmd, len, stdout);
+            execute_last_pipes(cmd, len);
         }
         i++;
     }
-    dup2(stdin, STDIN_FILENO);
-    close(stdin);
-    dup2(stdout, STDOUT_FILENO);
-    close(stdout);
     wait_close_pipes(cmd);
 }
 
@@ -350,7 +344,7 @@ void execute_heredoc_redirects(t_cmd *cmd, char *com, char **exec_args, int i)
     } */ 
 }
 
-void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
+void    execute_last_pipes(t_cmd *cmd, int i)
 {
     char    *com;
     char    **exec_args;
@@ -370,11 +364,9 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
         {
             if(is_builtin(cmd, i))
             {
-                close(cmd->fd[cmd->count_pipes][WRITE_END]);
-                dup2(cmd->fd[cmd->count_pipes][READ_END], STDIN_FILENO);
-                close(cmd->fd[cmd->count_pipes][READ_END]);
-                dup2(stdout, STDOUT_FILENO);
-                close(stdout);
+                close(cmd->fd[cmd->count_pipes - 1][WRITE_END]);
+                dup2(cmd->fd[cmd->count_pipes - 1][READ_END], STDIN_FILENO);
+                close(cmd->fd[cmd->count_pipes - 1][READ_END]);
                 if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
                 && !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
                 {
@@ -399,11 +391,9 @@ void    execute_last_pipes(t_cmd *cmd, int i, int stdout)
                     j++;
                 }
                 exec_args[j - i] = NULL;
-                close(cmd->fd[cmd->count_pipes][WRITE_END]);
-                dup2(cmd->fd[cmd->count_pipes][READ_END], STDIN_FILENO);
-                close(cmd->fd[cmd->count_pipes][READ_END]);
-                dup2(stdout, STDOUT_FILENO);
-                close(stdout);
+                close(cmd->fd[cmd->count_pipes - 1][WRITE_END]);
+                dup2(cmd->fd[cmd->count_pipes - 1][READ_END], STDIN_FILENO);
+                close(cmd->fd[cmd->count_pipes - 1][READ_END]);
                 if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) && \
                     !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i) && !is_executable(cmd, cmd->token[i][0]))
                 {
@@ -464,13 +454,13 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
         {
             if(is_builtin(cmd[0], i))
             {
-                close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
-                dup2(cmd[0]->fd[cmd[0]->count_pipes][READ_END], STDIN_FILENO);
-                close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
-                cmd[0]->count_pipes++;
+                close(cmd[0]->fd[cmd[0]->count_pipes - 1][WRITE_END]);
+                dup2(cmd[0]->fd[cmd[0]->count_pipes - 1][READ_END], STDIN_FILENO);
+                close(cmd[0]->fd[cmd[0]->count_pipes - 1][READ_END]);
                 close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
                 dup2(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END], STDOUT_FILENO);
                 close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
+                cmd[0]->count_pipes++;
                 if(!is_output_redirect(cmd[0], i) && !is_input_redirect(cmd[0], i) \
                 && !is_append_redirect(cmd[0], i) && !is_heredoc_redirect(cmd[0], i))
                 {
@@ -495,15 +485,13 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
                     j++;
                 }
                 exec_args[j - i] = NULL;
-                //recibe entrada
-                close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
-                dup2(cmd[0]->fd[cmd[0]->count_pipes][READ_END], STDIN_FILENO);
-                close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
-                cmd[0]->count_pipes++;
-                // envía salida
+                close(cmd[0]->fd[cmd[0]->count_pipes - 1][WRITE_END]);
+                dup2(cmd[0]->fd[cmd[0]->count_pipes - 1][READ_END], STDIN_FILENO);
+                close(cmd[0]->fd[cmd[0]->count_pipes - 1][READ_END]);
                 close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
                 dup2(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END], STDOUT_FILENO);
                 close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
+                cmd[0]->count_pipes++;
                 if(!is_output_redirect(cmd[0], i) && !is_input_redirect(cmd[0], i) && \
                     !is_append_redirect(cmd[0], i) && !is_heredoc_redirect(cmd[0], i) && !is_executable(cmd[0], cmd[0]->token[i][0]))
                 {
@@ -538,11 +526,10 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
         }
         else
         {
-            cmd[0]->count_pipes++;
             free(exec_args);
             free(com);
+            cmd[0]->count_pipes++;
         }
-            
     }
 }
 
@@ -569,6 +556,7 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                 close(cmd->fd[cmd->count_pipes][READ_END]);
                 dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
                 close(cmd->fd[cmd->count_pipes][WRITE_END]);
+                cmd->count_pipes++;
                 if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
                 && !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
                 {
@@ -596,6 +584,7 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                 close(cmd->fd[cmd->count_pipes][READ_END]);
                 dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
                 close(cmd->fd[cmd->count_pipes][WRITE_END]);
+                cmd->count_pipes++;
                 if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) && \
                     !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i) && !is_executable(cmd, cmd->token[i][0]))
                 {

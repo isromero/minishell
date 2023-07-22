@@ -39,7 +39,6 @@ char	*update_output(int fd)
 {
 	char	*line;
 
-	
 	line = get_next_line(fd);
 	line[ft_strlen(line) - 1] = 0; // Eliminar el salto de línea al final de la línea
 	if (!line)

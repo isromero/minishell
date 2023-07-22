@@ -130,11 +130,24 @@ void    execute_first_pipes(t_cmd *cmd, int i);
 char	*command_dir(t_cmd *cmd, char *command);
 int 	is_command_exists(t_cmd *cmd, char *command);
 char 	*build_command_path(const char *base_path, const char *command);
+void 	execute_vars(t_cmd *cmd, int i);
+
+/* execute_redirects.c */
 void 	execute_appends(t_cmd *cmd, char *com, char **exec_args, int i);
 void 	execute_output_redirects(t_cmd *cmd, char *com, char **exec_args, int i);
 void 	execute_input_redirects(t_cmd *cmd, char *com, char **exec_args, int i);
 void 	execute_heredoc_redirects(t_cmd *cmd, char *com, char **exec_args, int i);
-void 	execute_vars(t_cmd *cmd, int i);
+void 	execute_redirects(t_cmd *cmd, char *com, char **exec_args, int i);
+
+/* execute_utils */
+char	**get_exec_args(t_cmd *cmd, int i);
+void    execute_command_exists(t_cmd *cmd, char *com, char **exec_args, int i);
+void    execute_command_no_exists(t_cmd *cmd, int i);
+
+/* fork_processes.c */
+void    execute_fork(t_cmd *cmd, int i);
+void    parent_process(char *com, char **exec_args);
+void    child_process(t_cmd *cmd, char *com, char **exec_args, int i);
 
 /* expander.c */
 void	replace_vars(t_cmd *cmd, char **token);

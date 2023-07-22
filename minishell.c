@@ -26,7 +26,6 @@ int	main(int argc, char **argv, char **env)
 	cmd.env = NULL;
 	init_env(&cmd, env);
 	unlink("/tmp/heredocBURMITO");
-	/* signal(SIGQUIT, SIG_IGN); */
 	while(1)
 	{
 		signal(SIGINT, &handle_ctrlc);

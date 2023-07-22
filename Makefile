@@ -15,7 +15,7 @@ CC			=	gcc
 SRCS		=	builtins.c env.c execute.c expander.c minishell.c parser.c \
 				prompt.c token_utils.c pipes_utils.c utils.c output_redirects.c \
 				input_redirects.c signals.c try_access.c get_next_line/get_next_line.c \
-				get_next_line/get_next_line_utils.c
+				get_next_line/get_next_line_utils.c execute_redirects.c execute_utils.c
 
 LIBFT		=	libft/libft.a
 

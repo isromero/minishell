@@ -39,14 +39,10 @@ void executor(t_cmd *cmd)
     cmd->pid = (int *)malloc(sizeof(int) * cmd->n_processes);
     cmd->fd = (int **)malloc(sizeof(int *) * cmd->n_pipes);
     while(j < cmd->n_pipes)
-    {
-        cmd->fd[j] = (int *)malloc(sizeof(int) * 2);
-        // Reservamos para fd[x_numero_de_fd][2]
-        j++;
-    }
+        cmd->fd[j++] = (int *)malloc(sizeof(int) * 2);
     while(cmd->token[i] != NULL)
     {
-        if(cmd->token[i][0] == '|') // Si hay un echo quiero ignorar el pipe
+        if(cmd->token[i][0] == '|')
         {
             if(cmd->token[0][0] == '|') // Si hay un pipe de primer token
             {
@@ -68,14 +64,10 @@ void execute(t_cmd *cmd)
 {
     int i;
 	int	j;
-    char *com;
-    char **exec_args;
     int first_variable;
 
 	i = 0;
 	j = 0;
-    com = NULL;
-    exec_args = NULL;
     first_variable = 0;
     signal(SIGINT, &handle_ctrlc2);
     while (i < cmd->n_tokens - 1)
@@ -84,102 +76,17 @@ void execute(t_cmd *cmd)
             first_variable = 1; // Para que solo se ejecute una vez las variables
         if(cmd->no_expand_vars[i] == 0)
             replace_vars(cmd, &cmd->token[i]);
-        if (!is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_special(cmd->token[i][0] && !is_redirects(cmd->token[j][0])))/* Pendiente introducir is_special con todo */ 
-        {
-            // HACER UN INT QUE DEVUELVA ERROR Y NO ENTRAR
-            pid_t pid = fork();
-            if (pid == -1)
-            {
-                perror("fork");
-                exit(1);
-            }
-            else if (pid == 0)
-            {
-                if(!is_executable(cmd, cmd->token[i][0])) // Soluciona un leak a la hora de pasarle una ruta absoluta que es un directorio
-                    com = command_dir(cmd, cmd->token[i]);
-				/* Si se obtuvo una ruta válida (com != NULL), se crea un nuevo arreglo exec_args para almacenar los argumentos que se pasarán a execve. */
-                if (com != NULL || is_executable(cmd, cmd->token[i][0]))
-                {
-					/* Se asigna memoria dinámicamente para exec_args con un tamaño igual al número de tokens 
-					restantes en cmd desde la posición i, más 1 para el elemento NULL que se agrega al final del arreglo. */
-                    exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
-                    if (!exec_args)
-                    {
-                        free(exec_args);
-                        return ;
-                    }
-					j = i; // Así guardamos la distancia ya recorrida
-                    while(j < cmd->n_tokens - 1 && !is_special(cmd->token[j][0]) && !is_redirects(cmd->token[j][0]))
-                    {
-                        /* Ejemplo del por qué se = así:
-                        En la primera iteración del bucle, j tomará el valor de i, que es 2. Si simplemente usamos j como índice para 
-                        exec_args, se copiarían los tokens a partir del índice 2, pero queremos que se copien desde el índice 0 en exec_args.
-                        Entonces, para compensar el j = i, restamos i a j, obteniendo j - i que es 0 en este caso. */
-                        exec_args[j - i] = cmd->token[j];
-                        j++;
-                    }
-                    exec_args[j - i] = NULL;
-                    if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
-                     && !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i) && !is_executable(cmd, cmd->token[i][0]))
-                    {
-                        if(execve(com, exec_args, cmd->env) == -1)
-                        {
-                            g_status = 2;
-                            exit(g_status);
-                        }
-                    }
-                    /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
-                    //CAMBIAR LOS STATUS DE REDIRECTSSSSSSSSSSSSSSSSSSSSSSSSSSSS execve
-                    execute_executable(cmd, cmd->token[i]);
-                    execute_appends(cmd, com, exec_args, i); // ESTAMOS REVISANDO A PARTIR DE AQUI
-                    execute_output_redirects(cmd, com, exec_args, i); 
-                    execute_heredoc_redirects(cmd, com, exec_args, i);
-                    execute_input_redirects(cmd, com, exec_args, i);
-                    exit(0);
-                }
-                else if (!com && !is_executable(cmd, cmd->token[i][0]))
-                {
-                    g_status = 127;
-                    DIR* dir = opendir(cmd->token[i]);
-                    if(dir)
-                    {
-                        printf("-minishell: %s: Is a directory\n", cmd->token[i]);
-                        closedir(dir);
-                    }
-                    else
-                         printf(cmd->token[i][0] == '/' ? "-minishell: %s: No such file or directory\n" \
-                        : "-minishell: %s: command not found\n", cmd->token[i]);
-                    exit(g_status);
-                }
-                else
-                    exit(0);
-                    
-            }
-            else
-            {
-                free(com);
-                free(exec_args);
-                int child_status;
-                wait(&child_status); // Esperar a que el proceso hijo termine
-                if (WIFEXITED(child_status) && WEXITSTATUS(child_status) >= 0) // Wexitstatus: Si el hijo terminó y cambió g_status
-                {
-                    g_status = WEXITSTATUS(child_status); // Obtener el estado de salida del proceso hijo
-                    return ;
-                }
-            }
-        }
-        if (is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_special(cmd->token[i][0] && !is_redirects(cmd->token[i][0])))
-        {
+        if (!is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_special(cmd->token[i][0]) && !is_redirects(cmd->token[j][0]))
+            execute_fork(cmd, i);
+        if (is_builtin(cmd, i) && !is_argument_extension(cmd, i) && !is_special(cmd->token[i][0]) && !is_redirects(cmd->token[i][0]))
+        {   
             if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
                 && !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
             {
                 execute_builtin(cmd, i);
                 return ;
             }
-            execute_appends(cmd, com, exec_args, i);
-            execute_output_redirects(cmd, com, exec_args, i);
-            execute_heredoc_redirects(cmd, com, exec_args, i);
-            execute_input_redirects(cmd, com, exec_args, i);
+            execute_redirects(cmd, NULL, NULL, i);
             g_status = 0; /* Reinicializamos a 0 porque cuando se pone un echo $? necesitamos reestablecer el status después de haberse ejecutado para siguientes iteraciones */
             return ;
         }
@@ -265,92 +172,6 @@ void redirecting_pipes(t_cmd *cmd) /* dobles comandos como grep y cat se quedan 
         i++;
     }
     wait_close_pipes(cmd);
-}
-
-void execute_appends(t_cmd *cmd, char *com, char **exec_args, int i)
-{
-    if(is_append_redirect(cmd, i) == 1)
-    {
-        append_redirect(cmd);
-        if(!is_builtin(cmd, i))
-            execve(com, exec_args, cmd->env);
-        else if(is_builtin(cmd, i))
-            execute_builtin(cmd, i);
-        close_output_redirect(cmd);
-    }
-    else if(is_append_redirect(cmd, i) > 1)
-    {
-        append_multiple_redirect(cmd);
-        if(!is_builtin(cmd, i))
-            execve(com, exec_args, cmd->env);
-        else if(is_builtin(cmd, i))
-            execute_builtin(cmd, i);
-        close_output_redirect(cmd);
-    }
-}
-
-void execute_output_redirects(t_cmd *cmd, char *com, char **exec_args, int i)
-{
-    if(is_output_redirect(cmd, i) == 1)
-    {
-        output_redirect(cmd);
-        if(!is_builtin(cmd, i))
-            execve(com, exec_args, cmd->env);
-        else if(is_builtin(cmd, i))
-            execute_builtin(cmd, i);
-        close_output_redirect(cmd);
-    }
-    else if(is_output_redirect(cmd, i) > 1)
-    {
-        output_multiple_redirect(cmd);
-        if(!is_builtin(cmd, i))
-            execve(com, exec_args, cmd->env);
-        else if(is_builtin(cmd, i))
-            execute_builtin(cmd, i);
-        close_output_redirect(cmd);
-    }
-}
-
-void execute_input_redirects(t_cmd *cmd, char *com, char **exec_args, int i)
-{
-    if(is_input_redirect(cmd, i) == 1)
-    {
-        input_redirect(cmd);
-        if(!is_builtin(cmd, i))
-            execve(com, exec_args, cmd->env);
-        else if(is_builtin(cmd, i))
-            execute_builtin(cmd, i);
-        close_input_redirect(cmd);
-    }
-    else if(is_input_redirect(cmd, i) > 1)
-    {
-        input_multiple_redirect(cmd);
-        if(!is_builtin(cmd, i))
-            execve(com, exec_args, cmd->env);
-        else if(is_builtin(cmd, i))
-            execute_builtin(cmd, i);
-        close_input_redirect(cmd);
-    }
-}
-
-void execute_heredoc_redirects(t_cmd *cmd, char *com, char **exec_args, int i)
-{
-    if(is_heredoc_redirect(cmd, i) == 1)
-    {
-        heredoc_redirect(&cmd);
-        if(!is_builtin(cmd, i))
-            execve(com, exec_args, cmd->env);
-        else if(is_builtin(cmd, i))
-            execute_builtin(cmd, i);
-        close_input_redirect(cmd);
-    }
-    /* No sabemos si hay que gestionarlos */
-   /*  else if(is_heredoc_redirect(cmd) > 1)
-    {
-        heredoc_multiple_redirect(cmd);
-        execve(com, exec_args, cmd->env);
-        close_input_redirect(cmd);
-    } */ 
 }
 
 void    execute_last_pipes(t_cmd *cmd, int i)
@@ -638,7 +459,6 @@ void    execute_first_pipes(t_cmd *cmd, int i)
             free(com);
             cmd->count_pipes++;
         }
-            
     }
 }
 

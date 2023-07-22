@@ -17,7 +17,7 @@
 //La redirección < hola.txt intenta redirigir la entrada estándar del comando ls desde el archivo "hola.txt". 
 //Sin embargo, como el comando ls no está diseñado para leer datos de entrada estándar, no se producirá ningún cambio en el comportamiento del comando.
 
-int     is_input_redirect(t_cmd *cmd, int len)
+int	is_input_redirect(t_cmd *cmd, int len)
 {
 	int n_redirects;
 	
@@ -35,7 +35,7 @@ int     is_input_redirect(t_cmd *cmd, int len)
 	return(0);
 }
 
-int     find_first_input_redirect(t_cmd *cmd)
+int	find_first_input_redirect(t_cmd *cmd)
 {
 	int len;
 
@@ -49,7 +49,7 @@ int     find_first_input_redirect(t_cmd *cmd)
 	return(0);
 }
 
-int find_last_input_redirect(t_cmd *cmd)
+int	find_last_input_redirect(t_cmd *cmd)
 {
 	int len;
 
@@ -63,21 +63,21 @@ int find_last_input_redirect(t_cmd *cmd)
 	return(0);
 }
 
-void    input_redirect(t_cmd *cmd)
+void	input_redirect(t_cmd *cmd)
 {
 	int	fd;
 	int	len;
 
 	len = find_first_input_redirect(cmd);
 	fd = open(cmd->token[len + 1], O_RDONLY | S_IRUSR | S_IWUSR);
-    if (fd == -1)
-    {
-        perror("");
-        return ;
-    }
-    cmd->stdin = dup(STDIN_FILENO);
-    dup2(fd, STDIN_FILENO); 
-    close(fd);
+	if (fd == -1)
+	{
+		perror("");
+		return ;
+	}
+	cmd->stdin = dup(STDIN_FILENO);
+	dup2(fd, STDIN_FILENO); 
+	close(fd);
 }
 
 void	input_multiple_redirect(t_cmd *cmd)
@@ -90,26 +90,25 @@ void	input_multiple_redirect(t_cmd *cmd)
 	len = find_last_input_redirect(cmd);
 	fd = open(cmd->token[len + 1], O_RDONLY | S_IRUSR | S_IWUSR);
 	if (fd == -1)
-    {
-        perror("");
-        return ;
-    }
+	{
+		perror("");
+		return ;
+	}
 	while(i < len)
 	{
 		if(cmd->token[i][0] == INPUT_REDIRECT)
 			open(cmd->token[i + 1], O_RDONLY | S_IRUSR | S_IWUSR);
 		i++;
 	}
-    cmd->stdin = dup(STDIN_FILENO);
-    dup2(fd, STDIN_FILENO); 
-    close(fd);
+	cmd->stdin = dup(STDIN_FILENO);
+	dup2(fd, STDIN_FILENO); 
+	close(fd);
 }
 
-int     is_heredoc_redirect(t_cmd *cmd, int len)
+int	is_heredoc_redirect(t_cmd *cmd, int len)
 {
 	int n_redirects;
 	
-
 	n_redirects = 0;
 	while(cmd->token[len] != NULL)
 	{
@@ -210,44 +209,45 @@ int	heredoc_content(t_cmd *cmd, int fd)
 
 void replace_vars_heredoc(t_cmd *cmd, char *buffer, int i) /* parece tener algunos errores de memoria con la longitud muy de vez en cuando, CHECKEAR!!!!!!!!!! */
 {
-    char *path;
-    char *var;
-    int var_length;
-    int j;
+	char *path;
+	char *var;
+	int var_length;
+	int j;
+	size_t replace_length;
+	char *replacement;
+	char *start;
+	char *end;
 
-    var = NULL;
+	var = NULL;
 	var_length = 0;
-    j = ++i;
-    while (buffer[j] != '\0' && buffer[j] != ' ' && buffer[j] != '\n' &&
-           buffer[j] != '$' && buffer[j] != '\t' && !is_special(buffer[j]) && !is_redirects(buffer[j]))  /* más comprobaciones??? \t??*/
-    {
-        var_length++;
-        j++;
-    }
-    var = malloc(sizeof(char) * (var_length + 1));
-    ft_strncpy(var, &buffer[i], var_length);
-    var[var_length] = '\0';
-    path = ft_getenv(var, cmd->env);
+	j = ++i;
+	while (buffer[j] != '\0' && buffer[j] != ' ' && buffer[j] != '\n' &&
+		   buffer[j] != '$' && buffer[j] != '\t' && !is_special(buffer[j]) && !is_redirects(buffer[j]))  /* más comprobaciones??? \t??*/
+	{
+		var_length++;
+		j++;
+	}
+	var = malloc(sizeof(char) * (var_length + 1));
+	ft_strncpy(var, &buffer[i], var_length);
+	var[var_length] = '\0';
+	path = ft_getenv(var, cmd->env);
 	free(var);
-    if (path != NULL)
-    {
-        // Crear una nueva cadena con el reemplazo
-        size_t replace_length = ft_strlen(path);
-        char *replacement = malloc(sizeof(char) * (replace_length + 1));
-        strncpy(replacement, path, replace_length);
-        replacement[replace_length] = '\0';
-
-        // Actualizar el buffer con el reemplazo
-        char *start = &buffer[i - 1];
-        char *end = &buffer[i - 1 + var_length];
-        ft_memmove(start + replace_length, end + 1, ft_strlen(end));
-        ft_memcpy(start, replacement, replace_length);
-        free(path);
-        free(replacement);
-    }
+	if (path != NULL)
+	{
+		replace_length = ft_strlen(path);
+		replacement = malloc(sizeof(char) * (replace_length + 1));
+		strncpy(replacement, path, replace_length);
+		replacement[replace_length] = '\0';
+		start = &buffer[i - 1];
+		end = &buffer[i - 1 + var_length];
+		ft_memmove(start + replace_length, end + 1, ft_strlen(end));
+		ft_memcpy(start, replacement, replace_length);
+		free(path);
+		free(replacement);
+	}
 }
 
-void replace_env_vars(t_cmd *cmd, char *buffer) 
+void	replace_env_vars(t_cmd *cmd, char *buffer) 
 {
 	int	i;
 
@@ -260,10 +260,13 @@ void replace_env_vars(t_cmd *cmd, char *buffer)
 	}
 }
 
-void    heredoc_redirect(t_cmd **cmd)
+void	heredoc_redirect(t_cmd **cmd)
 {
 	int	fd;
 	pid_t pid;
+	char buffer[1024];
+	ssize_t bytes_read;
+	char *delim;
 
 	cmd[0]->in_quote_heredoc = 0;
 	pid = fork();
@@ -271,7 +274,7 @@ void    heredoc_redirect(t_cmd **cmd)
 	if (pid == -1)
 	{  
 		perror("fork");
-    	exit(1);
+		exit(1);
 	}
 	else if (pid == 0)
 	{
@@ -294,18 +297,16 @@ void    heredoc_redirect(t_cmd **cmd)
 		}
 		close(fd);
 		fd = open("/tmp/heredocBURMITO", O_RDONLY); /* Lo abrimos de nuevo después de cerrar para empezar desde el principio del archivo */
-        char buffer[1024];
-        ssize_t bytes_read;
 		ft_memset(buffer, 0, sizeof(buffer)); // Inicializar todo el buffer a cero
-        while ((bytes_read = read(fd, buffer, sizeof(buffer))) > 0) 
+		while ((bytes_read = read(fd, buffer, sizeof(buffer))) > 0) 
 		{
-			char *delim = find_heredoc_delim(cmd[0]);
+			delim = find_heredoc_delim(cmd[0]);
 			if (delim && delim[0] != '\"' && delim[0] != '\'' && cmd[0]->in_quote_heredoc == 0) /* cosas como "'a" NO FUNCIONAN, gestionar??????*/
 				replace_env_vars(cmd[0], buffer);
 			write(1, buffer, ft_strlen(buffer));
 		}
-        close(fd);
-        exit(0);
+		close(fd);
+		exit(0);
 	}
 	else
 	{
@@ -314,15 +315,15 @@ void    heredoc_redirect(t_cmd **cmd)
 		/* BORRAR ARCHIVO CUANDO MANDEMOS SEÑAL DE CTRL-D */
 		if (unlink("/tmp/heredocBURMITO") == -1)
 		{
-            perror("unlink");
-            exit(1);
-        }
+			perror("unlink");
+			exit(1);
+		}
 		exit(0);
 	}
 }
 
-void close_input_redirect(t_cmd *cmd)
+void	close_input_redirect(t_cmd *cmd)
 {
 	dup2(cmd->stdin, STDIN_FILENO);
-    close(cmd->stdin);
+	close(cmd->stdin);
 }

@@ -34,9 +34,9 @@ int	main(int argc, char **argv, char **env)
 		if (cmd.line == NULL)
 		{
 			free(cmd.prompt);
-            handle_ctrld();
-            break;
-        }
+			handle_ctrld();
+			break;
+		}
 		if(ft_strncmp(cmd.line, "", 1) > 0) 
 			add_history(cmd.line);
 		if(parse_args(&cmd) == 0)
@@ -51,5 +51,5 @@ int	main(int argc, char **argv, char **env)
 	}
 	rl_clear_history();
 	free_matrix(cmd.env);
-    return (g_status);
+	return (g_status);
 }

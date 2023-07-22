@@ -12,42 +12,59 @@
 
 #include "minishell.h"
 
-void clean_tokens(t_cmd *cmd)
+void	clean_tokens(t_cmd *cmd)
 {
-    for (int i = 0; i < cmd->n_tokens; i++)
-        free(cmd->token[i]);
-    free(cmd->token);
-    cmd->token = NULL;
-    cmd->n_tokens = 0;
+	int i;
+
+	i = 0;
+	while (i < cmd->n_tokens)
+	{
+		free(cmd->token[i]);
+		i++;
+	}
+	free(cmd->token);
+	cmd->token = NULL;
+	cmd->n_tokens = 0;
 }
 
-void print_tokens(t_cmd *cmd)
+void	print_tokens(t_cmd *cmd)
 {
-    int i;
-    for (i = 0; i < cmd->n_tokens; i++)
+	int i;
+
+	i = 0;
+	while (i < cmd->n_tokens)
+	{
 		printf("Token %d: %s\n", i, cmd->token[i]);
+		i++;
+	}
 }
 
 void save_token(t_cmd *cmd, char *token)
 {
-    cmd->n_tokens++;
-    char **new_token = (char **)malloc(cmd->n_tokens * sizeof(char *));
-    if (new_token == NULL)
-    {
-        printf("Error: No se pudo asignar memoria para cmd->token\n");
-        return;
-    }
-    if (cmd->token != NULL)
-    {
-        for (int i = 0; i < cmd->n_tokens - 1; i++)
-        {
-            new_token[i] = cmd->token[i];
-        }
-        free(cmd->token);
-    }
-    new_token[cmd->n_tokens - 1] = token;
-    cmd->token = new_token;
+	int i;
+	char **new_token;
+
+	cmd->n_tokens++;
+	new_token = (char **)malloc(cmd->n_tokens * sizeof(char *));
+	if (new_token == NULL)
+	{
+		printf("Error: No se pudo asignar memoria para cmd->token\n");
+		return;
+	}
+	i = 0;
+	if (cmd->token != NULL)
+	{
+		while (i < cmd->n_tokens - 1)
+		{
+			new_token[i] = cmd->token[i];
+			i++;
+		}
+		free(cmd->token);
+	}
+	new_token[cmd->n_tokens - 1] = token;
+	cmd->token = new_token;
 }
+
 
 int	is_special(char c)
 {
@@ -160,6 +177,7 @@ int is_double_quote(t_cmd *cmd, int len)
 int is_single_quote(t_cmd *cmd, int len)
 {
 	int	i;
+
 	cmd->in_single_quote = true;
 	i = 1;
 	while (cmd->line[i + len] != '\0')
@@ -177,9 +195,9 @@ int is_single_quote(t_cmd *cmd, int len)
 	return (i);
 }
 
-int check_len_special(t_cmd *cmd, int len)
+int	check_len_special(t_cmd *cmd, int len)
 {
-	int i;
+	int	i;
 	int	inputs;
 	int	outputs;
 
@@ -214,13 +232,13 @@ int check_len_special(t_cmd *cmd, int len)
 
 int cmd_token_len(t_cmd *cmd, int len)
 {
-    int i = 0;
+	int i = 0;
 	int	is_double_quote;
 	int is_single_quote;
-	/* en principio no hace falta checkear los appends y heredocs ya que los detectará este */
+
 	is_double_quote = 0;
 	is_single_quote = 0;
-    while (cmd->line[i + len] != '\0')
+	while (cmd->line[i + len] != '\0')
 	{
 		if((cmd->line[i + len] == ' ' || is_special2(cmd->line[i + len])) && is_double_quote % 2 == 0 && is_single_quote % 2 == 0)
 			break;
@@ -230,16 +248,13 @@ int cmd_token_len(t_cmd *cmd, int len)
 			is_single_quote++;
  		i++;
 	}
-    return i;
+	return i;
 }
 
 int	check_len_token(t_cmd *cmd, int len)
 {
 	while(cmd->line[len] != '\0')
 	{
-		// No necesario en principio
-		/* while(cmd->line[i + len] != '\0' && cmd->line[i + len] != ' ')
-			i++; */
 		if(cmd->line[len] == VARIABLE)
 			return(cmd_token_len(cmd, len));
 		else if(cmd->line[len] == SINGLE_QUOTE)

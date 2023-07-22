@@ -39,7 +39,6 @@ void    wait_close_pipes(t_cmd *cmd)
         close(cmd->fd[i][WRITE_END]);
         i++;
     }
-    printf("hola\n");
     i = 0; 
     while (i < cmd->n_processes)
     {

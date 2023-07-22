@@ -60,3 +60,20 @@ void    execute_command_no_exists(t_cmd *cmd, int i)
         : "-minishell: %s: command not found\n", cmd->token[i]);
     exit(g_status);
 }
+
+void    execute_when_builtin(t_cmd *cmd, int i)
+{
+    if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
+    && !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
+    {
+        execute_builtin(cmd, i);
+        g_status = 0;
+        exit(g_status);
+    }
+    execute_appends(cmd, NULL, NULL, i);
+    execute_output_redirects(cmd, NULL, NULL, i);
+    execute_heredoc_redirects(cmd, NULL, NULL, i);
+    execute_input_redirects(cmd, NULL, NULL, i);
+    g_status = 0;
+    exit(g_status);
+}

@@ -29,7 +29,6 @@ void    child_process(t_cmd *cmd, char *com, char **exec_args, int i)
 {
     if(!is_executable(cmd, cmd->token[i][0])) // Soluciona un leak a la hora de pasarle una ruta absoluta que es un directorio
         com = command_dir(cmd, cmd->token[i]);
-    exec_args = get_exec_args(cmd, i);
     if (com != NULL || is_executable(cmd, cmd->token[i][0]))
         execute_command_exists(cmd, com, exec_args, i);
     else if (!com && !is_executable(cmd, cmd->token[i][0]))

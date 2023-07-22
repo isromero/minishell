@@ -128,11 +128,15 @@ void	ft_pwd(t_cmd *cmd)
 /*	CHECKEAR GESTIÓN DE EXPORT SIN ARGUMENTOS */
 void ft_export(t_cmd *cmd, int export_token) 
 {
-	int i = 0;
-	int len_of_env = 0;
-	int	pos_var = 0;
-	char **new_env = NULL;
+	int i;
+	int len_of_env;
+	int	pos_var;
+	char **new_env;
 	
+	new_env = NULL;
+	i = 0;
+	len_of_env = 0;
+	pos_var = 0;
 	while (cmd->env[len_of_env] != NULL)
 		len_of_env++;
 	if(var_exists(cmd, cmd->token[export_token + 1]) == 1)
@@ -196,8 +200,9 @@ int var_exists(t_cmd *cmd, char *token)
 
 bool compare_variable(const char* variable, const char* name)
 {
-	int i = 0;
+	int i;
 
+	i = 0;
 	while (variable[i] != '=' && name[i] != '\0')
 	{
 		if (variable[i] != name[i])
@@ -212,10 +217,15 @@ bool compare_variable(const char* variable, const char* name)
 void ft_unset(t_cmd *cmd, int unset_token)
 {
 	// Meter perrors con errores de argumentos(bad identifiers)
-	int i = 0, j = 0;
-	int len_of_env = 0;
-	char **new_env = NULL;
+	int i;
+	int j;
+	int len_of_env;
+	char **new_env;
 
+	new_env = NULL;
+	i = 0;
+	j = 0;
+	len_of_env = 0;
 	while (cmd->env[len_of_env] != NULL)
 		len_of_env++;
 

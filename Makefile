@@ -23,7 +23,7 @@ LIBFT		=	libft/libft.a
 CFLAGS		=	-Wall -Werror -Wextra -lreadline -g #-fsanitize=address,undefined
 RM			=	rm -f
 #PONER LAS FLAGS NECESARIAS PARA LOS MACS DE 42
-#INCREIBLE, CON EL SANITIZER FUNCIONA LS A LA PRIMERA
+
 OBJS		=	$(SRCS:%.c=%.o)
 
 all:		$(NAME)

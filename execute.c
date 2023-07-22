@@ -220,6 +220,15 @@ void	execute_builtin(t_cmd *cmd, int n_token)
         return;
 }
 
+#include <stdarg.h>
+
+void print_to_stdout(const char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    vfprintf(stdout, format, args);
+    va_end(args);
+}
 
 void redirecting_pipes(t_cmd *cmd) /* dobles comandos como grep y cat se quedan en bucle, error de restauración de stdout stdin?? */
 {
@@ -240,14 +249,14 @@ void redirecting_pipes(t_cmd *cmd) /* dobles comandos como grep y cat se quedan 
             execute_first_pipes(cmd, 0);
             cmd->count_pids++;
         }
-        else if(cmd->token[i][0] == '|' && (first_time == 1 || cmd->count_pipes > 0) && cmd->count_pipes < cmd->n_pipes - 1)
+        else if(cmd->token[i][0] == '|' && (first_time == 1 || cmd->count_pipes > 0) && cmd->count_pipes < cmd->n_pipes/*  - 1 */)
         {
             first_time = 0;
             len = find_len_command_pipes(cmd, i);
-            execute_middle_pipes(&cmd, len);
+            execute_middle_pipes(cmd, len);
             cmd->count_pids++;
         }
-        else if (!is_special(cmd->token[i][0]) && cmd->token[i + 1] == NULL && (first_time == 1 || cmd->count_pipes > 0) && cmd->count_pipes == cmd->n_pipes - 1) 
+        else if (!is_special(cmd->token[i][0]) && cmd->token[i + 1] == NULL && (first_time == 1 || cmd->count_pipes > 0) && cmd->count_pipes == cmd->n_pipes /* - 1 */) 
         {
             first_time = 0;
             len = find_len_command_pipes(cmd, i);
@@ -393,7 +402,7 @@ void    execute_last_pipes(t_cmd *cmd, int i)
                 exec_args[j - i] = NULL;
 
                 // AQUÍ LLEGA MAL EL NÚMERO DE COUNT PIPES SI HAY UN PIPE SOLO, CON 0 FUNCIONA(ls | grep utils)
-                fprintf(stderr, "AQUIIIIIIIIIIIIII %d\n", cmd->count_pipes);
+                print_to_stdout("count_pipes: %d\n", cmd->count_pipes - 1);
                 close(cmd->fd[cmd->count_pipes - 1][WRITE_END]);
                 dup2(cmd->fd[cmd->count_pipes - 1][READ_END], STDIN_FILENO);
                 close(cmd->fd[cmd->count_pipes - 1][READ_END]);
@@ -437,7 +446,7 @@ void    execute_last_pipes(t_cmd *cmd, int i)
     }
 }
 
-void    execute_middle_pipes(t_cmd **cmd, int i)
+void    execute_middle_pipes(t_cmd *cmd, int i)
 {
     char    *com;
     char    **exec_args;
@@ -446,84 +455,86 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
     com = NULL;
     exec_args = NULL;
     j = 0;
-    if(cmd[0]->no_expand_vars[i] == 0)
-        replace_vars(cmd[0], &cmd[0]->token[i]);
-    if (!is_argument_extension(cmd[0], i) && !is_redirects(cmd[0]->token[i][0]) && !is_redirects_double_char(cmd[0]->token[i]))  //Double char redirects no hace falta?
+    if(cmd->no_expand_vars[i] == 0)
+        replace_vars(cmd, &cmd->token[i]);
+    if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0]) && !is_redirects_double_char(cmd->token[i]))  //Double char redirects no hace falta?
     {
-        if(!is_executable(cmd[0], cmd[0]->token[i][0])) // Soluciona un leak a la hora de pasarle una ruta absoluta que es un directorio
-            com = command_dir(cmd[0], cmd[0]->token[i]);
-        cmd[0]->pid[cmd[0]->count_pids] = fork(); //Checkear error de fork
-        if(cmd[0]->pid[cmd[0]->count_pids] == 0)
+        if(!is_executable(cmd, cmd->token[i][0])) // Soluciona un leak a la hora de pasarle una ruta absoluta que es un directorio
+            com = command_dir(cmd, cmd->token[i]);
+        cmd->pid[cmd->count_pids] = fork(); //Checkear error de fork
+        if(cmd->pid[cmd->count_pids] == 0)
         {
-            if(is_builtin(cmd[0], i))
+            if(is_builtin(cmd, i))
             {
-                close(cmd[0]->fd[cmd[0]->count_pipes - 1][WRITE_END]);
-                dup2(cmd[0]->fd[cmd[0]->count_pipes - 1][READ_END], STDIN_FILENO);
-                close(cmd[0]->fd[cmd[0]->count_pipes - 1][READ_END]);
-                close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
-                dup2(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END], STDOUT_FILENO);
-                close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
-                cmd[0]->count_pipes++;
-                if(!is_output_redirect(cmd[0], i) && !is_input_redirect(cmd[0], i) \
-                && !is_append_redirect(cmd[0], i) && !is_heredoc_redirect(cmd[0], i))
+                close(cmd->fd[cmd->count_pipes - 1][WRITE_END]);
+                dup2(cmd->fd[cmd->count_pipes - 1][READ_END], STDIN_FILENO);
+                close(cmd->fd[cmd->count_pipes - 1][READ_END]);
+                close(cmd->fd[cmd->count_pipes][READ_END]);
+                dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
+                close(cmd->fd[cmd->count_pipes][WRITE_END]);
+                cmd->count_pipes++;
+                if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
+                && !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
                 {
-                    execute_builtin(cmd[0], i);
+                    execute_builtin(cmd, i);
                     g_status = 0;
                     exit(g_status);
                 }
-                execute_appends(cmd[0], com, exec_args, i);
-                execute_output_redirects(cmd[0], com, exec_args, i);
-                execute_heredoc_redirects(cmd[0], com, exec_args, i);
-                execute_input_redirects(cmd[0], com, exec_args, i);
+                execute_appends(cmd, com, exec_args, i);
+                execute_output_redirects(cmd, com, exec_args, i);
+                execute_heredoc_redirects(cmd, com, exec_args, i);
+                execute_input_redirects(cmd, com, exec_args, i);
                 g_status = 0;
                 exit(g_status);
             }
-            else if (com != NULL || is_executable(cmd[0], cmd[0]->token[i][0]))
+            else if (com != NULL || is_executable(cmd, cmd->token[i][0]))
             {
-                exec_args = (char **)malloc(sizeof(char *) * (cmd[0]->n_tokens - i + 1));
+                exec_args = (char **)malloc(sizeof(char *) * (cmd->n_tokens - i + 1));
                 j = i;
-                while(j < cmd[0]->n_tokens - 1 && !is_special(cmd[0]->token[j][0]) && !is_redirects(cmd[0]->token[j][0]))
+                while(j < cmd->n_tokens - 1 && !is_special(cmd->token[j][0]) && !is_redirects(cmd->token[j][0]))
                 {
-                    exec_args[j - i] = cmd[0]->token[j];
+                    exec_args[j - i] = cmd->token[j];
                     j++;
                 }
                 exec_args[j - i] = NULL;
-                close(cmd[0]->fd[cmd[0]->count_pipes - 1][WRITE_END]);
-                dup2(cmd[0]->fd[cmd[0]->count_pipes - 1][READ_END], STDIN_FILENO);
-                close(cmd[0]->fd[cmd[0]->count_pipes - 1][READ_END]);
-                close(cmd[0]->fd[cmd[0]->count_pipes][READ_END]);
-                dup2(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END], STDOUT_FILENO);
-                close(cmd[0]->fd[cmd[0]->count_pipes][WRITE_END]);
-                cmd[0]->count_pipes++;
-                if(!is_output_redirect(cmd[0], i) && !is_input_redirect(cmd[0], i) && \
-                    !is_append_redirect(cmd[0], i) && !is_heredoc_redirect(cmd[0], i) && !is_executable(cmd[0], cmd[0]->token[i][0]))
+                print_to_stdout("count_pipes: %d\n", cmd->count_pipes - 1);
+                close(cmd->fd[cmd->count_pipes - 1][WRITE_END]);
+                dup2(cmd->fd[cmd->count_pipes - 1][READ_END], STDIN_FILENO);
+                close(cmd->fd[cmd->count_pipes - 1][READ_END]);
+                print_to_stdout("count_pipes: %d\n", cmd->count_pipes);
+                close(cmd->fd[cmd->count_pipes][READ_END]);
+                dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
+                close(cmd->fd[cmd->count_pipes][WRITE_END]);
+                cmd->count_pipes++;
+                if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) && \
+                    !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i) && !is_executable(cmd, cmd->token[i][0]))
                 {
-                    if(execve(com, exec_args, cmd[0]->env) == -1)
+                    if(execve(com, exec_args, cmd->env) == -1)
                     {
                         g_status = 2;
                         exit(g_status);
                     }
                 }
                 /* los appends y heredocs van antes ya que son 2 carácteres en vez de 1 */
-                execute_executable(cmd[0], cmd[0]->token[i]);
-                execute_appends(cmd[0], com, exec_args, i);
-                execute_output_redirects(cmd[0], com, exec_args, i);
-                execute_heredoc_redirects(cmd[0], com, exec_args, i);
-                execute_input_redirects(cmd[0], com, exec_args, i);
+                execute_executable(cmd, cmd->token[i]);
+                execute_appends(cmd, com, exec_args, i);
+                execute_output_redirects(cmd, com, exec_args, i);
+                execute_heredoc_redirects(cmd, com, exec_args, i);
+                execute_input_redirects(cmd, com, exec_args, i);
                 exit(0);
             }
-            else if (!com && !is_executable(cmd[0], cmd[0]->token[i][0]))
+            else if (!com && !is_executable(cmd, cmd->token[i][0]))
             {
                 g_status = 127;
-                DIR* dir = opendir(cmd[0]->token[i]);
+                DIR* dir = opendir(cmd->token[i]);
                 if(dir)
                 {
-                    printf("-minishell: %s: Is a directory\n", cmd[0]->token[i]);
+                    printf("-minishell: %s: Is a directory\n", cmd->token[i]);
                     closedir(dir);
                 }
                 else
-                        printf(cmd[0]->token[i][0] == '/' ? "-minishell: %s: No such file or directory\n" \
-                    : "-minishell: %s: command not found\n", cmd[0]->token[i]);
+                        printf(cmd->token[i][0] == '/' ? "-minishell: %s: No such file or directory\n" \
+                    : "-minishell: %s: command not found\n", cmd->token[i]);
                 exit(g_status);
             }    
         }
@@ -531,7 +542,7 @@ void    execute_middle_pipes(t_cmd **cmd, int i)
         {
             free(exec_args);
             free(com);
-            cmd[0]->count_pipes++;
+            cmd->count_pipes++;
         }
     }
 }
@@ -584,6 +595,7 @@ void    execute_first_pipes(t_cmd *cmd, int i)
                     j++;
                 }
                 exec_args[j - i] = NULL;
+                print_to_stdout("count_pipes: %d\n", cmd->count_pipes);
                 close(cmd->fd[cmd->count_pipes][READ_END]);
                 dup2(cmd->fd[cmd->count_pipes][WRITE_END], STDOUT_FILENO);
                 close(cmd->fd[cmd->count_pipes][WRITE_END]);

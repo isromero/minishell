@@ -61,7 +61,21 @@ void    execute_command_no_exists(t_cmd *cmd, int i)
 	exit(g_status);
 }
 
-void    execute_when_builtin(t_cmd *cmd, int i)
+int	execute_builtin_no_child(t_cmd	*cmd, int i)
+{
+	if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
+		&& !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
+	{
+		execute_builtin(cmd, i);
+		g_status = 0;
+		return (1);
+	}
+	execute_redirects(cmd, NULL, NULL, i);
+	g_status = 0; /* Reinicializamos a 0 porque cuando se pone un echo $? necesitamos reestablecer el status después de haberse ejecutado para siguientes iteraciones */
+	return (1);
+}
+
+void    execute_builtin_in_child(t_cmd *cmd, int i)
 {
 	if(!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
 	&& !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
@@ -77,3 +91,4 @@ void    execute_when_builtin(t_cmd *cmd, int i)
 	g_status = 0;
 	exit(g_status);
 }
+

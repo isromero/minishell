@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-void	parent_process(char *com, char **exec_args)
+int	parent_process(char *com, char **exec_args)
 {
 	int child_status;
 
@@ -22,8 +22,9 @@ void	parent_process(char *com, char **exec_args)
 	if (WIFEXITED(child_status) && WEXITSTATUS(child_status) >= 0)
 	{
 		g_status = WEXITSTATUS(child_status);
-		return ;
+		return (1);
 	}
+	return (0);
 }
 
 void	child_process(t_cmd *cmd, char *com, char **exec_args, int i)
@@ -38,13 +39,15 @@ void	child_process(t_cmd *cmd, char *com, char **exec_args, int i)
 		exit(0);
 }
 
-void	execute_fork(t_cmd *cmd, int i)
+int	execute_fork(t_cmd *cmd, int i)
 {
 	char **exec_args;
 	char *com;
+	int	error_code;
 
 	exec_args = get_exec_args(cmd, i);
 	com = NULL;
+	error_code = 0;
 	pid_t pid = fork();
 	if (pid == -1)
 	{
@@ -54,5 +57,6 @@ void	execute_fork(t_cmd *cmd, int i)
 	else if (pid == 0)
 		child_process(cmd, com, exec_args, i);
 	else
-		parent_process(com, exec_args);
+		error_code = parent_process(com, exec_args);
+	return(error_code);
 }

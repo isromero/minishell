@@ -147,11 +147,12 @@ void	execute_redirects(t_cmd *cmd, char *com, char **exec_args, int i);
 char	**get_exec_args(t_cmd *cmd, int i);
 void	execute_command_exists(t_cmd *cmd, char *com, char **exec_args, int i);
 void	execute_command_no_exists(t_cmd *cmd, int i);
-void	execute_when_builtin(t_cmd *cmd, int i);
+void    execute_builtin_in_child(t_cmd *cmd, int i);
+int		execute_builtin_no_child(t_cmd	*cmd, int i);
 
 /* fork_processes.c */
-void	execute_fork(t_cmd *cmd, int i);
-void	parent_process(char *com, char **exec_args);
+int		execute_fork(t_cmd *cmd, int i);
+int		parent_process(char *com, char **exec_args);
 void	child_process(t_cmd *cmd, char *com, char **exec_args, int i);
 
 /* redirecting_pipes.c */

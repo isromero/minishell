@@ -60,6 +60,32 @@ int parse_args(t_cmd *cmd)
 	return (0);
 }
 
+void	save_token(t_cmd *cmd, char *token)
+{
+	int		i;
+	char	**new_token;
+
+	cmd->n_tokens++;
+	new_token = (char **)malloc(cmd->n_tokens * sizeof(char *));
+	if (new_token == NULL)
+	{
+		printf("Error: No se pudo asignar memoria para cmd->token\n");
+		return ;
+	}
+	i = 0;
+	if (cmd->token != NULL)
+	{
+		while (i < cmd->n_tokens - 1)
+		{
+			new_token[i] = cmd->token[i];
+			i++;
+		}
+		free(cmd->token);
+	}
+	new_token[cmd->n_tokens - 1] = token;
+	cmd->token = new_token;
+}
+
 int count_quotes(char *line)
 {
 	int i;

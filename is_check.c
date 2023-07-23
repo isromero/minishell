@@ -1,44 +1,38 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   signals.c                                          :+:      :+:    :+:   */
+/*   is_check.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/06/14 20:34:02 by isromero          #+#    #+#             */
-/*   Updated: 2023/06/14 20:34:02 by isromero         ###   ########.fr       */
+/*   Created: 2023/07/23 17:10:21 by isromero          #+#    #+#             */
+/*   Updated: 2023/07/23 17:10:21 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	handle_ctrld_heredoc(void)
+int	is_special(char c)
 {
-	ft_putchar_fd('\n', STDOUT_FILENO);
-	exit(0);
+	return (c == INPUT_REDIRECT || c == PIPE || c == OUTPUT_REDIRECT);
 }
 
-void	handle_ctrlc_heredoc(void)
+int	is_variable(char c)
 {
-	ft_putchar_fd('\n', STDOUT_FILENO);
-	exit(0);
+	return (c == VARIABLE);
 }
 
-void	handle_ctrlc(void)
+int	is_redirects(char c)
 {
-	ft_putchar_fd('\n', STDOUT_FILENO);
-	rl_on_new_line();
-	rl_replace_line("", 0);
-	rl_redisplay();
-	g_status = 130;
+	return (c == INPUT_REDIRECT || c == OUTPUT_REDIRECT);
 }
 
-void	handle_ctrlc2(int sig)
+int	is_redirects_double_char(char *token)
 {
-	(void)sig;
+	return (ft_strcmp(APPEND_REDIRECT, token) == 0 || ft_strcmp(HEREDOC_REDIRECT, token) == 0);
 }
 
-void	handle_ctrld(void)
+int	is_argument(char c)
 {
-	g_status = 0;
+	return (c == ARGUMENT);
 }

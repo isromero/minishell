@@ -16,7 +16,7 @@ SRCS		=	builtins.c env.c execute.c expander.c minishell.c parser.c \
 				prompt.c token_utils.c pipes_utils.c utils.c output_redirects.c \
 				input_redirects.c signals.c try_access.c get_next_line/get_next_line.c \
 				get_next_line/get_next_line_utils.c execute_redirects.c execute_utils.c \
-				fork_processes.c redirecting_pipes.c
+				fork_processes.c redirecting_pipes.c is_check.c is_check2.c is_check3.c
 
 LIBFT		=	libft/libft.a
 

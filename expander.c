@@ -50,6 +50,10 @@ void	replace_vars(t_cmd *cmd, char **token)
 	char *new_replaced_token;
 	size_t value_len;
 
+	// Esta variable sirve para contear si se ha reemplazo una variable en el execute
+	// Si es así significa que no necesita reemplazar más, a no ser que con la lógica
+	// de a continuación si está concatenada la variable
+	cmd->replaced_var += 1;
 	token_len = ft_strlen(*token);
 	replaced_token = malloc(token_len + 1);
 	replaced_len = 0;
@@ -59,7 +63,6 @@ void	replace_vars(t_cmd *cmd, char **token)
 	{
 		if ((*token)[j] == VARIABLE && (*token)[j + 1] != '\0')
 		{
-			cmd->replaced_var = 1;
 			size_t var_start = j + 1;
 			size_t var_len = 0;
 			while ((*token)[j + 1 + var_len] != VARIABLE && (*token)[j + 1 + var_len] != '\0' && (*token)[j + 1 + var_len] != SINGLE_QUOTE)

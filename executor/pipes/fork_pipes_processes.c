@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../../minishell.h"
 
 void    child_pipes_process(t_cmd *cmd, char *com, char **exec_args, int i, int redirection_pipe)
 {

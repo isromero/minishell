@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 //redirigimos al input
 // si es comando que no puede recivir el input lo ejecutamos a pelo.

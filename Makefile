@@ -12,13 +12,13 @@
 
 NAME		=	minishell
 CC			=	gcc
-SRCS		=	builtins.c env.c execute.c expander.c minishell.c parser.c \
-				prompt.c token_utils.c pipes_utils.c utils.c output_redirects.c \
-				input_redirects.c signals.c try_access.c get_next_line/get_next_line.c \
-				get_next_line/get_next_line_utils.c execute_redirects.c execute_utils.c \
-				fork_processes.c redirecting_pipes.c is_check.c is_check2.c is_check3.c \
-				fork_pipes_processes.c quote_manage.c quote_manage2.c execute_pipes_utils.c \
-				execute_pipes.c
+SRCS		=	builtins/builtins.c builtins/builtins2.c builtins/builtins_utils.c environment/env.c executor/normal/execute.c expander/expander.c \
+				minishell.c parser/parser.c prompt/prompt.c parser/token_utils.c executor/pipes/pipes_utils.c \
+				utils.c redirects/output_redirects.c redirects/input_redirects.c signals.c executor/try_access.c \
+				get_next_line/get_next_line.c get_next_line/get_next_line_utils.c redirects/execute_redirects.c \
+				executor/normal/execute_utils.c executor/normal/fork_processes.c executor/pipes/redirecting_pipes.c \
+				is_check.c is_check2.c is_check3.c executor/pipes/fork_pipes_processes.c parser/quote_manage.c \
+				parser/quote_manage2.c executor/pipes/execute_pipes_utils.c executor/pipes/execute_pipes.c
 
 LIBFT		=	libft/libft.a
 

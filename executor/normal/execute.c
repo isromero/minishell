@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../../minishell.h"
 
 void executor(t_cmd *cmd)
 {
@@ -55,35 +55,6 @@ void execute(t_cmd *cmd)
         }
         i++;
     }
-}
-
-void	execute_builtin(t_cmd *cmd, int n_token)
-{
-    if (ft_strcmp(cmd->token[n_token], "cd") == 0)
-    {
-        ft_cd(cmd, n_token);
-        n_token++;
-    }
-    else if (ft_strcmp(cmd->token[n_token], "pwd") == 0)
-        ft_pwd(cmd);
-    else if (ft_strcmp(cmd->token[n_token], "env") == 0)
-        ft_env(cmd);
-    else if (ft_strcmp(cmd->token[n_token], "export") == 0 && cmd->token[n_token + 1] != NULL && ft_strchr(cmd->token[n_token + 1], '='))
-    {
-        ft_export(cmd, n_token);
-        n_token++;
-    }
-    else if (ft_strcmp(cmd->token[n_token], "unset") == 0 && cmd->token[n_token + 1] != NULL)
-    {
-        ft_unset(cmd, n_token);
-        n_token++;
-    }
-    else if (ft_strcmp(cmd->token[n_token], "echo") == 0)
-        n_token = ft_echo(cmd, n_token);
-    else if (ft_strcmp(cmd->token[n_token], "exit") == 0)
-        ft_exit(cmd, n_token);
-    else
-        return;
 }
 
 char  *command_dir(t_cmd *cmd, char *command) 

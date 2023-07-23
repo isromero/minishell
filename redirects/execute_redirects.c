@@ -10,7 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
 void execute_appends(t_cmd *cmd, char *com, char **exec_args, int i)
 {

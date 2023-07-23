@@ -13,8 +13,7 @@
 #include "minishell.h"
 
 // /bin/comando inventado  echo $? devuelve 1
-/* ls > hola | ls -l > puta | ls -a > gorditaDIOS FALLA LA DEL MEDIO */
-// CHECKEO NO QUITA COMILLAS POR NO ESTAR AL PRINCIPIO echo esto es" una "prueba
+/* ls > hola | ls -l > puta | ls -a > buenas FALLA LA DEL MEDIO */
 int g_status;
 
 int	main(int argc, char **argv, char **env)

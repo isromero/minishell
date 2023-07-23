@@ -10,28 +10,37 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
+#include "../minishell.h"
 
-int	is_builtin(t_cmd *cmd, int n_token)
+void	execute_builtin(t_cmd *cmd, int n_token)
 {
-	if (ft_strcmp(cmd->token[n_token], "echo") == 0)
-		return(1);
-	else if (ft_strcmp(cmd->token[n_token], "cd") == 0)
-		return(1);
-	else if (ft_strcmp(cmd->token[n_token], "pwd") == 0)
-		return(1);
-	else if (ft_strcmp(cmd->token[n_token], "export") == 0)
-		return(1);
-	else if (ft_strcmp(cmd->token[n_token], "unset") == 0)
-		return(1);
-	else if (ft_strcmp(cmd->token[n_token], "env") == 0)
-		return(1);
-	else if (ft_strcmp(cmd->token[n_token], "exit") == 0)
-		return(1);
-	return (0);
+    if (ft_strcmp(cmd->token[n_token], "cd") == 0)
+    {
+        ft_cd(cmd, n_token);
+        n_token++;
+    }
+    else if (ft_strcmp(cmd->token[n_token], "pwd") == 0)
+        ft_pwd(cmd);
+    else if (ft_strcmp(cmd->token[n_token], "env") == 0)
+        ft_env(cmd);
+    else if (ft_strcmp(cmd->token[n_token], "export") == 0 && cmd->token[n_token + 1] != NULL && ft_strchr(cmd->token[n_token + 1], '='))
+    {
+        ft_export(cmd, n_token);
+        n_token++;
+    }
+    else if (ft_strcmp(cmd->token[n_token], "unset") == 0 && cmd->token[n_token + 1] != NULL)
+    {
+        ft_unset(cmd, n_token);
+        n_token++;
+    }
+    else if (ft_strcmp(cmd->token[n_token], "echo") == 0)
+        n_token = ft_echo(cmd, n_token);
+    else if (ft_strcmp(cmd->token[n_token], "exit") == 0)
+        ft_exit(cmd, n_token);
+    else
+        return;
 }
 
-//INTENTO DE OPTIMIZAR PERO PETA CON COMILLAS , DEJO PARA OPTIMIZAR TRNAUQILAMENTE
 int ft_echo(t_cmd *cmd, int echo_token)
 {
 	int first_echo_token;
@@ -83,7 +92,6 @@ void	ft_cd(t_cmd *cmd, int cd_token)
 	setenv(oldpwd, cwd, 1);
 	free(oldpwd);
 }
-
 
 /* CADA VEZ QUE SE LLAMA O CUANDO HACEMOS GETENV LA ULTIMA VARIABLE TIENE QUE CONTENER EL ULTIMO COMANDO ASI QUE: _=/usr/bin/env */
 void ft_env(t_cmd *cmd)
@@ -161,57 +169,6 @@ void ft_export(t_cmd *cmd, int export_token)
 	cmd->env = new_env;
 }
 
-int len_var_in_env(t_cmd *cmd, char *token)
-{
-	int    i;
-	int    eqpos;
-
-	i = 0;
-	eqpos = 0;
-	while (token[eqpos] != '=')
-		eqpos++;
-	while (cmd->env[i])
-	{
-		if (ft_memcmp(cmd->env[i], token, eqpos + 1) == 0)
-			return (i);
-		i++;
-	}
-	return (0);
-}
-
-int var_exists(t_cmd *cmd, char *token)
-{
-	int    i;
-	int    eqpos;
-
-	i = 0;
-	eqpos = 0;
-	while (token[eqpos] != '=')
-		eqpos++;
-	while (cmd->env[i])
-	{
-		if (ft_memcmp(cmd->env[i], token, eqpos + 1) == 0)
-			return (1);
-		i++;
-	}
-	return (0);
-}
-
-
-bool compare_variable(const char* variable, const char* name)
-{
-	int i;
-
-	i = 0;
-	while (variable[i] != '=' && name[i] != '\0')
-	{
-		if (variable[i] != name[i])
-			return false;
-		i++;
-	}
-	return (variable[i] == '=' && name[i] == '\0');
-}
-
 /* CHECKEAR GESTIÓN DE UNSET SIN ARGUMENTOS */
 
 void ft_unset(t_cmd *cmd, int unset_token)
@@ -228,7 +185,6 @@ void ft_unset(t_cmd *cmd, int unset_token)
 	len_of_env = 0;
 	while (cmd->env[len_of_env] != NULL)
 		len_of_env++;
-
 	new_env = (char **)malloc(sizeof(char *) * (len_of_env + 1));
 	if(new_env == NULL)
 		return ;
@@ -243,37 +199,4 @@ void ft_unset(t_cmd *cmd, int unset_token)
 	}
 	new_env[j] = NULL;
 	cmd->env = new_env;
-}
-
-void execute_builtin_exit(t_cmd *cmd, int exit_code)
-{
-	// Realiza cualquier limpieza necesaria antes de salir
-	// Esto vale?????????????????????????????
-	clean_tokens(cmd);
-	free(cmd->line);
-	free(cmd->prompt);
-	free_matrix(cmd->env);
-	free(cmd->no_expand_vars);
-	/* HABRÍA QUE LIBERAR CMD->ENV */
-	// Salir del programa con el código de salida especificado
-	exit(exit_code);
-}
-
-void	ft_exit(t_cmd *cmd, int exit_token) // Con textos de argumentos creo que hay que devolver 2
-{
-	int	exit_code;
-
-	if(is_number(cmd->token[exit_token + 1]) && ft_atoi(cmd->token[exit_token + 1]) >= INT_MIN && ft_atoi(cmd->token[exit_token + 1]) <= INT_MAX) // Si es un número cualquiera entonces es que hay un argumento número y:
-	{
-		exit_code = ft_atoi(cmd->token[exit_token + 1]);
-		if(exit_code >= 0 && exit_code <= 255) // Habría que checkear si le pasas exit "numero random" debe devolver ese numero random o 1 predeterminado PENDIENTE
-			execute_builtin_exit(cmd, exit_code);
-		else if(exit_code < 0 || exit_code > 255) // Esto significa que está fuera de los límites del exit, y bash hace el % del valor pasado para hacer que esté en el rango válido
-		{
-			exit_code = (exit_code % 256);
-			execute_builtin_exit(cmd, exit_code);
-		}
-	}
-	else
-		execute_builtin_exit(cmd, 1); // En el caso de que no sea ningun número ni nada devolvemos un error predeterminado, el 1
 }

@@ -41,40 +41,31 @@ void	execute_builtin(t_cmd *cmd, int n_token)
         return;
 }
 
-int ft_echo(t_cmd *cmd, int echo_token)
-{
-	int first_echo_token;
-	int	first_iteration;
-
-	first_echo_token = echo_token;
-	first_iteration = 0;
-	echo_token++; // Avanzar a la posición después de "echo"
-	if (ft_strcmp(cmd->token[0], "echo") == 0 && ft_strcmp(cmd->token[1], "$?") == 0) 
-	{
-		ft_putnbr_fd(g_status, STDOUT_FILENO);
-		ft_putchar_fd('\n', STDOUT_FILENO);
-		return (0);
-	}
-	if(ft_strcmp(cmd->token[first_echo_token + 1], "-n") == 0)
-		echo_token++;
-	while (cmd->token[echo_token])
-	{
-		 if(cmd->no_expand_vars[echo_token] == 0)
-			replace_vars(cmd, &cmd->token[echo_token]);
+int ft_echo(t_cmd *cmd, int echo_token) 
+{ 
+    int i = 1; 
+   if (ft_strcmp(cmd->token[0], "echo") == 0 && ft_strcmp(cmd->token[1], "$?") == 0) 
+    { 
+        ft_putnbr_fd(g_status, STDOUT_FILENO); 
+        ft_putchar_fd('\n', STDOUT_FILENO); 
+        return (0); 
+    }
+	if(ft_strcmp(cmd->token[echo_token + 1], "-n") == 0)
+		i++;
+    while (cmd->token[i]) 
+    {
+        if (cmd->no_expand_vars[i] == 0) 
+            replace_vars(cmd, &cmd->token[i]); 
 		if(is_special(cmd->token[echo_token][0]) && (cmd->in_single_quote == 0 || cmd->in_double_quote == 0))
 			break ;
-		if(first_iteration != 0)
-			printf(" %s", cmd->token[echo_token]);
-		else if(first_iteration == 0)
-		{
-			printf("%s", cmd->token[echo_token]);
-			first_iteration++;
-		}
-		echo_token++;
-	}
-	if (ft_strcmp(cmd->token[first_echo_token + 1], "-n") != 0)
-		printf("\n");
-	return (echo_token);
+        printf("%s", cmd->token[i]); 
+        if (cmd->token[i + 1] != NULL) 
+            printf(" "); 
+        i++; 
+    } 
+    if (ft_strcmp(cmd->token[echo_token + 1], "-n") != 0) 
+        printf("\n"); 
+    return (i); 
 }
 
 void	ft_cd(t_cmd *cmd, int cd_token)

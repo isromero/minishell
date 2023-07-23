@@ -155,6 +155,10 @@ int		execute_fork(t_cmd *cmd, int i);
 int		parent_process(char *com, char **exec_args);
 void	child_process(t_cmd *cmd, char *com, char **exec_args, int i);
 
+/* fork_pipes_processes.c */
+void    execute_fork_pipes(t_cmd *cmd, int i, int redirection_pipe);
+void    child_pipes_process(t_cmd *cmd, char *com, char **exec_args, int i, int redirection_pipe);
+
 /* redirecting_pipes.c */
 void	redirect_first_pipe(t_cmd *cmd);
 void	redirect_middle_pipes(t_cmd *cmd);
@@ -181,7 +185,8 @@ void	init_expand_vars(t_cmd *cmd);
 void	init_pipes(t_cmd *cmd);
 void	wait_close_pipes(t_cmd *cmd);
 int		find_len_command_pipes(t_cmd *cmd, int i);
-void		count_pipes(t_cmd *cmd);
+void	count_pipes(t_cmd *cmd);
+void	free_pipes(t_cmd *cmd);
 
 /* prompt.c */
 char	*get_prompt(t_cmd *custom_prompt);

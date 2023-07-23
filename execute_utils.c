@@ -91,4 +91,3 @@ void    execute_builtin_in_child(t_cmd *cmd, int i)
 	g_status = 0;
 	exit(g_status);
 }
-

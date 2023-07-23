@@ -22,14 +22,18 @@ SRCS		=	builtins.c env.c execute.c expander.c minishell.c parser.c \
 
 LIBFT		=	libft/libft.a
 
-
 CFLAGS		=	-Wall -Werror -Wextra -lreadline -g -fsanitize=address,undefined
 RM			=	rm -f
 #PONER LAS FLAGS NECESARIAS PARA LOS MACS DE 42
 
-OBJS		=	$(SRCS:%.c=%.o)
-
 all:		$(NAME)
+
+OBJ_DIR		=	obj
+OBJS		=	$(addprefix $(OBJ_DIR)/,$(SRCS:.c=.o))
+
+$(OBJ_DIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(LIBFT):
 			@make -C libft >/dev/null 2>&1
@@ -38,17 +42,14 @@ $(LIBFT):
 $(NAME):	$(OBJS) $(LIBFT)
 			$(CC) $(OBJS) $(LIBFT) $(CFLAGS) -o $(NAME) >/dev/null 2>&1
 
-%o:			%.c
-			$(CC) $(CFLAGS) -c $< -o $@
-
 clean:
-			@$(RM) $(OBJS) >/dev/null 2>&1
+	@$(RM) $(OBJS) >/dev/null 2>&1
+	@$(RM) -r $(OBJ_DIR) >/dev/null 2>&1
 
-fclean:		clean
-			@$(RM) $(NAME) >/dev/null 2>&1
-			@$(RM) *.out >/dev/null 2>&1
-			@make fclean -C libft/ >/dev/null 2>&1
+fclean: clean
+	@$(RM) $(NAME) >/dev/null 2>&1
+	@make fclean -C libft/ >/dev/null 2>&1
 
-re:			fclean all
+re: fclean all
 
-.PHONY:		all clean fclean re
+.PHONY: all clean fclean re

@@ -29,10 +29,10 @@ void redirecting_pipes(t_cmd *cmd)
             execute_first_pipes(cmd, 0);
         }
         else if(cmd->token[i][0] == '|' && (first_time == 1 || cmd->count_pipes > 0) \
-            && cmd->count_pipes < cmd->n_pipes/*  - 1 */)
+            && cmd->count_pipes < cmd->n_pipes)
             execute_middle_pipes(cmd, find_len_command_pipes(cmd, i));
         else if (!is_special(cmd->token[i][0]) && cmd->token[i + 1] == NULL \
-            && (first_time == 1 || cmd->count_pipes > 0) && cmd->count_pipes == cmd->n_pipes /* - 1 */) 
+            && (first_time == 1 || cmd->count_pipes > 0) && cmd->count_pipes == cmd->n_pipes) 
             execute_last_pipes(cmd, find_len_command_pipes(cmd, i));
         i++;
     }

@@ -43,8 +43,10 @@ void	execute_builtin(t_cmd *cmd, int n_token)
 
 int ft_echo(t_cmd *cmd, int echo_token) 
 { 
-    int i = 1; 
-   if (ft_strcmp(cmd->token[0], "echo") == 0 && ft_strcmp(cmd->token[1], "$?") == 0) 
+	int i;
+	
+	i = 1; 
+   	if (ft_strcmp(cmd->token[0], "echo") == 0 && ft_strcmp(cmd->token[1], "$?") == 0) 
     { 
         ft_putnbr_fd(g_status, STDOUT_FILENO); 
         ft_putchar_fd('\n', STDOUT_FILENO); 

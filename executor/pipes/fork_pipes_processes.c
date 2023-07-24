@@ -29,7 +29,7 @@ void    child_pipes_process(t_cmd *cmd, char *com, char **exec_args, int i, int 
         else if (!com && !is_executable(cmd, cmd->token[i][0]))
             execute_command_no_exists(cmd, i);
     }
-    else // No necesario, pero por si acaso
+    else
         exit(0);
 }
 

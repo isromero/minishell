@@ -19,7 +19,7 @@ int g_status;
 int	main(int argc, char **argv, char **env)
 {
 	t_cmd	cmd;
-	// print_minishell();
+	print_minishell();
 	(void)argc;
 	(void)argv;
 	cmd.env = NULL;

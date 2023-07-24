@@ -35,9 +35,9 @@ char	*ft_strtok(char *str, const char *delim)
 
 char	**ft_strstrdup(char **strstr)
 {
-	char **dup;
-	int i;
-	int j;
+	char	**dup;
+	int		i;
+	int		j;
 
 	j = 0;
 	while (strstr && strstr[j])

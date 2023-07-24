@@ -12,6 +12,25 @@
 
 #include "../minishell.h"
 
+int	is_builtin(t_cmd *cmd, int n_token)
+{
+	if (ft_strcmp(cmd->token[n_token], "echo") == 0)
+		return (1);
+	else if (ft_strcmp(cmd->token[n_token], "cd") == 0)
+		return (1);
+	else if (ft_strcmp(cmd->token[n_token], "pwd") == 0)
+		return (1);
+	else if (ft_strcmp(cmd->token[n_token], "export") == 0)
+		return (1);
+	else if (ft_strcmp(cmd->token[n_token], "unset") == 0)
+		return (1);
+	else if (ft_strcmp(cmd->token[n_token], "env") == 0)
+		return (1);
+	else if (ft_strcmp(cmd->token[n_token], "exit") == 0)
+		return (1);
+	return (0);
+}
+
 int	is_single_quote(t_cmd *cmd, int len)
 {
 	int	i;

@@ -110,7 +110,7 @@ int		len_var_in_env(t_cmd *cmd, char *token);
 int		var_exists(t_cmd *cmd, char *token);
 void	remove_line_from_env(t_cmd *cmd, int line_index);
 int		len_to_equal(char *str);
-char	**malloc_new_env_export(t_cmd *cmd, int len_of_env);
+char	**malloc_new_env_builtin(t_cmd *cmd, int len_of_env);
 int		print_echo(t_cmd *cmd, int echo_token, int first_iteration);
 
 /* env.c */

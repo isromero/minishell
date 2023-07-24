@@ -25,7 +25,7 @@ void	ft_export(t_cmd *cmd, int export_token)
 		len_of_env++;
 	if (var_exists(cmd, cmd->token[export_token + 1]))
 		len_of_env--;
-	new_env = malloc_new_env_export(cmd, len_of_env);
+	new_env = malloc_new_env_builtin(cmd, len_of_env);
 	if (var_exists(cmd, cmd->token[export_token + 1]))
 	{
 		free(new_env[pos_var]);

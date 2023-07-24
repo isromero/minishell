@@ -12,23 +12,27 @@
 
 #include "../minishell.h"
 
-int	is_builtin(t_cmd *cmd, int n_token)
+void	execute_builtin(t_cmd *cmd, int n_token)
 {
-	if (ft_strcmp(cmd->token[n_token], "echo") == 0)
-		return (1);
-	else if (ft_strcmp(cmd->token[n_token], "cd") == 0)
-		return (1);
+	if (ft_strcmp(cmd->token[n_token], "cd") == 0)
+		ft_cd(cmd, n_token++);
 	else if (ft_strcmp(cmd->token[n_token], "pwd") == 0)
-		return (1);
-	else if (ft_strcmp(cmd->token[n_token], "export") == 0)
-		return (1);
-	else if (ft_strcmp(cmd->token[n_token], "unset") == 0)
-		return (1);
+		ft_pwd(cmd);
 	else if (ft_strcmp(cmd->token[n_token], "env") == 0)
-		return (1);
+		ft_env(cmd);
+	else if (ft_strcmp(cmd->token[n_token], "export") == 0 
+		&& cmd->token[n_token + 1] != NULL 
+		&& ft_strchr(cmd->token[n_token + 1], '='))
+		ft_export(cmd, n_token++);
+	else if (ft_strcmp(cmd->token[n_token], "unset") == 0 
+		&& cmd->token[n_token + 1] != NULL)
+		ft_unset(cmd, n_token++);
+	else if (ft_strcmp(cmd->token[n_token], "echo") == 0)
+		n_token = ft_echo(cmd, n_token);
 	else if (ft_strcmp(cmd->token[n_token], "exit") == 0)
-		return (1);
-	return (0);
+		ft_exit(cmd, n_token);
+	else
+		return ;
 }
 
 int	len_var_in_env(t_cmd *cmd, char *token)
@@ -81,7 +85,7 @@ bool	compare_variable(const char *variable, const char *name)
 	return (variable[i] == '=' && name[i] == '\0');
 }
 
-char	**malloc_new_env_export(t_cmd *cmd, int len_of_env)
+char	**malloc_new_env_builtin(t_cmd *cmd, int len_of_env)
 {
 	char	**new_env;
 	int		i;

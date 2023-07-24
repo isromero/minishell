@@ -12,29 +12,6 @@
 
 #include "../minishell.h"
 
-void	execute_builtin(t_cmd *cmd, int n_token)
-{
-	if (ft_strcmp(cmd->token[n_token], "cd") == 0)
-		ft_cd(cmd, n_token++);
-	else if (ft_strcmp(cmd->token[n_token], "pwd") == 0)
-		ft_pwd(cmd);
-	else if (ft_strcmp(cmd->token[n_token], "env") == 0)
-		ft_env(cmd);
-	else if (ft_strcmp(cmd->token[n_token], "export") == 0 
-		&& cmd->token[n_token + 1] != NULL 
-		&& ft_strchr(cmd->token[n_token + 1], '='))
-		ft_export(cmd, n_token++);
-	else if (ft_strcmp(cmd->token[n_token], "unset") == 0 
-		&& cmd->token[n_token + 1] != NULL)
-		ft_unset(cmd, n_token++);
-	else if (ft_strcmp(cmd->token[n_token], "echo") == 0)
-		n_token = ft_echo(cmd, n_token);
-	else if (ft_strcmp(cmd->token[n_token], "exit") == 0)
-		ft_exit(cmd, n_token);
-	else
-		return ;
-}
-
 int	print_echo(t_cmd *cmd, int echo_token, int first_iteration)
 {
 	while (cmd->token[echo_token])
@@ -79,18 +56,57 @@ int	ft_echo(t_cmd *cmd, int echo_token)
 	return (echo_token);
 }
 
+void	set_pwd_env(t_cmd *cmd, char **new_env, char *cwd, char *oldpwd)
+{
+	int		oldpwd_var;
+	int		pwd_var;
+	char	*actualpwd;
+	char	*change_oldpwd;
+
+	pwd_var = len_var_in_env(cmd, "PWD=");
+	oldpwd_var = len_var_in_env(cmd, "OLDPWD=");
+	actualpwd = 
+		malloc(sizeof(char) * (ft_strlen("PWD=") + ft_strlen(cwd) + 2));
+	if (actualpwd == NULL)
+		return ;
+	change_oldpwd = 
+		malloc(sizeof(char) * (ft_strlen("OLDPWD=") + ft_strlen(oldpwd) + 2));
+	if (change_oldpwd == NULL)
+		return ;
+	ft_strcpy(actualpwd, "PWD=");
+	ft_strcpy(change_oldpwd, "OLDPWD=");
+	free(new_env[pwd_var]);
+	new_env[pwd_var] = ft_strdup(ft_strcat(actualpwd, cwd));
+	free(new_env[oldpwd_var]);
+	new_env[oldpwd_var] = ft_strdup(ft_strcat(change_oldpwd, oldpwd));
+	free(actualpwd);
+	free(change_oldpwd);
+}
+
 void	ft_cd(t_cmd *cmd, int cd_token)
 {
-	char	*path;
 	char	cwd[1024];
 	char	*oldpwd;
+	char	**new_env;
+	int		len_of_env;
 
-	path = cmd->token[cd_token + 1];
 	oldpwd = ft_getenv("PWD", cmd->env);
-	if (chdir(path) != 0)
-		printf("-minishell: cd: %s: Not a directory\n", path);
+	len_of_env = 0;
+	new_env = NULL;
+	if (chdir(cmd->token[cd_token + 1]) != 0)
+	{
+		printf("-minishell: cd: %s: Not a directory\n", 
+			cmd->token[cd_token + 1]);
+		return ;
+	}
 	getcwd(cwd, sizeof(cwd));
-	setenv(oldpwd, cwd, 1);
+	while (cmd->env[len_of_env] != NULL)
+		len_of_env++;
+	new_env = malloc_new_env_builtin(cmd, len_of_env - 1);
+	set_pwd_env(cmd, new_env, cwd, oldpwd);
+	new_env[len_of_env] = NULL;
+	free(cmd->env);
+	cmd->env = new_env;
 	free(oldpwd);
 }
 

@@ -12,35 +12,35 @@
 
 #include "../../minishell.h"
 
-void    child_pipes_process(t_cmd *cmd, char *com, char **exec_args, int i, int redirection_pipe)
+void	child_pipes_process(t_cmd *cmd, char *com, char **args, int i, int pipe)
 {
-    if(redirection_pipe == 0)
-        redirect_first_pipe(cmd);
-    else if(redirection_pipe == 1)
-        redirect_middle_pipes(cmd);
-    else if(redirection_pipe == 2)
-        redirect_last_pipe(cmd);
-    if(is_builtin(cmd, i))
-        execute_builtin_in_child(cmd, i);
-    else if(!is_builtin(cmd, i))
-    {
-        if (com != NULL || is_executable(cmd, cmd->token[i][0]))
-            execute_command_exists(cmd, com, exec_args, i);
-        else if (!com && !is_executable(cmd, cmd->token[i][0]))
-            execute_command_no_exists(cmd, i);
-    }
-    else
-        exit(0);
+	if (pipe == 0)
+		redirect_first_pipe(cmd);
+	else if (pipe == 1)
+		redirect_middle_pipes(cmd);
+	else if (pipe == 2)
+		redirect_last_pipe(cmd);
+	if (is_builtin(cmd, i))
+		execute_builtin_in_child(cmd, i);
+	else if (!is_builtin(cmd, i))
+	{
+		if (com != NULL || is_executable(cmd, cmd->token[i][0]))
+			execute_command_exists(cmd, com, args, i);
+		else if (!com && !is_executable(cmd, cmd->token[i][0]))
+			execute_command_no_exists(cmd, i);
+	}
+	else
+		exit(0);
 }
 
-void    execute_fork_pipes(t_cmd *cmd, int i, int redirection_pipe)
+void	execute_fork_pipes(t_cmd *cmd, int i, int redirection_pipe)
 {
-	char **exec_args;
-	char *com;
+	char	**exec_args;
+	char	*com;
 
 	exec_args = get_exec_args(cmd, i);
-	if(!is_executable(cmd, cmd->token[i][0]))
-        com = command_dir(cmd, cmd->token[i]);
+	if (!is_executable(cmd, cmd->token[i][0]))
+		com = command_dir(cmd, cmd->token[i]);
 	cmd->pid[cmd->count_pids] = fork();
 	if (cmd->pid[cmd->count_pids] == -1)
 	{
@@ -48,10 +48,10 @@ void    execute_fork_pipes(t_cmd *cmd, int i, int redirection_pipe)
 		exit(1);
 	}
 	else if (cmd->pid[cmd->count_pids] == 0)
-        child_pipes_process(cmd, com, exec_args, i, redirection_pipe);
+		child_pipes_process(cmd, com, exec_args, i, redirection_pipe);
 	else
-    {
-        free(exec_args);
-        free(com);
-    }
+	{
+		free(exec_args);
+		free(com);
+	}
 }

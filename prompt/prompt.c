@@ -12,15 +12,19 @@
 
 #include "../minishell.h"
 
-char *get_prompt(t_cmd *custom_prompt)
+char	*get_prompt(t_cmd *custom_prompt)
 {
-	char *username = exec_custom(custom_prompt, "/usr/bin/whoami", "whoami"); // Obtener el nombre de usuario desde whoami
-	char cwd[1024];
-	size_t prompt_length;
+	char	*username;
+	char	cwd[1024];
+	size_t	prompt_length;
 
-	getcwd(cwd, sizeof(cwd)); // Obtener la ubicación actual de la terminal
-	prompt_length = ft_strlen(username) + ft_strlen(cwd) + ft_strlen(COLOR_GREEN) \
-	+ ft_strlen(COLOR_MAGENTA) + ft_strlen(COLOR_YELLOW) + ft_strlen(COLOR_CYAN) + ft_strlen(COLOR_WHITE) + 16; // Longitud total del prompt personalizado
+	username = exec_custom(custom_prompt, "/usr/bin/whoami", "whoami");
+	getcwd(cwd, sizeof(cwd));
+	prompt_length = ft_strlen(username) + ft_strlen(cwd) 
+		+ ft_strlen(COLOR_GREEN) \
+		+ ft_strlen(COLOR_MAGENTA) + ft_strlen(COLOR_YELLOW) 
+		+ ft_strlen(COLOR_CYAN) 
+		+ ft_strlen(COLOR_WHITE) + 16;
 	custom_prompt->prompt = (char *)malloc(prompt_length * sizeof(char));
 	ft_strcpy(custom_prompt->prompt, COLOR_GREEN);
 	ft_strcat(custom_prompt->prompt, username);
@@ -41,15 +45,14 @@ char	*update_output(int fd)
 	char	*line;
 
 	line = get_next_line(fd);
-	line[ft_strlen(line) - 1] = 0; // Eliminar el salto de línea al final de la línea
+	line[ft_strlen(line) - 1] = 0;
 	if (!line)
 		return (0);
-	return(line);
+	return (line);
 }
 
 char	*exec_custom(t_cmd *cmd, char *full, char *args)
 {
-	//full es la ruta absoluta, args solo whoami, out el user
 	pid_t	pid;
 	int		fd[2];
 	char	**matrix;

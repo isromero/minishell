@@ -16,13 +16,13 @@ void	init_pipes(t_cmd *cmd)
 {
 	int	i;
 	int	j;
-	
+
 	cmd->count_pipes = 0;
-    cmd->count_pids = 0;
-    cmd->pid = (int *)malloc(sizeof(int) * cmd->n_processes);
-    cmd->fd = (int **)malloc(sizeof(int *) * cmd->n_pipes);
+	cmd->count_pids = 0;
+	cmd->pid = (int *)malloc(sizeof(int) * cmd->n_processes);
+	cmd->fd = (int **)malloc(sizeof(int *) * cmd->n_pipes);
 	j = 0;
-	while(j < cmd->n_pipes)
+	while (j < cmd->n_pipes)
 		cmd->fd[j++] = (int *)malloc(sizeof(int) * 2);
 	i = 0;
 	while (i < cmd->n_pipes)
@@ -88,16 +88,16 @@ int	find_len_command_pipes(t_cmd *cmd, int i)
 	return (0);
 }
 
-void free_pipes(t_cmd *cmd)
+void	free_pipes(t_cmd *cmd)
 {
-    int i;
+	int	i;
 
-    i = 0;
-    while(i < cmd->n_pipes)
-    {
-        free(cmd->fd[i]);
-        i++;
-    }
-    free(cmd->fd);
-    free(cmd->pid);
+	i = 0;
+	while (i < cmd->n_pipes)
+	{
+		free(cmd->fd[i]);
+		i++;
+	}
+	free(cmd->fd);
+	free(cmd->pid);
 }

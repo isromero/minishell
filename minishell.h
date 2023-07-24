@@ -110,6 +110,8 @@ int		len_var_in_env(t_cmd *cmd, char *token);
 int		var_exists(t_cmd *cmd, char *token);
 void	remove_line_from_env(t_cmd *cmd, int line_index);
 int		len_to_equal(char *str);
+char	**malloc_new_env_export(t_cmd *cmd, int len_of_env);
+int		print_echo(t_cmd *cmd, int echo_token, int first_iteration);
 
 /* env.c */
 char	*ft_getenv(const char *name, char **env);
@@ -167,7 +169,6 @@ void	redirect_last_pipe(t_cmd *cmd);
 /* expander.c */
 void	replace_vars(t_cmd *cmd, char **token);
 int		special_for_vars(char c);
-void	print_vars(t_cmd *cmd, int i);
 
 /* parser.c */
 int		parse_args(t_cmd *cmd);
@@ -219,6 +220,7 @@ int		is_executable(t_cmd *cmd, char c);
 char	*ft_strtok(char *str, const char *delim);
 int		is_number(const char *str);
 void	free_matrix(char **matrix);
+char	**ft_strstrdup(char **strstr);
 
 /* output_redirects.c */
 void	output_redirect(t_cmd *cmd);

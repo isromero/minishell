@@ -12,28 +12,32 @@
 
 #include "../minishell.h"
 
-int parse_args(t_cmd *cmd)
+int	parse_args(t_cmd *cmd)
 {
-	int len = 0;
-	int i = 0;
+	int		len;
+	int		i;
+	char	*token;
+
+	len = 0;
+	i = 0;
 	cmd->n_tokens = 0;
 	cmd->token = NULL;
 	cmd->in_single_quote = false;
 	cmd->in_double_quote = false;
-	if(count_quotes(cmd->line) % 2 != 0)
+	if (count_quotes(cmd->line) % 2 != 0)
 	{
 		printf("-minishell: no closing quote\n");
-		return(-1);
+		return (-1);
 	}
-	// Cálculo del número de tokens y almacenamiento de los tokens
 	while (cmd->line[i] != '\0')
 	{
-		while (cmd->line[i] == ' ' && cmd->in_single_quote == false && cmd->in_double_quote == false) // Si hay espacios y no está en comillas las saltamos, sino las guardamos
+		while (cmd->line[i] == ' ' && cmd->in_single_quote == false 
+			&& cmd->in_double_quote == false)
 			i++;
 		len = check_len_token(cmd, i);
-		if(len > 0)
+		if (len > 0)
 		{
-			char *token = (char *)malloc((len + 1) * sizeof(char));
+			token = (char *)malloc((len + 1) * sizeof(char));
 			if (token == NULL)
 			{
 				printf("malloc error\n");
@@ -45,17 +49,13 @@ int parse_args(t_cmd *cmd)
 			save_token(cmd, token);
 			i += len;
 		}
-		else if(len == -1)
-			return(-1);
-		// En principio no es necesario esto:
-		// else
-		//     i++;
+		else if (len == -1)
+			return (-1);
 	}
-	// Asegurarse de que el último elemento del arreglo sea NULL
 	save_token(cmd, NULL);
 	init_expand_vars(cmd);
-	if(remove_quotes(cmd) == -1)
-		return(-1);
+	if (remove_quotes(cmd) == -1)
+		return (-1);
 	print_tokens(cmd);
 	return (0);
 }
@@ -86,22 +86,19 @@ void	save_token(t_cmd *cmd, char *token)
 	cmd->token = new_token;
 }
 
-
-void init_expand_vars(t_cmd *cmd)
+void	init_expand_vars(t_cmd *cmd)
 {
-	cmd->no_expand_vars = malloc((cmd->n_tokens) * sizeof(int));
-	int i;
+	int	i;
 
 	i = 0;
-	while(cmd->token[i])
+	cmd->no_expand_vars = malloc((cmd->n_tokens) * sizeof(int));
+	while (cmd->token[i])
 	{
-		if(count_left_single_quotes(cmd->token[i]) % 2 != 0 && cmd->token[i][0] == SINGLE_QUOTE)
+		if (count_left_single_quotes(cmd->token[i]) % 2 != 0 
+			&& cmd->token[i][0] == SINGLE_QUOTE)
 			cmd->no_expand_vars[i] = 1;
 		else
 			cmd->no_expand_vars[i] = 0;
 		i++;
 	}
 }
-// No gestionado de quotes:
-// ejemplo: "'hola"' /* printf("-minishell: error while looking for matching quote\n"); */
-/* o h"hola" (texto delante de comillas sin espacio) */

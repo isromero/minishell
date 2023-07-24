@@ -33,6 +33,28 @@ char	*ft_strtok(char *str, const char *delim)
 	return (token);
 }
 
+char	**ft_strstrdup(char **strstr)
+{
+	char **dup;
+	int i;
+	int j;
+
+	j = 0;
+	while (strstr && strstr[j])
+		j++;
+	dup = malloc((j + 1) * sizeof(char *));
+	if (!dup)
+		return (NULL);
+	i = 0;
+	while (strstr[i])
+	{
+		dup[i] = ft_strdup(strstr[i]);
+		i++;
+	}
+	dup[i] = NULL;
+	return (dup);
+}
+
 int	is_number(const char *str)
 {
 	if (str == NULL || *str == '\0')

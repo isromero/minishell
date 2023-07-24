@@ -56,8 +56,6 @@ void	remove_single_quotes(char **token)
 
 int	remove_quotes(t_cmd *cmd)
 {
-	size_t	double_quotes;
-	size_t	single_quotes;
 	int		left_double_quotes;
 	int		left_single_quotes;
 	size_t	len_token;
@@ -68,12 +66,11 @@ int	remove_quotes(t_cmd *cmd)
 	j = 0;
 	while (cmd->token[i])
 	{
-		single_quotes = count_single_quotes(cmd->token[i]);
-		double_quotes = count_double_quotes(cmd->token[i]);
 		len_token = ft_strlen(cmd->token[i]);
 		left_double_quotes = count_left_double_quotes(cmd->token[i]);
 		left_single_quotes = count_left_single_quotes(cmd->token[i]);
-		if (double_quotes >= 2 || single_quotes >= 2)
+		if (count_double_quotes(cmd->token[i]) >= 2 
+			|| count_single_quotes(cmd->token[i]) >= 2)
 		{
 			j = 0;
 			while (cmd->token[i][j] != '\0')
@@ -91,10 +88,12 @@ int	remove_quotes(t_cmd *cmd)
 				j++;
 			}
 			if (left_double_quotes % 2 == 0
-				&& single_quotes + double_quotes != len_token) 
+				&& (size_t)(count_single_quotes(cmd->token[i]) 
+				+ count_double_quotes(cmd->token[i])) != len_token) 
 				remove_single_quotes(&cmd->token[i]);
 			if (left_single_quotes % 2 == 0
-				&& single_quotes + double_quotes != len_token) 
+				&& (size_t)(count_single_quotes(cmd->token[i]) 
+				+ count_double_quotes(cmd->token[i])) != len_token) 
 				remove_double_quotes(&cmd->token[i]);
 		}
 		if (cmd->token[0] != NULL && ft_strlen(cmd->token[0]) == 0)

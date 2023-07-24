@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/28 15:04:45 by isromero          #+#    #+#             */
-/*   Updated: 2022/09/28 17:47:32 by isromero         ###   ########.fr       */
+/*   Updated: 2023/07/24 19:16:20 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,5 +18,5 @@ void	ft_lstadd_front(t_list **lst, t_list *new)
 	{
 		new->next = *lst;
 		*lst = new;
-	}	
+	}
 }

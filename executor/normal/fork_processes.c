@@ -14,7 +14,7 @@
 
 int	parent_process(char *com, char **exec_args)
 {
-	int child_status;
+	int	child_status;
 
 	free(com);
 	free(exec_args);
@@ -29,26 +29,27 @@ int	parent_process(char *com, char **exec_args)
 
 void	child_process(t_cmd *cmd, char *com, char **exec_args, int i)
 {
-	if(!is_executable(cmd, cmd->token[i][0])) // Soluciona un leak a la hora de pasarle una ruta absoluta que es un directorio
+	if (!is_executable(cmd, cmd->token[i][0]))
 		com = command_dir(cmd, cmd->token[i]);
 	if (com != NULL || is_executable(cmd, cmd->token[i][0]))
 		execute_command_exists(cmd, com, exec_args, i);
 	else if (!com && !is_executable(cmd, cmd->token[i][0]))
 		execute_command_no_exists(cmd, i);
-	else // No necesario, pero por si acaso
+	else
 		exit(0);
 }
 
 int	execute_fork(t_cmd *cmd, int i)
 {
-	char **exec_args;
-	char *com;
-	int	error_code;
+	char	**exec_args;
+	char	*com;
+	int		error_code;
+	pid_t	pid;
 
 	exec_args = get_exec_args(cmd, i);
 	com = NULL;
 	error_code = 0;
-	pid_t pid = fork();
+	pid = fork();
 	if (pid == -1)
 	{
 		perror("fork");
@@ -58,5 +59,5 @@ int	execute_fork(t_cmd *cmd, int i)
 		child_process(cmd, com, exec_args, i);
 	else
 		error_code = parent_process(com, exec_args);
-	return(error_code);
+	return (error_code);
 }

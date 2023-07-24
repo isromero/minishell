@@ -14,45 +14,22 @@
 
 int	special_for_vars(char c)
 {
-	return(c == INPUT_REDIRECT || c == PIPE || c == OUTPUT_REDIRECT);
+	return (c == INPUT_REDIRECT || c == PIPE || c == OUTPUT_REDIRECT);
 }
 
-/* En desuso */
-void	print_vars(t_cmd *cmd, int i)
-{
-
-	char *path;
-	char *aux;
-	char *var;
-
-	aux = NULL;
-	if(cmd->token[i][0] == VARIABLE)
-	{
-		aux = cmd->token[i];
-		var = &aux[1];
-		path = ft_getenv(var, cmd->env);
-		if(path == NULL)
-			return ;
-		printf("-minishell: %s\n", path);
-		free(path);
-	}
-}
-
-/* Le pasamos doble puntero porque podemos modificar directamente el valor dentro de la funcion y se verá actualizado en executes por pasarle la memoria */
 void	replace_vars(t_cmd *cmd, char **token)
 {
-	size_t token_len;
-	char *replaced_token;
-	size_t replaced_len;
-	size_t j;
-	char *value;
-	char *var;
-	char *new_replaced_token;
-	size_t value_len;
+	size_t	token_len;
+	char	*replaced_token;
+	size_t	replaced_len;
+	size_t	j;
+	char	*value;
+	char	*var;
+	char	*new_replaced_token;
+	size_t	value_len;
+	size_t	var_start;
+	size_t	var_len;
 
-	// Esta variable sirve para contear si se ha reemplazo una variable en el execute
-	// Si es así significa que no necesita reemplazar más, a no ser que con la lógica
-	// de a continuación si está concatenada la variable
 	cmd->replaced_var += 1;
 	token_len = ft_strlen(*token);
 	replaced_token = malloc(token_len + 1);
@@ -63,9 +40,11 @@ void	replace_vars(t_cmd *cmd, char **token)
 	{
 		if ((*token)[j] == VARIABLE && (*token)[j + 1] != '\0')
 		{
-			size_t var_start = j + 1;
-			size_t var_len = 0;
-			while ((*token)[j + 1 + var_len] != VARIABLE && (*token)[j + 1 + var_len] != '\0' && (*token)[j + 1 + var_len] != SINGLE_QUOTE)
+			var_start = j + 1;
+			var_len = 0;
+			while ((*token)[j + 1 + var_len] != VARIABLE
+				&& (*token)[j + 1 + var_len] != '\0' 
+				&& (*token)[j + 1 + var_len] != SINGLE_QUOTE)
 				var_len++;
 			var = malloc(var_len + 1);
 			ft_strncpy(var, *token + var_start, var_len);
@@ -79,7 +58,7 @@ void	replace_vars(t_cmd *cmd, char **token)
 				{
 					free(replaced_token);
 					free(value);
-					return;
+					return ;
 				}
 				ft_strncpy(new_replaced_token, replaced_token, replaced_len);
 				ft_strncpy(new_replaced_token + replaced_len, value, value_len);
@@ -90,7 +69,7 @@ void	replace_vars(t_cmd *cmd, char **token)
 				free(value);
 			}
 			free(var);
-			j += var_len; // Saltar al siguiente símbolo de variable
+			j += var_len;
 		}
 		else
 			replaced_token[replaced_len++] = (*token)[j];

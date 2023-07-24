@@ -236,6 +236,7 @@ int		find_last_output_redirect(t_cmd *cmd);
 int		find_first_append_redirect(t_cmd *cmd);
 int		find_last_append_redirect(t_cmd *cmd);
 
+
 /*input_redirects.c*/
 int		is_input_redirect(t_cmd *cmd, int len);
 int		find_first_input_redirect(t_cmd *cmd);

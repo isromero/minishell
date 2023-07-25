@@ -48,7 +48,7 @@ void	wait_close_pipes(t_cmd *cmd)
 		close(cmd->fd[i][WRITE_END]);
 		i++;
 	}
-	i = 0; 
+	i = 0;
 	while (i < cmd->n_processes)
 	{
 		waitpid(cmd->pid[i], &child_status, 0);

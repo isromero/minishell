@@ -31,7 +31,7 @@ int	parse_args(t_cmd *cmd)
 	}
 	while (cmd->line[i] != '\0')
 	{
-		while (cmd->line[i] == ' ' && cmd->in_single_quote == false 
+		while (cmd->line[i] == ' ' && cmd->in_single_quote == false
 			&& cmd->in_double_quote == false)
 			i++;
 		len = check_len_token(cmd, i);
@@ -94,7 +94,7 @@ void	init_expand_vars(t_cmd *cmd)
 	cmd->no_expand_vars = malloc((cmd->n_tokens) * sizeof(int));
 	while (cmd->token[i])
 	{
-		if (count_left_single_quotes(cmd->token[i]) % 2 != 0 
+		if (count_left_single_quotes(cmd->token[i]) % 2 != 0
 			&& cmd->token[i][0] == SINGLE_QUOTE)
 			cmd->no_expand_vars[i] = 1;
 		else

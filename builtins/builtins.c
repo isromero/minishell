@@ -18,7 +18,7 @@ int	print_echo(t_cmd *cmd, int echo_token, int first_iteration)
 	{
 		if (cmd->no_expand_vars[echo_token] == 0)
 			replace_vars(cmd, &cmd->token[echo_token]);
-		if (is_special(cmd->token[echo_token][0]) 
+		if (is_special(cmd->token[echo_token][0])
 			&& (cmd->in_single_quote == 0 || cmd->in_double_quote == 0))
 			break ;
 		if (first_iteration != 0)
@@ -41,8 +41,8 @@ int	ft_echo(t_cmd *cmd, int echo_token)
 	first_echo_token = echo_token;
 	first_iteration = 0;
 	echo_token++;
-	if (ft_strcmp(cmd->token[0], "echo") == 0 
-		&& ft_strcmp(cmd->token[1], "$?") == 0) 
+	if (ft_strcmp(cmd->token[0], "echo") == 0
+		&& ft_strcmp(cmd->token[1], "$?") == 0)
 	{
 		ft_putnbr_fd(g_status, STDOUT_FILENO);
 		ft_putchar_fd('\n', STDOUT_FILENO);
@@ -65,12 +65,12 @@ void	set_pwd_env(t_cmd *cmd, char **new_env, char *cwd, char *oldpwd)
 
 	pwd_var = len_var_in_env(cmd, "PWD=");
 	oldpwd_var = len_var_in_env(cmd, "OLDPWD=");
-	actualpwd = 
-		malloc(sizeof(char) * (ft_strlen("PWD=") + ft_strlen(cwd) + 2));
+	actualpwd
+		= malloc(sizeof(char) * (ft_strlen("PWD=") + ft_strlen(cwd) + 2));
 	if (actualpwd == NULL)
 		return ;
-	change_oldpwd = 
-		malloc(sizeof(char) * (ft_strlen("OLDPWD=") + ft_strlen(oldpwd) + 2));
+	change_oldpwd
+		= malloc(sizeof(char) * (ft_strlen("OLDPWD=") + ft_strlen(oldpwd) + 2));
 	if (change_oldpwd == NULL)
 		return ;
 	ft_strcpy(actualpwd, "PWD=");
@@ -95,7 +95,7 @@ void	ft_cd(t_cmd *cmd, int cd_token)
 	new_env = NULL;
 	if (chdir(cmd->token[cd_token + 1]) != 0)
 	{
-		printf("-minishell: cd: %s: Not a directory\n", 
+		printf("-minishell: cd: %s: Not a directory\n",
 			cmd->token[cd_token + 1]);
 		return ;
 	}

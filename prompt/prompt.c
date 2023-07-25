@@ -20,10 +20,10 @@ char	*get_prompt(t_cmd *custom_prompt)
 
 	username = exec_custom(custom_prompt, "/usr/bin/whoami", "whoami");
 	getcwd(cwd, sizeof(cwd));
-	prompt_length = ft_strlen(username) + ft_strlen(cwd) 
+	prompt_length = ft_strlen(username) + ft_strlen(cwd)
 		+ ft_strlen(COLOR_GREEN) \
-		+ ft_strlen(COLOR_MAGENTA) + ft_strlen(COLOR_YELLOW) 
-		+ ft_strlen(COLOR_CYAN) 
+		+ ft_strlen(COLOR_MAGENTA) + ft_strlen(COLOR_YELLOW)
+		+ ft_strlen(COLOR_CYAN)
 		+ ft_strlen(COLOR_WHITE) + 16;
 	custom_prompt->prompt = (char *)malloc(prompt_length * sizeof(char));
 	ft_strcpy(custom_prompt->prompt, COLOR_GREEN);

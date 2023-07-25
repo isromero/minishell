@@ -34,7 +34,7 @@ char	**get_exec_args(t_cmd *cmd, int i)
 void	execute_command_exists(t_cmd *cmd, char *com, char **exec_args, int i)
 {
 	if (!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
-		&& !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i) 
+		&& !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i)
 		&& !is_executable(cmd, cmd->token[i][0]))
 	{
 		if (execve(com, exec_args, cmd->env) == -1)

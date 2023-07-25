@@ -94,8 +94,8 @@ void	ft_exit(t_cmd *cmd, int exit_token)
 {
 	int	exit_code;
 
-	if (is_number(cmd->token[exit_token + 1]) 
-		&& ft_atoi(cmd->token[exit_token + 1]) >= INT_MIN 
+	if (is_number(cmd->token[exit_token + 1])
+		&& ft_atoi(cmd->token[exit_token + 1]) >= INT_MIN
 		&& ft_atoi(cmd->token[exit_token + 1]) <= INT_MAX)
 	{
 		exit_code = ft_atoi(cmd->token[exit_token + 1]);

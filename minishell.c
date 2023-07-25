@@ -16,18 +16,19 @@
 /* ls > hola | ls -l > puta | ls -a > buenas FALLA LA DEL MEDIO */
 //grep $PATH???????????????????????????????????????
 
-int g_status;
+int	g_status;
 
 int	main(int argc, char **argv, char **env)
 {
 	t_cmd	cmd;
+
 	print_minishell();
 	(void)argc;
 	(void)argv;
 	cmd.env = NULL;
 	init_env(&cmd, env);
 	unlink("/tmp/heredocBURMITO");
-	while(1)
+	while (1)
 	{
 		signal(SIGINT, &handle_ctrlc);
 		cmd.prompt = get_prompt(&cmd);
@@ -36,11 +37,11 @@ int	main(int argc, char **argv, char **env)
 		{
 			free(cmd.prompt);
 			handle_ctrld();
-			break;
+			break ;
 		}
-		if(ft_strncmp(cmd.line, "", 1) > 0) 
+		if (ft_strncmp(cmd.line, "", 1) > 0)
 			add_history(cmd.line);
-		if(parse_args(&cmd) == 0)
+		if (parse_args(&cmd) == 0)
 		{
 			count_pipes(&cmd);
 			executor(&cmd);

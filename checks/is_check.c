@@ -29,7 +29,7 @@ int	is_redirects(char c)
 
 int	is_redirects_double_char(char *token)
 {
-	return (ft_strcmp(APPEND_REDIRECT, token) == 0 
+	return (ft_strcmp(APPEND_REDIRECT, token) == 0
 		|| ft_strcmp(HEREDOC_REDIRECT, token) == 0);
 }
 

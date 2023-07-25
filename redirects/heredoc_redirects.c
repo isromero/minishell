@@ -27,7 +27,7 @@ void	replace_vars_heredoc(t_cmd *cmd, char *buffer, int i)
 	var_length = 0;
 	j = ++i;
 	while (buffer[j] != '\0' && buffer[j] != ' ' && buffer[j] != '\n'
-		&& buffer[j] != '$' && buffer[j] != '\t' && !is_special(buffer[j]) 
+		&& buffer[j] != '$' && buffer[j] != '\t' && !is_special(buffer[j])
 		&& !is_redirects(buffer[j]))
 	{
 		var_length++;
@@ -84,7 +84,8 @@ void	heredoc_redirect(t_cmd **cmd)
 	}
 	else if (pid == 0)
 	{
-		fd = open("/tmp/heredocBURMITO", O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+		fd = open("/tmp/heredocBURMITO", O_RDWR
+				| O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
 		if (fd == -1)
 		{
 			perror("");
@@ -105,7 +106,8 @@ void	heredoc_redirect(t_cmd **cmd)
 		{
 			bytes_read = read(fd, buffer, sizeof(buffer));
 			delim = find_heredoc_delim(cmd[0]);
-			if (delim && delim[0] != '\"' && delim[0] != '\'' && cmd[0]->in_quote_heredoc == 0)
+			if (delim && delim[0] != '\"'
+				&& delim[0] != '\'' && cmd[0]->in_quote_heredoc == 0)
 				replace_env_vars(cmd[0], buffer);
 			write(1, buffer, ft_strlen(buffer));
 		}

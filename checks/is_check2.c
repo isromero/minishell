@@ -26,9 +26,9 @@ int	is_argument_extension(t_cmd *cmd, int i)
 	else if (cmd->token[i][0] == '-')
 		return (1);
 	else if (i != 0 && ((cmd->token[i][0] >= 'A' && cmd->token[i][0] <= 'Z')
-		|| (cmd->token[i][0] >= 'a' && cmd->token[i][0] <= 'z')) 
-		&& (is_command_exists(cmd, cmd->token[i - 1]) 
-		|| is_redirects(cmd->token[i - 1][0]) 
+		|| (cmd->token[i][0] >= 'a' && cmd->token[i][0] <= 'z'))
+		&& (is_command_exists(cmd, cmd->token[i - 1])
+		|| is_redirects(cmd->token[i - 1][0])
 		|| is_redirects_double_char(cmd->token[i - 1])))
 		return (1);
 	return (0);
@@ -52,13 +52,13 @@ int	is_double_quote(t_cmd *cmd, int len)
 	i = 0;
 	while (cmd->line[i + len] != '\0')
 	{
-		if (cmd->line[i + len] == DOUBLE_QUOTE && cmd->line[i + len + 1] == ' ' 
+		if (cmd->line[i + len] == DOUBLE_QUOTE && cmd->line[i + len + 1] == ' '
 			&& cmd->in_double_quote == true)
 		{
 			cmd->in_double_quote = false;
 			i++;
 		}
-		if (cmd->line[i + len] == DOUBLE_QUOTE && cmd->line[i + len + 1] == ' ' 
+		if (cmd->line[i + len] == DOUBLE_QUOTE && cmd->line[i + len + 1] == ' '
 			&& cmd->in_double_quote == false)
 			break ;
 		i++;

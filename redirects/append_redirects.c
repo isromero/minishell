@@ -20,7 +20,7 @@ void	append_multiple_redirect(t_cmd *cmd)
 
 	i = 0;
 	len = find_last_append_redirect(cmd);
-	fd = open(cmd->token[len + 1], O_WRONLY 
+	fd = open(cmd->token[len + 1], O_WRONLY
 			| O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
 	if (fd == -1)
 	{
@@ -30,12 +30,12 @@ void	append_multiple_redirect(t_cmd *cmd)
 	while (i < len)
 	{
 		if (ft_strcmp(cmd->token[len], APPEND_REDIRECT) == 0)
-			open(cmd->token[i + 1], O_CREAT 
+			open(cmd->token[i + 1], O_CREAT
 				| O_WRONLY | O_APPEND, S_IRUSR | S_IWUSR);
 		i++;
 	}
 	cmd->stdout = dup(STDOUT_FILENO);
-	dup2(fd, STDOUT_FILENO); 
+	dup2(fd, STDOUT_FILENO);
 	close(fd);
 }
 
@@ -45,7 +45,7 @@ void	append_redirect(t_cmd *cmd)
 	int	len;
 
 	len = find_first_append_redirect(cmd);
-	fd = open(cmd->token[len + 1], O_WRONLY 
+	fd = open(cmd->token[len + 1], O_WRONLY
 			| O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
 	if (fd == -1)
 	{
@@ -53,7 +53,7 @@ void	append_redirect(t_cmd *cmd)
 		return ;
 	}
 	cmd->stdout = dup(STDOUT_FILENO);
-	dup2(fd, STDOUT_FILENO); 
+	dup2(fd, STDOUT_FILENO);
 	close(fd);
 }
 

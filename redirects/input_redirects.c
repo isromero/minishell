@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   input_redirects.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: adgutier <adgutier@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 19:37:01 by adgutier          #+#    #+#             */
-/*   Updated: 2023/07/24 18:47:57 by isromero         ###   ########.fr       */
+/*   Updated: 2023/07/25 11:41:04 by adgutier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,7 @@ void	input_redirect(t_cmd *cmd)
 		return ;
 	}
 	cmd->stdin = dup(STDIN_FILENO);
-	dup2(fd, STDIN_FILENO); 
+	dup2(fd, STDIN_FILENO);
 	close(fd);
 }
 
@@ -96,6 +96,6 @@ void	input_multiple_redirect(t_cmd *cmd)
 		i++;
 	}
 	cmd->stdin = dup(STDIN_FILENO);
-	dup2(fd, STDIN_FILENO); 
+	dup2(fd, STDIN_FILENO);
 	close(fd);
 }

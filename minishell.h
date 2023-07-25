@@ -13,50 +13,50 @@
 #ifndef MINISHELL_H
 # define MINISHELL_H
 
-#include <stdlib.h>
-#include <limits.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/wait.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <errno.h>
-#include <readline/readline.h>
-#include <readline/history.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include "libft/libft.h"
-#include "get_next_line/get_next_line.h"
+# include <stdlib.h>
+# include <limits.h>
+# include <unistd.h>
+# include <string.h>
+# include <sys/wait.h>
+# include <sys/types.h>
+# include <sys/stat.h>
+# include <fcntl.h>
+# include <stdio.h>
+# include <stdbool.h>
+# include <errno.h>
+# include <readline/readline.h>
+# include <readline/history.h>
+# include <sys/types.h>
+# include <dirent.h>
+# include "libft/libft.h"
+# include "get_next_line/get_next_line.h"
 
-#define READ_END 0
-#define WRITE_END 1
+# define READ_END 0
+# define WRITE_END 1
 
-#define STYLE_BOLD "\033[1m"
-#define STYLE_UNDERLINE "\033[4m"
-#define STYLE_BLINK "\033[5m"
+# define STYLE_BOLD "\033[1m"
+# define STYLE_UNDERLINE "\033[4m"
+# define STYLE_BLINK "\033[5m"
 
 // Colores de texto
-#define COLOR_BLACK "\033[30m"
-#define COLOR_RED "\033[31m"
-#define COLOR_GREEN "\033[32m"
-#define COLOR_YELLOW "\033[33m"
-#define COLOR_BLUE "\033[34m"
-#define COLOR_MAGENTA "\033[35m"
-#define COLOR_CYAN "\033[36m"
-#define COLOR_WHITE "\033[37m"
+# define COLOR_BLACK "\033[30m"
+# define COLOR_RED "\033[31m"
+# define COLOR_GREEN "\033[32m"
+# define COLOR_YELLOW "\033[33m"
+# define COLOR_BLUE "\033[34m"
+# define COLOR_MAGENTA "\033[35m"
+# define COLOR_CYAN "\033[36m"
+# define COLOR_WHITE "\033[37m"
 
 // Colores de fondo
-#define BACKGROUND_BLACK "\033[40m"
-#define BACKGROUND_RED "\033[41m"
-#define BACKGROUND_GREEN "\033[42m"
-#define BACKGROUND_YELLOW "\033[43m"
-#define BACKGROUND_BLUE "\033[44m"
-#define BACKGROUND_MAGENTA "\033[45m"
-#define BACKGROUND_CYAN "\033[46m"
-#define BACKGROUND_WHITE "\033[47m"
+# define BACKGROUND_BLACK "\033[40m"
+# define BACKGROUND_RED "\033[41m"
+# define BACKGROUND_GREEN "\033[42m"
+# define BACKGROUND_YELLOW "\033[43m"
+# define BACKGROUND_BLUE "\033[44m"
+# define BACKGROUND_MAGENTA "\033[45m"
+# define BACKGROUND_CYAN "\033[46m"
+# define BACKGROUND_WHITE "\033[47m"
 
 typedef struct cmd
 {
@@ -69,7 +69,7 @@ typedef struct cmd
 	int		n_processes;
 	int		count_pipes;
 	int		count_pids;
-	int		pipes_stdout; // Posible uso para guardar el estado de antes de empezar redireccionamientos con pipes
+	int		pipes_stdout;
 	int		**fd;
 	int		*pid;
 	char	**exec_args;
@@ -82,27 +82,27 @@ typedef struct cmd
 	int		*has_single_quote;
 	int		*no_expand_vars;
 	int		replaced_var;
-} t_cmd;
+}	t_cmd;
 
-#define HEREDOC_REDIRECT "<<"
-#define INPUT_REDIRECT '<'
-#define PIPE '|'
-#define OUTPUT_REDIRECT '>'
-#define APPEND_REDIRECT ">>"
-#define ARGUMENT '-'
-#define DOUBLE_QUOTE '"'
-#define ARGUMENT '-'
-#define SINGLE_QUOTE '\''
-#define VARIABLE '$'
+# define HEREDOC_REDIRECT "<<"
+# define INPUT_REDIRECT '<'
+# define PIPE '|'
+# define OUTPUT_REDIRECT '>'
+# define APPEND_REDIRECT ">>"
+# define ARGUMENT '-'
+# define DOUBLE_QUOTE '"'
+# define ARGUMENT '-'
+# define SINGLE_QUOTE '\''
+# define VARIABLE '$'
 
 /* builtins.c */
 int		is_builtin(t_cmd *cmd, int n_token);
-int 	ft_echo(t_cmd *cmd, int echo_token);
+int		ft_echo(t_cmd *cmd, int echo_token);
 void	ft_cd(t_cmd *cmd, int cd_token);
 void	ft_env(t_cmd *cmd);
 void	ft_pwd(t_cmd *cmd);
 void	ft_export(t_cmd *cmd, int export_token);
-bool	compare_variable(const char* variable, const char* name);
+bool	compare_variable(const char *variable, const char *name);
 void	ft_unset(t_cmd *cmd, int unset_token);
 void	execute_builtin_exit(t_cmd *cmd, int exit_code);
 void	ft_exit(t_cmd *cmd, int exit_token);
@@ -140,16 +140,18 @@ void	execute_vars(t_cmd *cmd, int i);
 
 /* execute_redirects.c */
 void	execute_appends(t_cmd *cmd, char *com, char **exec_args, int i);
-void	execute_output_redirects(t_cmd *cmd, char *com, char **exec_args, int i);
+void	execute_output_redirects(t_cmd *cmd, char *com,
+			char **exec_args, int i);
 void	execute_input_redirects(t_cmd *cmd, char *com, char **exec_args, int i);
-void	execute_heredoc_redirects(t_cmd *cmd, char *com, char **exec_args, int i);
+void	execute_heredoc_redirects(t_cmd *cmd, char *com,
+			char **exec_args, int i);
 void	execute_redirects(t_cmd *cmd, char *com, char **exec_args, int i);
 
 /* execute_utils */
 char	**get_exec_args(t_cmd *cmd, int i);
 void	execute_command_exists(t_cmd *cmd, char *com, char **exec_args, int i);
 void	execute_command_no_exists(t_cmd *cmd, int i);
-void    execute_builtin_in_child(t_cmd *cmd, int i);
+void	execute_builtin_in_child(t_cmd *cmd, int i);
 int		execute_builtin_no_child(t_cmd	*cmd, int i);
 
 /* fork_processes.c */
@@ -158,8 +160,8 @@ int		parent_process(char *com, char **exec_args);
 void	child_process(t_cmd *cmd, char *com, char **exec_args, int i);
 
 /* fork_pipes_processes.c */
-void    execute_fork_pipes(t_cmd *cmd, int i, int redirection_pipe);
-void    child_pipes_process(t_cmd *cmd, char *com, char **exec_args, int i, int redirection_pipe);
+void	execute_fork_pipes(t_cmd *cmd, int i, int redirection_pipe);
+void	child_pipes_process(t_cmd *cmd, char *com, char **exec_args, int i, int redirection_pipe);
 
 /* redirecting_pipes.c */
 void	redirect_first_pipe(t_cmd *cmd);
@@ -191,7 +193,7 @@ void	free_pipes(t_cmd *cmd);
 
 /* prompt.c */
 char	*get_prompt(t_cmd *custom_prompt);
-void	print_minishell();
+void	print_minishell(void);
 char	*exec_custom(t_cmd *cmd, char *full, char *args);
 char	*update_output(int fd);
 
@@ -209,7 +211,7 @@ int		is_pipe(char c);
 int		is_special2(char c);
 int		is_double_quote(t_cmd *cmd, int len);
 int		is_single_quote(t_cmd *cmd, int len);
-void	error_special(); // Meter perror mejor?
+void	error_special(void); // Meter perror mejor?
 int		check_len_special(t_cmd *cmd, int len);
 int		cmd_token_len(t_cmd *cmd, int len);
 int		check_len_token(t_cmd *cmd, int len);
@@ -235,7 +237,6 @@ int		find_first_output_redirect(t_cmd *cmd);
 int		find_last_output_redirect(t_cmd *cmd);
 int		find_first_append_redirect(t_cmd *cmd);
 int		find_last_append_redirect(t_cmd *cmd);
-
 
 /*input_redirects.c*/
 int		is_input_redirect(t_cmd *cmd, int len);
@@ -263,6 +264,6 @@ void	handle_ctrlc_heredoc();
 void	execute_executable(t_cmd *cmd, char *command);
 void	try_execute(t_cmd *cmd, char *path, char *command);
 
-extern int g_status;
+extern int	g_status;
 
 #endif

@@ -73,7 +73,9 @@ char	*find_heredoc_delim(t_cmd *cmd)
 		{
 			delim = cmd->token[len + 1];
 			delim_len = ft_strlen(delim);
-			if((delim[0] == '\'' || delim[0] == '\"') && delim_len > 1 && delim[delim_len - 1] != delim[0] && cmd->in_quote_heredoc == 0)
+			if ((delim[0] == '\'' || delim[0] == '\"') && delim_len > 1
+				&& delim[delim_len - 1] != delim[0]
+				&& cmd->in_quote_heredoc == 0)
 				delim = "NOT DELIMITATORXXxXxxXXxxXXXXXX";
 			return (delim);
 		}

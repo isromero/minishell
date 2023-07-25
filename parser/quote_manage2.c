@@ -69,7 +69,7 @@ int	remove_quotes(t_cmd *cmd)
 		len_token = ft_strlen(cmd->token[i]);
 		left_double_quotes = count_left_double_quotes(cmd->token[i]);
 		left_single_quotes = count_left_single_quotes(cmd->token[i]);
-		if (count_double_quotes(cmd->token[i]) >= 2 
+		if (count_double_quotes(cmd->token[i]) >= 2
 			|| count_single_quotes(cmd->token[i]) >= 2)
 		{
 			j = 0;
@@ -88,12 +88,12 @@ int	remove_quotes(t_cmd *cmd)
 				j++;
 			}
 			if (left_double_quotes % 2 == 0
-				&& (size_t)(count_single_quotes(cmd->token[i]) 
-				+ count_double_quotes(cmd->token[i])) != len_token) 
+				&& (size_t)(count_single_quotes(cmd->token[i])
+				+ count_double_quotes(cmd->token[i])) != len_token)
 				remove_single_quotes(&cmd->token[i]);
 			if (left_single_quotes % 2 == 0
-				&& (size_t)(count_single_quotes(cmd->token[i]) 
-				+ count_double_quotes(cmd->token[i])) != len_token) 
+				&& (size_t)(count_single_quotes(cmd->token[i])
+				+ count_double_quotes(cmd->token[i])) != len_token)
 				remove_double_quotes(&cmd->token[i]);
 		}
 		if (cmd->token[0] != NULL && ft_strlen(cmd->token[0]) == 0)

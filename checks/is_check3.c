@@ -39,13 +39,13 @@ int	is_single_quote(t_cmd *cmd, int len)
 	i = 1;
 	while (cmd->line[i + len] != '\0')
 	{
-		if (cmd->line[i + len] == SINGLE_QUOTE && cmd->line[i + len + 1] == ' ' 
+		if (cmd->line[i + len] == SINGLE_QUOTE && cmd->line[i + len + 1] == ' '
 			&& cmd->in_single_quote == true)
 		{
 			cmd->in_single_quote = false;
 			i++;
 		}
-		if (cmd->line[i + len] == SINGLE_QUOTE && cmd->line[i + len + 1] == ' ' 
+		if (cmd->line[i + len] == SINGLE_QUOTE && cmd->line[i + len + 1] == ' '
 			&& cmd->in_single_quote == false)
 			break ;
 		i++;

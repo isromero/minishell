@@ -45,9 +45,9 @@ void	execute(t_cmd *cmd)
 	{
 		if (cmd->no_expand_vars[i] == 0)
 			replace_vars(cmd, &cmd->token[i]);
-		if (!is_argument_extension(cmd, i) && cmd->replaced_var <= 1 
-			&& !is_special(cmd->token[i][0]) 
-			&& !is_redirects(cmd->token[i][0]) 
+		if (!is_argument_extension(cmd, i) && cmd->replaced_var <= 1
+			&& !is_special(cmd->token[i][0])
+			&& !is_redirects(cmd->token[i][0])
 			&& !is_redirects_double_char(cmd->token[i]))
 		{
 			if (!is_builtin(cmd, i))
@@ -73,7 +73,7 @@ char	*command_dir(t_cmd *cmd, char *command)
 	dir = ft_strtok(path, ":");
 	if (!is_executable(cmd, command[0]))
 	{
-		while (dir != NULL) 
+		while (dir != NULL)
 		{
 			dir_len = ft_strlen(dir);
 			ft_strcpy(executable_path, dir);
@@ -128,7 +128,7 @@ int	is_command_exists(t_cmd *cmd, char *command)
 	char	*command_path;
 
 	if (access(command, F_OK) == 0)
-		return (1); 
+		return (1);
 	path = ft_getenv("PATH", cmd->env);
 	if (path != NULL)
 	{

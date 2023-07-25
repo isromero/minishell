@@ -34,7 +34,7 @@ void	output_redirect(t_cmd *cmd)
 	int	len;
 
 	len = find_first_output_redirect(cmd);
-	fd = open(cmd->token[len + 1], O_WRONLY 
+	fd = open(cmd->token[len + 1], O_WRONLY
 			| O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 	if (fd == -1)
 	{
@@ -42,7 +42,7 @@ void	output_redirect(t_cmd *cmd)
 		return ;
 	}
 	cmd->stdout = dup(STDOUT_FILENO);
-	dup2(fd, STDOUT_FILENO); 
+	dup2(fd, STDOUT_FILENO);
 	close(fd);
 }
 
@@ -54,7 +54,7 @@ void	output_multiple_redirect(t_cmd *cmd)
 
 	i = 0;
 	len = find_last_output_redirect(cmd);
-	fd = open(cmd->token[len + 1], O_WRONLY 
+	fd = open(cmd->token[len + 1], O_WRONLY
 			| O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 	if (fd == -1)
 	{
@@ -69,6 +69,6 @@ void	output_multiple_redirect(t_cmd *cmd)
 		i++;
 	}
 	cmd->stdout = dup(STDOUT_FILENO);
-	dup2(fd, STDOUT_FILENO); 
+	dup2(fd, STDOUT_FILENO);
 	close(fd);
 }

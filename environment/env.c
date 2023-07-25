@@ -23,7 +23,7 @@ char	*ft_getenv(const char *name, char **env)
 	i = 0;
 	while (env[i] != NULL && env[i][0] != ' ')
 	{
-		if (ft_strncmp(name, env[i], ft_strlen(name)) == 0 
+		if (ft_strncmp(name, env[i], ft_strlen(name)) == 0
 			&& env[i][ft_strlen(name)] == '=')
 		{
 			value_start = env[i] + ft_strlen(name) + 1;
@@ -80,8 +80,8 @@ void	get_default_env(t_cmd *cmd)
 	i = 0;
 	default_env[env_index++] = ft_strjoin("PWD=", getcwd(pwd, sizeof(pwd)));
 	default_env[env_index++] = ft_strdup("SHLVL=1");
-	default_env[env_index++] = 
-		ft_strdup("PATH=/usr/local/sbin:/usr/local/bin:/usr/bin:/bin");
+	default_env[env_index++]
+		= ft_strdup("PATH=/usr/local/sbin:/usr/local/bin:/usr/bin:/bin");
 	default_env[env_index++] = ft_strjoin("_=", "./minishell");
 	default_env[env_index] = NULL;
 	cmd->env = malloc((env_count + 1) * sizeof(char *));

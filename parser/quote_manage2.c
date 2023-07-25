@@ -61,6 +61,7 @@ int	remove_quotes(t_cmd *cmd)
 	size_t	len_token;
 	int		i;
 	int		j;
+	cmd->in_quote_delim_heredoc = 0;
 
 	i = 0;
 	j = 0;
@@ -72,6 +73,9 @@ int	remove_quotes(t_cmd *cmd)
 		if (count_double_quotes(cmd->token[i]) >= 2
 			|| count_single_quotes(cmd->token[i]) >= 2)
 		{
+			if(cmd->token[i - 1] != NULL
+				&& ft_strcmp(cmd->token[i - 1], HEREDOC_REDIRECT) == 0)
+				cmd->in_quote_delim_heredoc = 1;
 			j = 0;
 			while (cmd->token[i][j] != '\0')
 			{

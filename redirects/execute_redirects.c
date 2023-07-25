@@ -78,18 +78,33 @@ void	execute_input_redirects(t_cmd *cmd, char *com, char **exec_args, int i)
 	}
 }
 
-void	execute_heredoc_redirects(t_cmd *cmd, char *com, char **args, int i)
+void execute_heredoc_redirects(t_cmd *cmd, char *com, char **args, int i)
 {
-	if (is_heredoc_redirect(cmd, i) == 1)
-	{
-		heredoc_redirect(&cmd);
-		if (!is_builtin(cmd, i))
-			execve(com, args, cmd->env);
-		else if (is_builtin(cmd, i))
-			execute_builtin(cmd, i);
-		close_input_redirect(cmd);
-	}
+	unlink("/tmp/heredocBURMITO");
+	/* unlink("/tmp/heredocBURMITO"); */
+    if (is_heredoc_redirect(cmd, i) == 1)
+    {
+        heredoc_redirect(cmd);
+        int fd = open("./expanded.txt", O_RDONLY); // Abrir el archivo temporal del heredoc en modo lectura
+        if (fd == -1)
+        {
+            perror("open");
+            exit(1);
+        }
+        if (dup2(fd, STDIN_FILENO) == -1)
+        {
+            perror("dup2");
+            exit(1);
+        }
+        close(fd);
+        if (!is_builtin(cmd, i))
+            execve(com, args, cmd->env);
+        else if (is_builtin(cmd, i))
+            execute_builtin(cmd, i);
+        close_input_redirect(cmd);
+    }
 }
+
 
 void	execute_redirects(t_cmd *cmd, char *com, char **exec_args, int i)
 {

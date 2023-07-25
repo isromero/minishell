@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   input_redirects.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adgutier <adgutier@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 19:37:01 by adgutier          #+#    #+#             */
-/*   Updated: 2023/07/25 11:41:04 by adgutier         ###   ########.fr       */
+/*   Updated: 2023/07/25 20:38:22 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,7 +68,7 @@ void	input_redirect(t_cmd *cmd)
 	if (fd == -1)
 	{
 		perror("");
-		return ;
+		exit(1);
 	}
 	cmd->stdin = dup(STDIN_FILENO);
 	dup2(fd, STDIN_FILENO);

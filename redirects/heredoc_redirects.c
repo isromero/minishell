@@ -22,20 +22,27 @@ void	replace_vars_heredoc(t_cmd *cmd, char *buffer, int i)
 	char	*replacement;
 	char	*start;
 	char	*end;
+	int		has_quotes;
 
 	var = NULL;
 	var_length = 0;
+	has_quotes = 0;
 	j = ++i;
 	while (buffer[j] != '\0' && buffer[j] != ' ' && buffer[j] != '\n'
-		&& buffer[j] != '$' && buffer[j] != '\t' && !is_special(buffer[j])
-		&& !is_redirects(buffer[j]))
+		&& buffer[j] != '$' && buffer[j] != '\t' && !is_special(buffer[j]))
 	{
+		if(buffer[j] == SINGLE_QUOTE || buffer[j] == DOUBLE_QUOTE)
+			has_quotes++;
 		var_length++;
 		j++;
 	}
-	var = malloc(sizeof(char) * (var_length + 1));
-	ft_strncpy(var, &buffer[i], var_length);
+	var = malloc(sizeof(char) * (var_length + has_quotes + 1));
+	if(has_quotes >= 1) 
+		var_length -= has_quotes;
+
+	ft_strncpy(var, &buffer[i + (has_quotes / 2)], var_length);
 	var[var_length] = '\0';
+	printf("var: %s\n", var);
 	path = ft_getenv(var, cmd->env);
 	free(var);
 	if (path != NULL)
@@ -66,65 +73,76 @@ void	replace_env_vars(t_cmd *cmd, char *buffer)
 	}
 }
 
-void	heredoc_redirect(t_cmd **cmd)
+void	heredoc_child_process(t_cmd *cmd, int fd[2])
 {
-	int		fd;
-	pid_t	pid;
 	char	buffer[1024];
 	ssize_t	bytes_read;
 	char	*delim;
 
-	cmd[0]->in_quote_heredoc = 0;
-	pid = fork();
-	signal(SIGINT, SIG_IGN);
-	if (pid == -1)
+	close(fd[0]);
+	fd[1] = open("/tmp/heredocBURMITO", O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+	if (fd[1] == -1)
 	{
-		perror("fork");
+		perror("open");
 		exit(1);
 	}
-	else if (pid == 0)
+	signal(SIGINT, SIG_IGN);
+	signal(SIGINT, &handle_ctrlc_heredoc);
+	while (1)
 	{
-		fd = open("/tmp/heredocBURMITO", O_RDWR
-				| O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
-		if (fd == -1)
-		{
-			perror("");
-			exit(1);
-		}
-		signal(SIGINT, SIG_IGN);
-		signal(SIGINT, &handle_ctrlc_heredoc);
-		while (1)
-		{
-			if (heredoc_content(cmd[0], fd) == 1)
-				break ;
-		}
-		close(fd);
-		fd = open("/tmp/heredocBURMITO", O_RDONLY);
-		ft_memset(buffer, 0, sizeof(buffer));
-		bytes_read = read(fd, buffer, sizeof(buffer));
-		while ((bytes_read) > 0)
-		{
-			bytes_read = read(fd, buffer, sizeof(buffer));
-			delim = find_heredoc_delim(cmd[0]);
-			if (delim && delim[0] != '\"'
-				&& delim[0] != '\'' && cmd[0]->in_quote_heredoc == 0)
-				replace_env_vars(cmd[0], buffer);
-			write(1, buffer, ft_strlen(buffer));
-		}
-		close(fd);
-		exit(0);
+		if (heredoc_content(cmd, fd[1]) == 1)
+			break;
 	}
-	else
+	close(fd[1]);
+	int new_fd = open("./expanded.txt", O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+	if (new_fd == -1)
 	{
-		wait(NULL);
-		signal(SIGINT, &handle_ctrlc);
-		if (unlink("/tmp/heredocBURMITO") == -1)
-		{
-			perror("unlink");
-			exit(1);
-		}
-		exit(0);
+		perror("open");
+		exit(1);
 	}
+	int	old_fd = open("/tmp/heredocBURMITO", O_RDONLY);
+	ft_memset(buffer, 0, sizeof(buffer));
+	bytes_read = read(old_fd, buffer, sizeof(buffer));
+	while ((bytes_read) > 0)
+	{
+		delim = find_heredoc_delim(cmd);
+		if (delim && cmd->in_quote_delim_heredoc == 0)
+			replace_env_vars(cmd, buffer);
+		write(new_fd, buffer, ft_strlen(buffer));
+		bytes_read = read(old_fd, buffer, sizeof(buffer));
+	}
+	close(new_fd);
+	close(old_fd);
+	exit(0);
+}
+
+
+void	heredoc_redirect(t_cmd *cmd)
+{
+    int fd[2];
+    pid_t pid;
+
+    cmd->in_quote_heredoc = 0;
+    if (pipe(fd) == -1)
+    {
+        perror("pipe");
+        exit(1);
+    }
+    pid = fork();
+    signal(SIGINT, SIG_IGN);
+    if (pid == -1)
+    {
+        perror("fork");
+        exit(1);
+    }
+    else if (pid == 0)
+		heredoc_child_process(cmd, fd);
+    else
+    {
+        close(fd[1]);
+        wait(NULL);
+        signal(SIGINT, &handle_ctrlc);
+    }
 }
 
 void	close_input_redirect(t_cmd *cmd)

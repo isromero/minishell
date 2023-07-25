@@ -82,6 +82,7 @@ typedef struct cmd
 	int		*has_single_quote;
 	int		*no_expand_vars;
 	int		replaced_var;
+	int		in_quote_delim_heredoc;
 }	t_cmd;
 
 # define HEREDOC_REDIRECT "<<"
@@ -249,7 +250,7 @@ int		find_first_heredoc_redirect(t_cmd *cmd);
 int		find_last_heredoc_redirect(t_cmd *cmd);
 char	*find_heredoc_delim(t_cmd *cmd);
 int		heredoc_content(t_cmd *cmd, int fd);
-void	heredoc_redirect(t_cmd **cmd);
+void	heredoc_redirect(t_cmd *cmd);
 void	replace_vars_heredoc(t_cmd *cmd, char *buffer, int i);
 void	close_input_redirect(t_cmd *cmd);
 

@@ -78,3 +78,39 @@ int	check_len_special(t_cmd *cmd, int len)
 		return (2);
 	return (-1);
 }
+
+int	is_heredoc_redirect(t_cmd *cmd, int len)
+{
+	int	n_redirects;
+
+	n_redirects = 0;
+	while (cmd->token[len] != NULL)
+	{
+		if (ft_strcmp(cmd->token[len], HEREDOC_REDIRECT) == 0)
+			n_redirects++;
+		len++;
+	}
+	if (n_redirects == 1)
+		return (1);
+	else if (n_redirects > 1)
+		return (n_redirects);
+	return (0);
+}
+
+int	is_append_redirect(t_cmd *cmd, int len)
+{
+	int	n_redirects;
+
+	n_redirects = 0;
+	while (cmd->token[len] != NULL)
+	{
+		if (ft_strcmp(cmd->token[len], APPEND_REDIRECT) == 0)
+			n_redirects++;
+		len++;
+	}
+	if (n_redirects == 1)
+		return (1);
+	else if (n_redirects > 1)
+		return (n_redirects);
+	return (0);
+}

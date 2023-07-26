@@ -76,7 +76,6 @@ typedef struct cmd
 	int		stdout;
 	int		stdin;
 	char	**save_lines;
-	int		in_quote_heredoc;
 	bool	in_single_quote;
 	bool	in_double_quote;
 	int		*has_single_quote;
@@ -171,7 +170,7 @@ void	redirect_last_pipe(t_cmd *cmd);
 
 /* expander.c */
 void	replace_vars(t_cmd *cmd, char **token);
-int		special_for_vars(char c);
+void	search_var_replace(t_cmd *cmd, char *buffer);
 
 /* parser.c */
 int		parse_args(t_cmd *cmd);
@@ -253,6 +252,7 @@ int		heredoc_content(t_cmd *cmd, int fd);
 void	heredoc_redirect(t_cmd *cmd);
 void	replace_vars_heredoc(t_cmd *cmd, char *buffer, int i);
 void	close_input_redirect(t_cmd *cmd);
+void	heredoc_write_replaced(t_cmd *cmd, int fd, int new_fd);
 
 /* signals.c */
 void	handle_ctrld();

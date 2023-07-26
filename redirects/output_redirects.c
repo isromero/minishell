@@ -12,76 +12,47 @@
 
 #include "../minishell.h"
 
-int	find_first_output_redirect(t_cmd *cmd)
+void	output_redirect(t_cmd *cmd)
 {
+	int	fd;
 	int	len;
 
-	len = 0;
-	while (cmd->token[len] != NULL)
+	len = find_first_output_redirect(cmd);
+	fd = open(cmd->token[len + 1], O_WRONLY
+			| O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+	if (fd == -1)
 	{
-		if (cmd->token[len][0] == OUTPUT_REDIRECT)
-			return (len);
-		len++;
+		perror("");
+		return ;
 	}
-	return (0);
+	cmd->stdout = dup(STDOUT_FILENO);
+	dup2(fd, STDOUT_FILENO);
+	close(fd);
 }
 
-int	find_last_output_redirect(t_cmd *cmd)
+void	output_multiple_redirect(t_cmd *cmd)
 {
+	int	fd;
 	int	len;
+	int	i;
 
-	len = cmd->n_tokens - 2;
-	while (len >= 0)
+	i = 0;
+	len = find_last_output_redirect(cmd);
+	fd = open(cmd->token[len + 1], O_WRONLY
+			| O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+	if (fd == -1)
 	{
-		if (cmd->token[len][0] == OUTPUT_REDIRECT)
-			return (len);
-		len--;
+		perror("");
+		return ;
 	}
-	return (0);
-}
-
-int	find_first_append_redirect(t_cmd *cmd)
-{
-	int	len;
-
-	len = 0;
-	while (cmd->token[len] != NULL)
+	while (i < len)
 	{
-		if (ft_strcmp(cmd->token[len], APPEND_REDIRECT) == 0)
-			return (len);
-		len++;
+		if (cmd->token[i][0] == OUTPUT_REDIRECT)
+			open(cmd->token[i + 1], O_CREAT
+				| O_WRONLY | O_TRUNC, S_IRUSR | S_IWUSR);
+		i++;
 	}
-	return (0);
-}
-
-int	find_last_append_redirect(t_cmd *cmd)
-{
-	int	len;
-
-	len = cmd->n_tokens - 2;
-	while (len >= 0)
-	{
-		if (ft_strcmp(cmd->token[len], APPEND_REDIRECT) == 0)
-			return (len);
-		len--;
-	}
-	return (0);
-}
-
-int	is_output_redirect(t_cmd *cmd, int len)
-{
-	int	n_redirects;
-
-	n_redirects = 0;
-	while (cmd->token[len] != NULL)
-	{
-		if (cmd->token[len][0] == OUTPUT_REDIRECT)
-			n_redirects++;
-		len++;
-	}
-	if (n_redirects == 1)
-		return (1);
-	else if (n_redirects > 1)
-		return (n_redirects);
-	return (0);
+	cmd->stdout = dup(STDOUT_FILENO);
+	dup2(fd, STDOUT_FILENO);
+	close(fd);
 }

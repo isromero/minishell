@@ -6,57 +6,11 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 19:37:01 by adgutier          #+#    #+#             */
-/*   Updated: 2023/07/25 20:38:22 by isromero         ###   ########.fr       */
+/*   Updated: 2023/07/26 10:11:08 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
-
-int	is_input_redirect(t_cmd *cmd, int len)
-{
-	int	n_redirects;
-
-	n_redirects = 0;
-	while (cmd->token[len] != NULL)
-	{
-		if (cmd->token[len][0] == INPUT_REDIRECT)
-			n_redirects++;
-		len++;
-	}
-	if (n_redirects == 1)
-		return (1);
-	else if (n_redirects > 1)
-		return (n_redirects);
-	return (0);
-}
-
-int	find_first_input_redirect(t_cmd *cmd)
-{
-	int	len;
-
-	len = 0;
-	while (cmd->token[len] != NULL)
-	{
-		if (cmd->token[len][0] == INPUT_REDIRECT)
-			return (len);
-		len++;
-	}
-	return (0);
-}
-
-int	find_last_input_redirect(t_cmd *cmd)
-{
-	int	len;
-
-	len = cmd->n_tokens - 2;
-	while (len >= 0)
-	{
-		if (cmd->token[len][0] == INPUT_REDIRECT)
-			return (len);
-		len--;
-	}
-	return (0);
-}
 
 void	input_redirect(t_cmd *cmd)
 {
@@ -67,7 +21,7 @@ void	input_redirect(t_cmd *cmd)
 	fd = open(cmd->token[len + 1], O_RDONLY | S_IRUSR | S_IWUSR);
 	if (fd == -1)
 	{
-		perror("");
+		perror("open");
 		exit(1);
 	}
 	cmd->stdin = dup(STDIN_FILENO);
@@ -86,7 +40,7 @@ void	input_multiple_redirect(t_cmd *cmd)
 	fd = open(cmd->token[len + 1], O_RDONLY | S_IRUSR | S_IWUSR);
 	if (fd == -1)
 	{
-		perror("");
+		perror("open");
 		return ;
 	}
 	while (i < len)

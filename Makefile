@@ -23,7 +23,7 @@ SRCS		=	builtins/builtins.c builtins/builtins2.c builtins/builtins_utils.c envir
 
 LIBFT		=	libft/libft.a
 
-CFLAGS		=	-Wall  -Wextra -lreadline -g -fsanitize=address,undefined
+CFLAGS		=	-Wall -Werror -Wextra -lreadline -g -fsanitize=address,undefined
 RM			=	rm -f
 #PONER LAS FLAGS NECESARIAS PARA LOS MACS DE 42
 

@@ -22,27 +22,20 @@ void	replace_vars_heredoc(t_cmd *cmd, char *buffer, int i)
 	char	*replacement;
 	char	*start;
 	char	*end;
-	int		has_quotes;
 
 	var = NULL;
 	var_length = 0;
-	has_quotes = 0;
 	j = ++i;
 	while (buffer[j] != '\0' && buffer[j] != ' ' && buffer[j] != '\n'
-		&& buffer[j] != '$' && buffer[j] != '\t' && !is_special(buffer[j]))
+		&& buffer[j] != '$' && buffer[j] != '\t' && !is_special(buffer[j])
+		&& buffer[j] != SINGLE_QUOTE && buffer[j] != DOUBLE_QUOTE)
 	{
-		if(buffer[j] == SINGLE_QUOTE || buffer[j] == DOUBLE_QUOTE)
-			has_quotes++;
 		var_length++;
 		j++;
 	}
-	var = malloc(sizeof(char) * (var_length + has_quotes + 1));
-	if(has_quotes >= 1) 
-		var_length -= has_quotes;
-
-	ft_strncpy(var, &buffer[i + (has_quotes / 2)], var_length);
+	var = malloc(sizeof(char) * (var_length + 1));
+	ft_strncpy(var, &buffer[i], var_length);
 	var[var_length] = '\0';
-	printf("var: %s\n", var);
 	path = ft_getenv(var, cmd->env);
 	free(var);
 	if (path != NULL)

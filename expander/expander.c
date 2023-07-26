@@ -12,6 +12,23 @@
 
 #include "../minishell.h"
 
+void	init_expand_vars(t_cmd *cmd)
+{
+	int	i;
+
+	i = 0;
+	cmd->no_expand_vars = malloc((cmd->n_tokens) * sizeof(int));
+	while (cmd->token[i])
+	{
+		if (count_left_single_quotes(cmd->token[i]) % 2 != 0
+			&& cmd->token[i][0] == SINGLE_QUOTE)
+			cmd->no_expand_vars[i] = 1;
+		else
+			cmd->no_expand_vars[i] = 0;
+		i++;
+	}
+}
+
 void	replace_vars(t_cmd *cmd, char **token)
 {
 	size_t	token_len;

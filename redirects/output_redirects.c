@@ -22,7 +22,7 @@ void	output_redirect(t_cmd *cmd)
 			| O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 	if (fd == -1)
 	{
-		perror("");
+		perror("open");
 		return ;
 	}
 	cmd->stdout = dup(STDOUT_FILENO);
@@ -42,7 +42,7 @@ void	output_multiple_redirect(t_cmd *cmd)
 			| O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 	if (fd == -1)
 	{
-		perror("");
+		perror("open");
 		return ;
 	}
 	while (i < len)

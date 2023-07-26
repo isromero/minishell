@@ -183,6 +183,7 @@ void	remove_double_quotes(char **token);
 void	remove_single_quotes(char **token);
 int		count_quotes(char *line);
 void	init_expand_vars(t_cmd *cmd);
+void	even_quotes(char *token, int left_double_quotes, int left_single_quotes, size_t len_token);
 
 /* pipes_utils.c */
 void	init_pipes(t_cmd *cmd);

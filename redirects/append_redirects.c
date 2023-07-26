@@ -24,7 +24,7 @@ void	append_multiple_redirect(t_cmd *cmd)
 			| O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
 	if (fd == -1)
 	{
-		perror("");
+		perror("open");
 		return ;
 	}
 	while (i < len)
@@ -49,7 +49,7 @@ void	append_redirect(t_cmd *cmd)
 			| O_CREAT | O_APPEND, S_IRUSR | S_IWUSR);
 	if (fd == -1)
 	{
-		perror("");
+		perror("open");
 		return ;
 	}
 	cmd->stdout = dup(STDOUT_FILENO);

@@ -106,7 +106,11 @@ int	heredoc_content(t_cmd *cmd, int fd)
 		ft_putchar_fd('\n', fd);
 		free(line);
 	}
-	else if (*line == '\n')
-		ft_putchar_fd('\n', fd);
+	else
+	{
+		free(line);
+		printf("minishell: warning: here-document delimited by end-of-file (wanted '%s')\n", find_heredoc_delim(cmd));
+		exit(0);
+	}
 	return (0);
 }

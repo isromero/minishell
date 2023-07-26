@@ -66,27 +66,20 @@ void	replace_env_vars(t_cmd *cmd, char *buffer)
 	}
 }
 
-void	heredoc_child_process(t_cmd *cmd, int fd[2])
+void	heredoc_child_process(t_cmd *cmd, int fd)
 {
 	char	buffer[1024];
 	ssize_t	bytes_read;
 	char	*delim;
 
-	close(fd[0]);
-	fd[1] = open("/tmp/heredocBURMITO", O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
-	if (fd[1] == -1)
-	{
-		perror("open");
-		exit(1);
-	}
 	signal(SIGINT, SIG_IGN);
 	signal(SIGINT, &handle_ctrlc_heredoc);
 	while (1)
 	{
-		if (heredoc_content(cmd, fd[1]) == 1)
+		if (heredoc_content(cmd, fd) == 1)
 			break;
 	}
-	close(fd[1]);
+	close(fd);
 	int new_fd = open("./expanded.txt", O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
 	if (new_fd == -1)
 	{
@@ -112,15 +105,16 @@ void	heredoc_child_process(t_cmd *cmd, int fd[2])
 
 void	heredoc_redirect(t_cmd *cmd)
 {
-    int fd[2];
     pid_t pid;
 
     cmd->in_quote_heredoc = 0;
-    if (pipe(fd) == -1)
-    {
-        perror("pipe");
-        exit(1);
-    }
+    int fd;
+	fd = open("/tmp/heredocBURMITO", O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+	if (fd == -1)
+	{
+		perror("open");
+		exit(1);
+	}
     pid = fork();
     signal(SIGINT, SIG_IGN);
     if (pid == -1)
@@ -132,7 +126,7 @@ void	heredoc_redirect(t_cmd *cmd)
 		heredoc_child_process(cmd, fd);
     else
     {
-        close(fd[1]);
+        close(fd);
         wait(NULL);
         signal(SIGINT, &handle_ctrlc);
     }

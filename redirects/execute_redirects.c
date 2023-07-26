@@ -86,16 +86,8 @@ void execute_heredoc_redirects(t_cmd *cmd, char *com, char **args, int i)
     {
         heredoc_redirect(cmd);
         int fd = open("./expanded.txt", O_RDONLY); // Abrir el archivo temporal del heredoc en modo lectura
-        if (fd == -1)
-        {
-            perror("open");
-            exit(1);
-        }
         if (dup2(fd, STDIN_FILENO) == -1)
-        {
-            perror("dup2");
-            exit(1);
-        }
+            exit(0);
         close(fd);
         if (!is_builtin(cmd, i))
             execve(com, args, cmd->env);

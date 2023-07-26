@@ -84,6 +84,18 @@ typedef struct cmd
 	int		in_quote_delim_heredoc;
 }	t_cmd;
 
+typedef struct replace_vars
+{
+	size_t token_len;
+	char	*replaced_token;
+	size_t	replaced_len;
+	size_t	j;
+	char	*value;
+	size_t var_start;
+	size_t var_len;
+	char *var;
+}	t_replace_vars;
+
 # define HEREDOC_REDIRECT "<<"
 # define INPUT_REDIRECT '<'
 # define PIPE '|'
@@ -169,7 +181,6 @@ void	redirect_middle_pipes(t_cmd *cmd);
 void	redirect_last_pipe(t_cmd *cmd);
 
 /* expander.c */
-void	replace_vars(t_cmd *cmd, char **token);
 void	search_var_replace(t_cmd *cmd, char *buffer);
 
 /* parser.c */
@@ -265,6 +276,19 @@ void	handle_ctrlc_heredoc();
 /* try_access */
 void	execute_executable(t_cmd *cmd, char *command);
 void	try_execute(t_cmd *cmd, char *path, char *command);
+
+/*expand_vars_utils.c*/
+size_t	get_variable_length(const char *token, size_t var_start);
+char	*get_variable(const char *token, size_t var_start, size_t var_len);
+char	*get_environment_value(const char *var, char **env);
+char	*append_value(char *replaced_token, size_t replace, const char *value);
+void	init_replace_vars(t_replace_vars **replace_vars);
+
+/*expand_vars_normal.c*/
+void	free_replace_vars(t_replace_vars *replace_vars);
+void	process_variables(t_cmd *cmd, char **token, t_replace_vars *replace);
+void	process_token(t_cmd *cmd, char **token, t_replace_vars *replace_vars);
+void	replace_vars(t_cmd *cmd, char **token);
 
 extern int	g_status;
 

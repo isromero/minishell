@@ -20,6 +20,7 @@ SRCS		=	builtins/builtins.c builtins/builtins2.c builtins/builtins_utils.c envir
 				checks/is_check.c checks/is_check2.c checks/is_check3.c executor/pipes/fork_pipes_processes.c parser/quote_manage_utils.c \
 				parser/quote_manage.c executor/pipes/execute_pipes_utils.c executor/pipes/execute_pipes.c redirects/heredoc_redirects_utils.c \
 				redirects/heredoc_redirects.c checks/is_check4.c redirects/input_redirects_utils.c redirects/append_redirects_utils.c \
+				expander/expand_vars_normal.c expander/expand_vars_utils.c
 
 LIBFT		=	libft/libft.a
 

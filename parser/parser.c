@@ -37,6 +37,8 @@ int	parser_save_token(t_cmd *cmd)
 			save_token(cmd, token);
 			i += len;
 		}
+        else if(len == -1)
+            return (-1);
 	}
 	return (len);
 }

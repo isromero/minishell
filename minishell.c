@@ -20,40 +20,45 @@
 
 int	g_status;
 
+void    init_minishell(t_cmd *cmd)
+{
+    while (1)
+	{
+		signal(SIGINT, &handle_ctrlc);
+		cmd->prompt = get_prompt(cmd);
+		cmd->line = readline(cmd->prompt);
+		if (cmd->line == NULL)
+		{
+			free(cmd->prompt);
+			handle_ctrld();
+			break ;
+		}
+		if (ft_strncmp(cmd->line, "", 1) > 0)
+			add_history(cmd->line);
+		if (parse_args(cmd) == 0)
+		{
+			count_pipes(cmd);
+			executor(cmd);
+			clean_tokens(cmd);
+			free(cmd->no_expand_vars);
+		}
+		free(cmd->line);
+		free(cmd->prompt);
+	}
+}
+
 int	main(int argc, char **argv, char **env)
 {
 	t_cmd	cmd;
 
-	print_minishell();
 	(void)argc;
 	(void)argv;
 	cmd.env = NULL;
+    print_minishell();
 	init_env(&cmd, env);
 	unlink("/tmp/heredoc");
 	unlink("/tmp/heredoc_expanded");
-	while (1)
-	{
-		signal(SIGINT, &handle_ctrlc);
-		cmd.prompt = get_prompt(&cmd);
-		cmd.line = readline(cmd.prompt);
-		if (cmd.line == NULL)
-		{
-			free(cmd.prompt);
-			handle_ctrld();
-			break ;
-		}
-		if (ft_strncmp(cmd.line, "", 1) > 0)
-			add_history(cmd.line);
-		if (parse_args(&cmd) == 0)
-		{
-			count_pipes(&cmd);
-			executor(&cmd);
-			clean_tokens(&cmd);
-			free(cmd.no_expand_vars);
-		}
-		free(cmd.line);
-		free(cmd.prompt);
-	}
+    init_minishell(&cmd);
 	rl_clear_history();
 	free_matrix(cmd.env);
 	return (g_status);

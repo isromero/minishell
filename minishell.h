@@ -119,6 +119,8 @@ typedef struct replace_vars_heredoc
 # define SINGLE_QUOTE '\''
 # define VARIABLE '$'
 
+void    init_minishell(t_cmd *cmd);
+
 /* builtins.c */
 int		is_builtin(t_cmd *cmd, int n_token);
 int		ft_echo(t_cmd *cmd, int echo_token);
@@ -185,7 +187,7 @@ void	child_process(t_cmd *cmd, char *com, char **exec_args, int i);
 
 /* fork_pipes_processes.c */
 void	execute_fork_pipes(t_cmd *cmd, int i, int redirection_pipe);
-void	child_pipes_process(t_cmd *cmd, char *com, char **exec_args, int i, int redirection_pipe);
+void	child_pipes_process(t_cmd *cmd, char *com, char **args, int i);
 
 /* redirecting_pipes.c */
 void	redirect_first_pipe(t_cmd *cmd);

@@ -12,14 +12,8 @@
 
 #include "../../minishell.h"
 
-void	child_pipes_process(t_cmd *cmd, char *com, char **args, int i, int pipe)
+void	child_pipes_process(t_cmd *cmd, char *com, char **args, int i)
 {
-	if (pipe == 0)
-		redirect_first_pipe(cmd);
-	else if (pipe == 1)
-		redirect_middle_pipes(cmd);
-	else if (pipe == 2)
-		redirect_last_pipe(cmd);
 	if (is_builtin(cmd, i))
 		execute_builtin_in_child(cmd, i);
 	else if (!is_builtin(cmd, i))
@@ -48,7 +42,15 @@ void	execute_fork_pipes(t_cmd *cmd, int i, int redirection_pipe)
 		exit(1);
 	}
 	else if (cmd->pid[cmd->count_pids] == 0)
-		child_pipes_process(cmd, com, exec_args, i, redirection_pipe);
+    {
+        if (redirection_pipe == 0)
+            redirect_first_pipe(cmd);
+        else if (redirection_pipe == 1)
+            redirect_middle_pipes(cmd);
+        else if (redirection_pipe == 2)
+            redirect_last_pipe(cmd);
+		child_pipes_process(cmd, com, exec_args, i);
+     }
 	else
 	{
 		free(exec_args);

@@ -12,23 +12,26 @@
 
 #include "../minishell.h"
 
-int	is_builtin(t_cmd *cmd, int n_token)
+int	is_double_quote(t_cmd *cmd, int len)
 {
-	if (ft_strcmp(cmd->token[n_token], "echo") == 0)
-		return (1);
-	else if (ft_strcmp(cmd->token[n_token], "cd") == 0)
-		return (1);
-	else if (ft_strcmp(cmd->token[n_token], "pwd") == 0)
-		return (1);
-	else if (ft_strcmp(cmd->token[n_token], "export") == 0)
-		return (1);
-	else if (ft_strcmp(cmd->token[n_token], "unset") == 0)
-		return (1);
-	else if (ft_strcmp(cmd->token[n_token], "env") == 0)
-		return (1);
-	else if (ft_strcmp(cmd->token[n_token], "exit") == 0)
-		return (1);
-	return (0);
+	int	i;
+
+	cmd->in_double_quote = true;
+	i = 0;
+	while (cmd->line[i + len] != '\0')
+	{
+		if (cmd->line[i + len] == DOUBLE_QUOTE && cmd->line[i + len + 1] == ' '
+			&& cmd->in_double_quote == true)
+		{
+			cmd->in_double_quote = false;
+			i++;
+		}
+		if (cmd->line[i + len] == DOUBLE_QUOTE && cmd->line[i + len + 1] == ' '
+			&& cmd->in_double_quote == false)
+			break ;
+		i++;
+	}
+	return (i);
 }
 
 int	is_single_quote(t_cmd *cmd, int len)

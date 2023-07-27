@@ -12,20 +12,23 @@
 
 #include "minishell.h"
 
-void	handle_ctrld_heredoc(void)
+void	handle_ctrld_heredoc(int sig)
 {
+	(void)sig;
 	ft_putchar_fd('\n', STDOUT_FILENO);
 	exit(0);
 }
 
-void	handle_ctrlc_heredoc(void)
+void	handle_ctrlc_heredoc(int sig)
 {
+	(void)sig;
 	ft_putchar_fd('\n', STDOUT_FILENO);
 	exit(0);
 }
 
-void	handle_ctrlc(void)
+void	handle_ctrlc(int sig)
 {
+	(void)sig;
 	ft_putchar_fd('\n', STDOUT_FILENO);
 	rl_on_new_line();
 	rl_replace_line("", 0);
@@ -38,7 +41,8 @@ void	handle_ctrlc2(int sig)
 	(void)sig;
 }
 
-void	handle_ctrld(void)
+void	handle_ctrld(int sig)
 {
+	(void)sig;
 	g_status = 0;
 }

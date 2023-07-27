@@ -18,7 +18,7 @@
 
 int	g_status;
 
-void	init_minishell(t_cmd *cmd)
+void	init_minishell(t_cmd *cmd, int sig)
 {
 	while (1)
 	{
@@ -28,7 +28,7 @@ void	init_minishell(t_cmd *cmd)
 		if (cmd->line == NULL)
 		{
 			free(cmd->prompt);
-			handle_ctrld();
+			handle_ctrld(sig);
 			break ;
 		}
 		if (ft_strncmp(cmd->line, "", 1) > 0)
@@ -48,15 +48,17 @@ void	init_minishell(t_cmd *cmd)
 int	main(int argc, char **argv, char **env)
 {
 	t_cmd	cmd;
+	int		sig;
 
 	(void)argc;
 	(void)argv;
+	sig = 0;
 	cmd.env = NULL;
 	print_minishell();
 	init_env(&cmd, env);
 	unlink("/tmp/heredoc");
 	unlink("/tmp/heredoc_expanded");
-	init_minishell(&cmd);
+	init_minishell(&cmd, sig);
 	rl_clear_history();
 	free_matrix(cmd.env);
 	return (g_status);

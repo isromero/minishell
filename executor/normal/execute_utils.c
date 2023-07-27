@@ -60,10 +60,10 @@ void	execute_command_no_exists(t_cmd *cmd, int i)
 		closedir(dir);
 	}
 	else if (cmd->token[i][0] == '/')
-    {
-        printf("-minishell: %s: No such file or directory\n", cmd->token[i]);
-        g_status = 127;
-    }
+	{
+		printf("-minishell: %s: No such file or directory\n", cmd->token[i]);
+		g_status = 127;
+	}
 	else
 		printf("-minishell: %s: command not found\n", cmd->token[i]);
 	exit(g_status);

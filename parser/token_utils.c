@@ -71,7 +71,7 @@ int	check_len_token(t_cmd *cmd, int len)
 			return (is_single_quote(cmd, len));
 		else if (cmd->line[len] == DOUBLE_QUOTE)
 			return (is_double_quote(cmd, len));
-		else if (is_special2(cmd->line[len]))
+		else if (is_special(cmd->line[len]))
 			return (check_len_special(cmd, len));
 		else if (cmd->line[len] != '\0')
 			return (cmd_token_len(cmd, len));

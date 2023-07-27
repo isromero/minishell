@@ -43,15 +43,10 @@ void	execute_fork_pipes(t_cmd *cmd, int i, int redirection_pipe)
 		exit(1);
 	}
 	else if (cmd->pid[cmd->count_pids] == 0)
-    {
-        if (redirection_pipe == 0)
-            redirect_first_pipe(cmd);
-        else if (redirection_pipe == 1)
-            redirect_middle_pipes(cmd);
-        else if (redirection_pipe == 2)
-            redirect_last_pipe(cmd);
+	{
+		which_pipe_direct(cmd, redirection_pipe);
 		child_pipes_process(cmd, com, exec_args, i);
-     }
+	}
 	else
 	{
 		free(exec_args);

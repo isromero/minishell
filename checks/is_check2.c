@@ -14,7 +14,7 @@
 
 int	is_executable(t_cmd *cmd, char c)
 {
-    (void)cmd;
+	(void)cmd;
 	return (c == '/' || c == '.');
 }
 

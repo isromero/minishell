@@ -120,6 +120,8 @@ typedef struct replace_vars_heredoc
 # define VARIABLE '$'
 
 void    init_minishell(t_cmd *cmd);
+void	parser_aux_save_token(t_cmd *cmd, int i, int len);
+void    which_pipe_direct(t_cmd *cmd, int redirection_pipe);
 
 /* builtins.c */
 int		is_builtin(t_cmd *cmd, int n_token);

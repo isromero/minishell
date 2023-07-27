@@ -12,15 +12,25 @@
 
 #include "../minishell.h"
 
+void	parser_aux_save_token(t_cmd *cmd, int i, int len)
+{
+	char	*token;
+
+	token = (char *)malloc((len + 1) * sizeof(char));
+	if (!token)
+		return ;
+	ft_strncpy(token, cmd->line + i, len);
+	token[len] = '\0';
+	save_token(cmd, token);
+}
+
 int	parser_save_token(t_cmd *cmd)
 {
 	int		i;
 	int		len;
-	char	*token;
 
 	i = 0;
 	len = 0;
-	token = NULL;
 	while (cmd->line[i] != '\0')
 	{
 		while (cmd->line[i] == ' ' && cmd->in_single_quote == false
@@ -29,16 +39,11 @@ int	parser_save_token(t_cmd *cmd)
 		len = check_len_token(cmd, i);
 		if (len > 0)
 		{
-			token = (char *)malloc((len + 1) * sizeof(char));
-			if (!token)
-				return (-1);
-			ft_strncpy(token, cmd->line + i, len);
-			token[len] = '\0';
-			save_token(cmd, token);
+			parser_aux_save_token(cmd, i, len);
 			i += len;
 		}
-        else if(len == -1)
-            return (-1);
+		else if (len == -1)
+			return (-1);
 	}
 	return (len);
 }

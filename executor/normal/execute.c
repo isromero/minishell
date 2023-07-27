@@ -18,7 +18,6 @@ void	executor(t_cmd *cmd)
 
 	i = 0;
 	cmd->replaced_var = 0;
-    
 	while (cmd->token[i] != NULL)
 	{
 		if (cmd->token[i][0] == '|')

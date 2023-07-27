@@ -35,3 +35,13 @@ void	redirect_last_pipe(t_cmd *cmd)
 	dup2(cmd->fd[cmd->count_pipes - 1][READ_END], STDIN_FILENO);
 	close(cmd->fd[cmd->count_pipes - 1][READ_END]);
 }
+
+void	which_pipe_direct(t_cmd *cmd, int redirection_pipe)
+{
+	if (redirection_pipe == 0)
+		redirect_first_pipe(cmd);
+	else if (redirection_pipe == 1)
+		redirect_middle_pipes(cmd);
+	else if (redirection_pipe == 2)
+		redirect_last_pipe(cmd);
+}

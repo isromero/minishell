@@ -12,17 +12,15 @@
 
 #include "minishell.h"
 
-// /bin/comando inventado  echo $? devuelve 1
-/* ls > hola | ls -l > puta | ls -a > buenas FALLA LA DEL MEDIO */
-//grep $PATH???????????????????????????????????????
-// "'$PATH'" LEAK Y NO SE REPLACEA
-// cat << NO devuelve syntax error, lo hemos borrado?
+// /bin/comando inventado echo $? devuelve 1
+// ls > hola | ls -l > co | ls -a > buenas FALLA LA DEL MEDIO
+//grep $PATH preguntar en 42
 
 int	g_status;
 
-void    init_minishell(t_cmd *cmd)
+void	init_minishell(t_cmd *cmd)
 {
-    while (1)
+	while (1)
 	{
 		signal(SIGINT, &handle_ctrlc);
 		cmd->prompt = get_prompt(cmd);
@@ -54,11 +52,11 @@ int	main(int argc, char **argv, char **env)
 	(void)argc;
 	(void)argv;
 	cmd.env = NULL;
-    print_minishell();
+	print_minishell();
 	init_env(&cmd, env);
 	unlink("/tmp/heredoc");
 	unlink("/tmp/heredoc_expanded");
-    init_minishell(&cmd);
+	init_minishell(&cmd);
 	rl_clear_history();
 	free_matrix(cmd.env);
 	return (g_status);

@@ -60,7 +60,6 @@ void	process_token(t_cmd *cmd, char **token, t_replace_vars *replace_vars)
 {
 	replace_vars->token_len = ft_strlen(*token);
 	replace_vars->replaced_token = malloc(replace_vars->token_len + 1);
-	cmd->replaced_var += 1;
 	process_variables(cmd, token, replace_vars);
 	replace_vars->replaced_token[replace_vars->replaced_len] = '\0';
 }

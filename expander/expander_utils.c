@@ -38,12 +38,9 @@ char	*append_value(char *replaced_token, size_t replace, const char *value)
 {
 	char	*new_replaced_token;
 
-	new_replaced_token = malloc(replace + ft_strlen(value) + 1);
-	if (new_replaced_token == NULL)
-	{
-		free(replaced_token);
+	new_replaced_token = malloc(replace + ft_strlen(value) + 2);
+	if (!new_replaced_token)
 		return (NULL);
-	}
 	ft_strncpy(new_replaced_token, replaced_token, replace);
 	ft_strncpy(new_replaced_token + replace, value, ft_strlen(value));
 	new_replaced_token[replace + ft_strlen(value)] = '\0';

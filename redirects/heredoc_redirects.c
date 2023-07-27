@@ -40,7 +40,7 @@ int	heredoc_content(t_cmd *cmd, int fd)
 
 void	heredoc_write_replaced(t_cmd *cmd, int fd, int new_fd)
 {
-	char	buffer[1024];
+	char	buffer[4096];
 	ssize_t	bytes_read;
 	char	*delim;
 

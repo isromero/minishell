@@ -96,6 +96,18 @@ typedef struct replace_vars
 	char *var;
 }	t_replace_vars;
 
+typedef struct replace_vars_heredoc
+{
+	char	*path;
+	char	*var;
+	int		var_length;
+	int		j;
+	size_t	replace_length;
+	char	*replacement;
+	char	*start;
+	char	*end;
+}	t_replace_vars_heredoc;
+
 # define HEREDOC_REDIRECT "<<"
 # define INPUT_REDIRECT '<'
 # define PIPE '|'
@@ -289,6 +301,8 @@ void	free_replace_vars(t_replace_vars *replace_vars);
 void	process_variables(t_cmd *cmd, char **token, t_replace_vars *replace);
 void	process_token(t_cmd *cmd, char **token, t_replace_vars *replace_vars);
 void	replace_vars(t_cmd *cmd, char **token);
+
+void	path_var_exists(t_replace_vars_heredoc *replace, char *buffer, int i);
 
 extern int	g_status;
 

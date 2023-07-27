@@ -12,11 +12,6 @@
 
 #include "../minishell.h"
 
-void	free_replace_vars(t_replace_vars *replace_vars)
-{
-	free(replace_vars);
-}
-
 void	process_variables(t_cmd *cmd, char **token, t_replace_vars *replace)
 {
 	while (replace->j < replace->token_len)
@@ -63,5 +58,5 @@ void	replace_vars(t_cmd *cmd, char **token)
 	process_token(cmd, token, replace_vars);
 	free(*token);
 	*token = replace_vars->replaced_token;
-	free_replace_vars(replace_vars);
+	free(replace_vars);
 }

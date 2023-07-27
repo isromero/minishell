@@ -1,103 +1,77 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   expander.c                                         :+:      :+:    :+:   */
+/*   expand_vars_normal.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: adgutier <adgutier@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/26 17:51:23 by isromero          #+#    #+#             */
-/*   Updated: 2023/05/26 17:51:23 by isromero         ###   ########.fr       */
+/*   Created: 2023/07/26 18:24:56 by adgutier          #+#    #+#             */
+/*   Updated: 2023/07/26 18:24:56 by adgutier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-void	init_expand_vars(t_cmd *cmd)
+void	init_replace_vars(t_replace_vars **replace_vars)
 {
-	int	i;
-
-	i = 0;
-	cmd->no_expand_vars = malloc((cmd->n_tokens) * sizeof(int));
-	while (cmd->token[i])
-	{
-		if (count_left_single_quotes(cmd->token[i]) % 2 != 0
-			&& cmd->token[i][0] == SINGLE_QUOTE)
-			cmd->no_expand_vars[i] = 1;
-		else
-			cmd->no_expand_vars[i] = 0;
-		i++;
-	}
-}
-
-void	init_replace_vars_heredoc(t_replace_vars_heredoc **replace_vars)
-{
-	*replace_vars
-		= (t_replace_vars_heredoc *)malloc(sizeof(t_replace_vars_heredoc));
+	*replace_vars = (t_replace_vars *)malloc(sizeof(t_replace_vars));
 	if (*replace_vars == NULL)
 		return ;
-	(*replace_vars)->path = NULL;
-	(*replace_vars)->var = NULL;
-	(*replace_vars)->var_length = 0;
+	(*replace_vars)->token_len = 0;
 	(*replace_vars)->j = 0;
-	(*replace_vars)->replace_length = 0;
-	(*replace_vars)->replacement = NULL;
-	(*replace_vars)->start = NULL;
-	(*replace_vars)->end = NULL;
+	(*replace_vars)->value = NULL;
+	(*replace_vars)->replaced_len = 0;
+	(*replace_vars)->replaced_token = NULL;
+	(*replace_vars)->var_start = 0;
+	(*replace_vars)->var_len = 0;
+	(*replace_vars)->var = NULL;
 }
 
-void	replace_vars_heredoc(t_cmd *cmd, char *buffer, int i)
+void	process_variables(t_cmd *cmd, char **token, t_replace_vars *replace)
 {
-	t_replace_vars_heredoc	*replace_vars;
-
-	init_replace_vars_heredoc(&replace_vars);
-	replace_vars->j = ++i;
-	while (buffer[replace_vars->j] != '\0' && buffer[replace_vars->j] != ' '
-		&& buffer[replace_vars->j] != '\n'
-		&& buffer[replace_vars->j] != '$' && buffer[replace_vars->j] != '\t'
-		&& !is_special(buffer[replace_vars->j]) 
-		&& buffer[replace_vars->j] != SINGLE_QUOTE 
-		&& buffer[replace_vars->j] != DOUBLE_QUOTE)
+	while (replace->j < replace->token_len)
 	{
-		replace_vars->var_length++;
-		replace_vars->j++;
+		if ((*token)[replace->j] == VARIABLE
+			&& (*token)[replace->j + 1] != '\0')
+		{
+			replace->var_start = replace->j + 1;
+			replace->var_len = get_variable_length(*token, replace->var_start);
+			replace->var = get_variable(*token,
+					replace->var_start, replace->var_len);
+			replace->value = ft_getenv(replace->var, cmd->env);
+			if (replace->value != NULL)
+			{
+				replace->replaced_token = append_value(replace->replaced_token,
+						replace->replaced_len, replace->value);
+				replace->replaced_len += ft_strlen(replace->value);
+				free(replace->value);
+			}
+			free(replace->var);
+			replace->j += replace->var_len;
+		}
+		else
+			replace->replaced_token[replace->replaced_len++]
+				= (*token)[replace->j];
+		replace->j++;
 	}
-	replace_vars->var = malloc(sizeof(char) * (replace_vars->var_length + 1));
-	ft_strncpy(replace_vars->var, &buffer[i], replace_vars->var_length);
-	replace_vars->var[replace_vars->var_length] = '\0';
-	replace_vars->path = ft_getenv(replace_vars->var, cmd->env);
-	free(replace_vars->var);
-	if (replace_vars->path != NULL)
-		path_var_exists(replace_vars, buffer, i);
+}
+
+void	process_token(t_cmd *cmd, char **token, t_replace_vars *replace_vars)
+{
+	replace_vars->token_len = ft_strlen(*token);
+	replace_vars->replaced_token = malloc(replace_vars->token_len + 1);
+	cmd->replaced_var += 1;
+	process_variables(cmd, token, replace_vars);
+	replace_vars->replaced_token[replace_vars->replaced_len] = '\0';
+}
+
+void	replace_vars(t_cmd *cmd, char **token)
+{
+	t_replace_vars	*replace_vars;
+
+	init_replace_vars(&replace_vars);
+	process_token(cmd, token, replace_vars);
+	free(*token);
+	*token = replace_vars->replaced_token;
 	free(replace_vars);
-}
-
-void	path_var_exists(t_replace_vars_heredoc *replace, char *buffer, int i)
-{
-	replace->replace_length = ft_strlen(replace->path);
-	replace->replacement
-		= malloc(sizeof(char) * (replace->replace_length + 1));
-	ft_strncpy(replace->replacement, replace->path,
-		replace->replace_length);
-	replace->replacement[replace->replace_length] = '\0';
-	replace->start = &buffer[i - 1];
-	replace->end = &buffer[i - 1 + replace->var_length];
-	ft_memmove(replace->start + replace->replace_length,
-		replace->end + 1, ft_strlen(replace->end));
-	ft_memcpy(replace->start, replace->replacement,
-		replace->replace_length);
-	free(replace->path);
-	free(replace->replacement);
-}
-
-void	search_var_replace(t_cmd *cmd, char *buffer)
-{
-	int	i;
-
-	i = 0;
-	while (buffer[i] != '\0')
-	{
-		if (buffer[i] == '$')
-			replace_vars_heredoc(cmd, buffer, i);
-		i++;
-	}
 }

@@ -34,14 +34,6 @@ char	*get_variable(const char *token, size_t var_start, size_t var_len)
 	return (var);
 }
 
-char	*get_environment_value(const char *var, char **env)
-{
-	char	*value;
-
-	value = ft_getenv(var, env);
-	return (value);
-}
-
 char	*append_value(char *replaced_token, size_t replace, const char *value)
 {
 	char	*new_replaced_token;
@@ -57,19 +49,4 @@ char	*append_value(char *replaced_token, size_t replace, const char *value)
 	new_replaced_token[replace + ft_strlen(value)] = '\0';
 	free(replaced_token);
 	return (new_replaced_token);
-}
-
-void	init_replace_vars(t_replace_vars **replace_vars)
-{
-	*replace_vars = (t_replace_vars *)malloc(sizeof(t_replace_vars));
-	if (*replace_vars == NULL)
-		return ;
-	(*replace_vars)->token_len = 0;
-	(*replace_vars)->j = 0;
-	(*replace_vars)->value = NULL;
-	(*replace_vars)->replaced_len = 0;
-	(*replace_vars)->replaced_token = NULL;
-	(*replace_vars)->var_start = 0;
-	(*replace_vars)->var_len = 0;
-	(*replace_vars)->var = NULL;
 }

@@ -45,5 +45,10 @@ void	try_execute(t_cmd *cmd, char *path, char *command)
 		}
 	}
 	else if (access(path, F_OK) == -1)
-		printf("-minishell: %s: No such file or directory\n", command);
+    {
+        printf("-minishell: %s: No such file or directory\n", command);
+        g_status = 127;
+        exit(g_status);
+    }
+		
 }

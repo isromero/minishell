@@ -12,34 +12,6 @@
 
 #include "../minishell.h"
 
-int	find_first_heredoc_redirect(t_cmd *cmd)
-{
-	int	len;
-
-	len = 0;
-	while (cmd->token[len] != NULL)
-	{
-		if (ft_strcmp(cmd->token[len], HEREDOC_REDIRECT) == 0)
-			return (len);
-		len++;
-	}
-	return (0);
-}
-
-int	find_last_heredoc_redirect(t_cmd *cmd)
-{
-	int	len;
-
-	len = cmd->n_tokens - 2;
-	while (len >= 0)
-	{
-		if (ft_strcmp(cmd->token[len], HEREDOC_REDIRECT) == 0)
-			return (len);
-		len--;
-	}
-	return (0);
-}
-
 char	*find_heredoc_delim(t_cmd *cmd)
 {
 	int		len;

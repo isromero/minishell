@@ -50,8 +50,7 @@ int	cmd_token_len(t_cmd *cmd, int len)
 	i = 0;
 	while (cmd->line[i + len] != '\0')
 	{
-		if ((cmd->line[i + len] == ' ' || is_special2(cmd->line[i + len]))
-			&& is_double_quote % 2 == 0 && is_single_quote % 2 == 0)
+		if (cmd->line[i + len] == ' ' || is_special(cmd->line[i + len]))
 			break ;
 		else if (cmd->line[i + len] == DOUBLE_QUOTE)
 			is_double_quote++;

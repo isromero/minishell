@@ -86,6 +86,11 @@ void	execute_heredoc_redirects(t_cmd *cmd, char *com, char **args, int i)
 	unlink("/tmp/heredoc_expanded");
 	if (is_heredoc_redirect(cmd, i) == 1)
 	{
+        if(cmd->token[i + 2] == NULL)
+        {
+            printf("minishell: syntax error near unexpected token `newline'\n");
+            exit(0);
+        }
 		heredoc_redirect(cmd);
 		fd = open("/tmp/heredoc_expanded", O_RDONLY);
 		if (dup2(fd, STDIN_FILENO) == -1)

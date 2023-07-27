@@ -32,6 +32,7 @@ void	execute_fork_pipes(t_cmd *cmd, int i, int redirection_pipe)
 	char	**exec_args;
 	char	*com;
 
+	com = NULL;
 	exec_args = get_exec_args(cmd, i);
 	if (!is_executable(cmd, cmd->token[i][0]))
 		com = command_dir(cmd, cmd->token[i]);

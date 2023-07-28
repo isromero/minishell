@@ -75,3 +75,16 @@ void	replace_vars(t_cmd *cmd, char **token)
 	*token = replace_vars->replaced_token;
 	free(replace_vars);
 }
+
+void	replace_before_execute(t_cmd *cmd)
+{
+	int	i;
+
+	i = 0;
+	while (i < cmd->n_tokens - 1)
+	{
+		if (cmd->no_expand_vars[i] == 0)
+			replace_vars(cmd, &cmd->token[i]);
+		i++;
+	}
+}

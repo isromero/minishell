@@ -251,6 +251,7 @@ void	init_replace_vars(t_replace_vars **replace_vars);
 void	process_variables(t_cmd *cmd, char **token, t_replace_vars *replace);
 void	process_token(t_cmd *cmd, char **token, t_replace_vars *replace_vars);
 void	replace_vars(t_cmd *cmd, char **token);
+void	replace_before_execute(t_cmd *cmd);
 
 /* 
 	PARSER 

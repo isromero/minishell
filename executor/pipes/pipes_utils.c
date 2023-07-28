@@ -56,6 +56,7 @@ void	wait_close_pipes(t_cmd *cmd)
 			g_status = WEXITSTATUS(child_status);
 		i++;
 	}
+	free_pipes(cmd);
 }
 
 void	count_pipes(t_cmd *cmd)

@@ -54,8 +54,8 @@ void	replace_vars_heredoc(t_cmd *cmd, char *buffer, int i)
 	while (buffer[replace_vars->j] != '\0' && buffer[replace_vars->j] != ' '
 		&& buffer[replace_vars->j] != '\n'
 		&& buffer[replace_vars->j] != '$' && buffer[replace_vars->j] != '\t'
-		&& !is_special(buffer[replace_vars->j]) 
-		&& buffer[replace_vars->j] != SINGLE_QUOTE 
+		&& !is_special(buffer[replace_vars->j])
+		&& buffer[replace_vars->j] != SINGLE_QUOTE
 		&& buffer[replace_vars->j] != DOUBLE_QUOTE)
 	{
 		replace_vars->var_length++;

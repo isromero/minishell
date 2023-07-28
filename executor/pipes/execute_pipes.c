@@ -21,6 +21,7 @@ void	redirecting_pipes(t_cmd *cmd)
 	first_time = 0;
 	init_pipes(cmd);
 	signal(SIGINT, &handle_ctrlc2);
+	replace_before_execute(cmd);
 	while (i < cmd->n_tokens - 1)
 	{
 		if (cmd->token[i][0] == '|' && cmd->count_pipes == 0 && first_time == 0)
@@ -31,20 +32,17 @@ void	redirecting_pipes(t_cmd *cmd)
 		else if (cmd->token[i][0] == '|' && (first_time == 1
 			|| cmd->count_pipes > 0) && cmd->count_pipes < cmd->n_pipes)
 			execute_middle_pipes(cmd, find_len_command_pipes(cmd, i));
-		else if (!is_special(cmd->token[i][0]) && cmd->token[i + 1] == NULL \
+		else if (!is_special(cmd->token[i][0]) && cmd->token[i + 1] == NULL
 			&& (first_time == 1 || cmd->count_pipes > 0)
 			&& cmd->count_pipes == cmd->n_pipes)
 			execute_last_pipes(cmd, find_len_command_pipes(cmd, i));
 		i++;
 	}
 	wait_close_pipes(cmd);
-	free_pipes(cmd);
 }
 
 void	execute_last_pipes(t_cmd *cmd, int i)
 {
-	if (cmd->no_expand_vars[i] == 0)
-		replace_vars(cmd, &cmd->token[i]);
 	if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0])
 		&& !is_redirects_double_char(cmd->token[i]))
 		execute_fork_pipes(cmd, i, 2);
@@ -52,8 +50,6 @@ void	execute_last_pipes(t_cmd *cmd, int i)
 
 void	execute_middle_pipes(t_cmd *cmd, int i)
 {
-	if (cmd->no_expand_vars[i] == 0)
-		replace_vars(cmd, &cmd->token[i]);
 	if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0])
 		&& !is_redirects_double_char(cmd->token[i]))
 	{
@@ -65,8 +61,6 @@ void	execute_middle_pipes(t_cmd *cmd, int i)
 
 void	execute_first_pipes(t_cmd *cmd, int i)
 {
-	if (cmd->no_expand_vars[i] == 0)
-		replace_vars(cmd, &cmd->token[i]);
 	if (!is_argument_extension(cmd, i) && !is_redirects(cmd->token[i][0])
 		&& !is_redirects_double_char(cmd->token[i]))
 	{

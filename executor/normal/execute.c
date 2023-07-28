@@ -41,13 +41,7 @@ void	execute(t_cmd *cmd)
 	i = 0;
 	return_code = 0;
 	signal(SIGINT, &handle_ctrlc2);
-	while (i < cmd->n_tokens - 1)
-	{
-		if (cmd->no_expand_vars[i] == 0)
-			replace_vars(cmd, &cmd->token[i]);
-		i++;
-	}
-	i = 0;
+	replace_before_execute(cmd);
 	while (i < cmd->n_tokens - 1)
 	{
 		if (!is_argument_extension(cmd, i)
@@ -58,7 +52,7 @@ void	execute(t_cmd *cmd)
 			if (!is_builtin(cmd, i))
 				return_code = execute_fork(cmd, i);
 			else
-				return_code = execute_builtin_no_child(cmd, i);	
+				return_code = execute_builtin_no_child(cmd, i);
 			if (return_code == 1)
 				return ;
 		}

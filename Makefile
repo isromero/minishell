@@ -24,9 +24,10 @@ SRCS		=	builtins/builtins.c builtins/builtins2.c builtins/builtins_utils.c envir
 
 LIBFT		=	libft/libft.a
 
-CFLAGS		=	-Wall -Werror -Wextra -lreadline -g -fsanitize=address,undefined
+CFLAGS		=	-Wall -Werror -Wextra -g -fsanitize=address,undefined
+LDFLAGS		=	-lreadline
+INCFLAGS	=	-I /usr/local/include
 RM			=	rm -f
-#PONER LAS FLAGS NECESARIAS PARA LOS MACS DE 42
 
 all:		$(NAME)
 
@@ -35,14 +36,14 @@ OBJS		=	$(addprefix $(OBJ_DIR)/,$(SRCS:.c=.o))
 
 $(OBJ_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(INCFLAGS) -c $< -o $@
 
 $(LIBFT):
 			@make -C libft >/dev/null 2>&1
 			@make clean -C libft >/dev/null 2>&1
 
 $(NAME):	$(OBJS) $(LIBFT)
-			$(CC) $(OBJS) $(LIBFT) $(CFLAGS) -o $(NAME) >/dev/null 2>&1
+			$(CC) $(OBJS) $(LIBFT) $(CFLAGS) $(LDFLAGS) -o $(NAME) >/dev/null 2>&1
 
 clean:
 	@$(RM) $(OBJS) >/dev/null 2>&1

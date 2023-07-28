@@ -36,7 +36,7 @@ void	redirect_last_pipe(t_cmd *cmd)
 	close(cmd->fd[cmd->count_pipes - 1][READ_END]);
 }
 
-void	which_pipe_direct(t_cmd *cmd, int redirection_pipe)
+void	which_pipe_redirect(t_cmd *cmd, int redirection_pipe)
 {
 	if (redirection_pipe == 0)
 		redirect_first_pipe(cmd);

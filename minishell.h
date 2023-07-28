@@ -225,7 +225,7 @@ void	free_pipes(t_cmd *cmd);
 void	redirect_first_pipe(t_cmd *cmd);
 void	redirect_middle_pipes(t_cmd *cmd);
 void	redirect_last_pipe(t_cmd *cmd);
-void	which_pipe_direct(t_cmd *cmd, int redirection_pipe);
+void	which_pipe_redirect(t_cmd *cmd, int redirection_pipe);
 
 /* executor/try_access.c */
 void	execute_executable(t_cmd *cmd, char *command);

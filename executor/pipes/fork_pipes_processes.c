@@ -44,7 +44,7 @@ void	execute_fork_pipes(t_cmd *cmd, int i, int redirection_pipe)
 	}
 	else if (cmd->pid[cmd->count_pids] == 0)
 	{
-		which_pipe_direct(cmd, redirection_pipe);
+		which_pipe_redirect(cmd, redirection_pipe);
 		child_pipes_process(cmd, com, exec_args, i);
 	}
 	else

@@ -45,7 +45,12 @@ void	execute(t_cmd *cmd)
 	{
 		if (cmd->no_expand_vars[i] == 0)
 			replace_vars(cmd, &cmd->token[i]);
-		if (!is_argument_extension(cmd, i) && cmd->replaced_var <= 1
+		i++;
+	}
+	i = 0;
+	while (i < cmd->n_tokens - 1)
+	{
+		if (!is_argument_extension(cmd, i)
 			&& !is_special(cmd->token[i][0])
 			&& !is_redirects(cmd->token[i][0])
 			&& !is_redirects_double_char(cmd->token[i]))
@@ -53,7 +58,7 @@ void	execute(t_cmd *cmd)
 			if (!is_builtin(cmd, i))
 				return_code = execute_fork(cmd, i);
 			else
-				return_code = execute_builtin_no_child(cmd, i);
+				return_code = execute_builtin_no_child(cmd, i);	
 			if (return_code == 1)
 				return ;
 		}

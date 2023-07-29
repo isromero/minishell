@@ -83,7 +83,8 @@ void	replace_before_execute(t_cmd *cmd)
 	i = 0;
 	while (i < cmd->n_tokens - 1)
 	{
-		if (cmd->no_expand_vars[i] == 0)
+		if (cmd->no_expand_vars[i] == 0
+			&& ft_strcmp(cmd->token[i], "$?") != 0)
 			replace_vars(cmd, &cmd->token[i]);
 		i++;
 	}

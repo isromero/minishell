@@ -57,6 +57,7 @@ void	execute_command_no_exists(t_cmd *cmd, int i)
 	if (dir)
 	{
 		printf("-minishell: %s: Is a directory\n", cmd->token[i]);
+		g_status = 126;
 		closedir(dir);
 	}
 	else if (cmd->token[i][0] == '/')

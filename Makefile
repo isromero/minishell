@@ -18,7 +18,7 @@ SRCS		=	builtins/builtins.c builtins/builtins2.c builtins/builtins_utils.c envir
 				get_next_line/get_next_line.c get_next_line/get_next_line_utils.c redirects/execute_redirects.c \
 				executor/normal/execute_utils.c executor/normal/fork_processes.c executor/pipes/redirecting_pipes.c \
 				checks/is_check.c checks/is_check2.c checks/is_check3.c executor/pipes/fork_pipes_processes.c parser/quote_manage_utils.c \
-				parser/quote_manage.c executor/pipes/execute_pipes_utils.c executor/pipes/execute_pipes.c redirects/heredoc_redirects_utils.c \
+				parser/quote_manage.c executor/pipes/execute_pipes.c redirects/heredoc_redirects_utils.c \
 				redirects/heredoc_redirects.c checks/is_check4.c redirects/input_redirects_utils.c redirects/append_redirects_utils.c \
 				expander/expander_heredoc.c expander/expander_utils.c executor/normal/get_cmd.c
 

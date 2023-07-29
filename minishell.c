@@ -12,7 +12,6 @@
 
 #include "minishell.h"
 
-// /bin/comando inventado echo $? devuelve 1
 // ls > hola | ls -l > co | ls -a > buenas FALLA LA DEL MEDIO
 //grep $PATH preguntar en 42
 

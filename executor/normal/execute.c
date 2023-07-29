@@ -27,6 +27,7 @@ void	executor(t_cmd *cmd)
 					cmd->token[i]);
 			else
 				redirecting_pipes(cmd);
+			return ;
 		}
 		i++;
 	}

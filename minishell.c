@@ -58,7 +58,7 @@ int	main(int argc, char **argv, char **env)
 	unlink("/tmp/heredoc");
 	unlink("/tmp/heredoc_expanded");
 	init_minishell(&cmd, sig);
-	clear_history();
+	rl_clear_history();
 	free_matrix(cmd.env);
 	return (g_status);
 }

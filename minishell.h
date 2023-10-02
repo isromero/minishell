@@ -141,6 +141,7 @@ void	ft_unset(t_cmd *cmd, int unset_token);
 void	ft_env(t_cmd *cmd);
 void	ft_exit(t_cmd *cmd, int exit_token);
 void	execute_builtin_exit(t_cmd *cmd, int exit_code);
+void	ft_export2(t_cmd *cmd);
 
 /* 
 	CHECKS 
@@ -323,7 +324,6 @@ void	heredoc_child_process(t_cmd *cmd, int fd);
 void	heredoc_redirect(t_cmd *cmd);
 
 /* redirects/input_redirects_utils.c */
-void	heredoc_redirect(t_cmd *cmd);
 int		find_first_input_redirect(t_cmd *cmd);
 int		find_last_input_redirect(t_cmd *cmd);
 void	close_input_redirect(t_cmd *cmd);

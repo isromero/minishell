@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_isdigit.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: adgutier <adgutier@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/09/14 14:08:54 by isromero          #+#    #+#             */
-/*   Updated: 2023/07/08 17:14:16 by isromero         ###   ########.fr       */
+/*   Updated: 2023/10/02 15:25:18 by adgutier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 

@@ -42,6 +42,7 @@ void	execute(t_cmd *cmd)
 	i = 0;
 	return_code = 0;
 	signal(SIGINT, &handle_ctrlc2);
+	signal(SIGQUIT, SIG_DFL);
 	replace_before_execute(cmd);
 	while (i < cmd->n_tokens - 1)
 	{

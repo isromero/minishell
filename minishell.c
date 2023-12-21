@@ -22,6 +22,7 @@ void	init_minishell(t_cmd *cmd, int sig)
 	while (1)
 	{
 		signal(SIGINT, &handle_ctrlc);
+		signal(SIGQUIT, SIG_IGN);
 		cmd->prompt = get_prompt(cmd);
 		cmd->line = readline(cmd->prompt);
 		if (cmd->line == NULL)

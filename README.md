@@ -18,7 +18,7 @@ Para descargar y compilar Minishell, sigue los siguientes pasos en tu terminal:
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/tuUsuario/minishell.git
+git clone https://github.com/isromero/minishell.git
 
 # Cambiar al directorio del proyecto
 cd minishell

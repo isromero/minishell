@@ -1,5 +1,5 @@
 # Minishell :shell:
-<img align="center" src="imagenes/imagen1.PNG" alt="Screenshot of the game" />
+<img align="center" src="imagenes/imagen1.PNG" alt="Minishell" />
 ## Descripción :page_facing_up:
 
 Minishell es un proyecto desarrollado por [amsteradri](https://github.com/amsteradri) y [isromero](https://github.com/isromero) . 

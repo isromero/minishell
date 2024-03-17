@@ -12,10 +12,16 @@
 
 #include "minishell.h"
 
-//grep $PATH preguntar en 42
-
 //cd $HOME/Bureau no lleva al directorio si hay una barra deps de home
-//
+// echo -n -n -nnnn -nnnnm Empieza a escribir del argumento que existe, no lo interpretamos así nosotros
+// echo -n (Lo pone en la misma línea)
+// cd ./minishell exit code deberia dar 1, devuelve 0 porque lo reiniciamos
+// $? tiene que imprimir el error y el not a directory, también en comandos como cd $?
+// Ejecutar un ./file_that_is_not_an_executable no devuelve el mismo error y el exit code es 2 en vez de 126
+// export $ew=a -> bash: export: `=a': not a valid identifier ->>>>> a nosotros nos imprime el env
+// export var=a ; export $var=test ; echo $var $a
+// export HOME= ; cd Y también unset HOME; cd da seg fault
+
 
 int	g_status;
 
@@ -56,7 +62,7 @@ int	main(int argc, char **argv, char **env)
 	(void)argv;
 	sig = 0;
 	cmd.env = NULL;
-	print_minishell();
+	/* print_minishell(); */
 	init_env(&cmd, env);
 	unlink("/tmp/heredoc");
 	unlink("/tmp/heredoc_expanded");

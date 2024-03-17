@@ -21,7 +21,9 @@
 // export $ew=a -> bash: export: `=a': not a valid identifier ->>>>> a nosotros nos imprime el env
 // export var=a ; export $var=test ; echo $var $a
 // export HOME= ; cd Y también unset HOME; cd da seg fault
-
+// export "" test=a
+// ~ no se expande
+// Tiene que exportarlo: export var=te"st 
 
 int	g_status;
 

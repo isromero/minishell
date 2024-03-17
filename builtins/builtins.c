@@ -83,27 +83,34 @@ void	set_pwd_env(t_cmd *cmd, char **new_env, char *cwd, char *oldpwd)
 	free(change_oldpwd);
 }
 
-void	ft_cd(t_cmd *cmd, int cd_token)
+void ft_cd(t_cmd *cmd, int cd_token)
 {
-	char	cwd[1024];
-	char	*oldpwd;
-	char	**new_env;
-	int		len_of_env;
+	char cwd[1024];
+	char *oldpwd;
+	char **new_env;
+	int len_of_env;
 
 	oldpwd = ft_getenv("PWD", cmd->env);
 	len_of_env = 0;
 	new_env = NULL;
-	if (chdir(cmd->token[cd_token + 1]) != 0)
+	if (chdir(cmd->token[cd_token + 1]) != 0 && cmd->token[cd_token + 1][0] != '-')
 	{
 		printf("-minishell: cd: %s: Not a directory\n",
-			cmd->token[cd_token + 1]);
-		return ;
+				cmd->token[cd_token + 1]);
+		return;
 	}
 	getcwd(cwd, sizeof(cwd));
 	while (cmd->env[len_of_env] != NULL)
 		len_of_env++;
 	new_env = malloc_new_env_builtin(cmd, len_of_env - 1);
-	set_pwd_env(cmd, new_env, cwd, oldpwd);
+	if (cmd->token[cd_token + 1][0] == '-')
+	{
+		oldpwd = ft_getenv("OLDPWD", cmd->env);
+		chdir(oldpwd);
+		set_pwd_env(cmd, new_env, oldpwd, cwd);
+	}
+	else
+		set_pwd_env(cmd, new_env, cwd, oldpwd);
 	new_env[len_of_env] = NULL;
 	free(cmd->env);
 	cmd->env = new_env;

@@ -12,8 +12,10 @@
 
 #include "minishell.h"
 
-// ls > hola | ls -l > co | ls -a > buenas FALLA LA DEL MEDIO
 //grep $PATH preguntar en 42
+
+//cd $HOME/Bureau no lleva al directorio si hay una barra deps de home
+//
 
 int	g_status;
 

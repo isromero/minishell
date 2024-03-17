@@ -91,5 +91,5 @@ void	get_default_env(t_cmd *cmd)
 		i++;
 	}
 	cmd->env[env_count] = NULL;
-	free_matrix(default_env);
+	free(default_env);
 }

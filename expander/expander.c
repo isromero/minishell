@@ -16,7 +16,16 @@ void	process_variables(t_cmd *cmd, char **token, t_replace_vars *replace)
 {
 	while (replace->j < replace->token_len)
 	{
-		if (((*token)[replace->j] == VARIABLE
+		if ((*token)[replace->j] == VARIABLE
+			&& (*token)[replace->j + 1] == '?')
+		{
+			replace->value = ft_itoa(g_status);
+			replace->replaced_token = append_value(replace, token);
+			printf("replace->replaced_token: %s\n", replace->replaced_token);
+			replace->replaced_len += ft_strlen(replace->value);
+			free(replace->value);
+		}
+		else if (((*token)[replace->j] == VARIABLE
 			&& (*token)[replace->j + 1] != '\0')
 			|| (*token)[replace->j] == '~')
 			get_replaced_token(cmd, token, replace);

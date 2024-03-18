@@ -12,6 +12,21 @@
 
 #include "../minishell.h"
 
+void	init_replace_vars(t_replace_vars **replace_vars)
+{
+	*replace_vars = (t_replace_vars *)malloc(sizeof(t_replace_vars));
+	if (*replace_vars == NULL)
+		return ;
+	(*replace_vars)->token_len = 0;
+	(*replace_vars)->j = 0;
+	(*replace_vars)->value = NULL;
+	(*replace_vars)->replaced_len = 0;
+	(*replace_vars)->replaced_token = NULL;
+	(*replace_vars)->var_start = 0;
+	(*replace_vars)->var_len = 0;
+	(*replace_vars)->var = NULL;
+}
+
 size_t	get_variable_length(const char *token, size_t var_start)
 {
 	size_t	var_len;

@@ -244,12 +244,13 @@ void	path_var_exists(t_replace_vars_heredoc *replace, char *buffer, int i);
 void	search_var_replace(t_cmd *cmd, char *buffer);
 
 /* expander/expander_utils.c */
+void	init_replace_vars(t_replace_vars **replace_vars);
 size_t	get_variable_length(const char *token, size_t var_start);
 char	*get_variable(const char *token, size_t var_start, size_t var_len);
 char	*append_value(t_replace_vars *replace, char **token);
 
 /* expander/expander.c */
-void	init_replace_vars(t_replace_vars **replace_vars);
+void	process_home_directory_expansion(t_cmd *cmd, char **token, t_replace_vars *rep);
 void	process_variables(t_cmd *cmd, char **token, t_replace_vars *replace);
 void	process_token(t_cmd *cmd, char **token, t_replace_vars *replace_vars);
 void	replace_vars(t_cmd *cmd, char **token);

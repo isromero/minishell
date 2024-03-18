@@ -12,50 +12,53 @@
 
 #include "../minishell.h"
 
-void	init_replace_vars(t_replace_vars **replace_vars)
+void	process_home_directory_expansion(t_cmd *cmd, char **token,
+	t_replace_vars *rep)
 {
-	*replace_vars = (t_replace_vars *)malloc(sizeof(t_replace_vars));
-	if (*replace_vars == NULL)
-		return ;
-	(*replace_vars)->token_len = 0;
-	(*replace_vars)->j = 0;
-	(*replace_vars)->value = NULL;
-	(*replace_vars)->replaced_len = 0;
-	(*replace_vars)->replaced_token = NULL;
-	(*replace_vars)->var_start = 0;
-	(*replace_vars)->var_len = 0;
-	(*replace_vars)->var = NULL;
+	rep->var_start = rep->j + 1;
+	rep->var_len = get_variable_length(*token, rep->var_start);
+	rep->var = get_variable(*token, rep->var_start, rep->var_len);
+	rep->value = ft_getenv("HOME", cmd->env);
+	if (rep->value != NULL)
+	{
+		rep->replaced_token = append_value(rep, token);
+		rep->replaced_len += ft_strlen(rep->value);
+		free(rep->value);
+	}
+	free(rep->var);
+	rep->j += rep->var_len;
+	ft_strcat(rep->replaced_token, *token + rep->j + 1);
 }
 
-void	process_variables(t_cmd *cmd, char **token, t_replace_vars *replace)
+void	process_variables(t_cmd *cmd, char **token, t_replace_vars *rep)
 {
-	while (replace->j < replace->token_len)
+	while (rep->j < rep->token_len)
 	{
-		if ((*token)[replace->j] == VARIABLE
-			&& (*token)[replace->j + 1] != '\0')
+		if ((*token)[rep->j] == VARIABLE
+			&& (*token)[rep->j + 1] != '\0')
 		{
-			replace->var_start = replace->j + 1;
-			replace->var_len = get_variable_length(*token, replace->var_start);
-			replace->var = get_variable(*token,
-					replace->var_start, replace->var_len);
-			replace->value = ft_getenv(replace->var, cmd->env);
-			if (replace->value != NULL)
+			rep->var_start = rep->j + 1;
+			rep->var_len = get_variable_length(*token, rep->var_start);
+			rep->var = get_variable(*token, rep->var_start, rep->var_len);
+			rep->value = ft_getenv(rep->var, cmd->env);
+			if (rep->value != NULL)
 			{
-				replace->replaced_token = append_value(replace, token);
-				replace->replaced_len += ft_strlen(replace->value);
-				free(replace->value);
+				rep->replaced_token = append_value(rep, token);
+				rep->replaced_len += ft_strlen(rep->value);
+				free(rep->value);
 			}
-			free(replace->var);
-			replace->j += replace->var_len;
-			ft_strcat(replace->replaced_token, *token + replace->j + 1);
+			free(rep->var);
+			rep->j += rep->var_len;
+			ft_strcat(rep->replaced_token, *token + rep->j + 1);
 		}
+		else if ((*token)[rep->j] == '~')
+			process_home_directory_expansion(cmd, token, rep);
 		else
-			replace->replaced_token[replace->replaced_len++] = (*token)[replace->j];
-			
-		replace->j++;
+			rep->replaced_token[rep->replaced_len++] = (*token)[rep->j];
+		rep->j++;
 	}
 }
-//cd $HOME/Documents
+
 void	process_token(t_cmd *cmd, char **token, t_replace_vars *replace_vars)
 {
 	replace_vars->token_len = ft_strlen(*token);

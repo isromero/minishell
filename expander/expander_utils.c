@@ -19,7 +19,8 @@ size_t	get_variable_length(const char *token, size_t var_start)
 	var_len = 0;
 	while (token[var_start + var_len] != VARIABLE
 		&& token[var_start + var_len] != '\0'
-		&& token[var_start + var_len] != SINGLE_QUOTE)
+		&& token[var_start + var_len] != SINGLE_QUOTE
+		&& token[var_start + var_len] != '/')
 		var_len++;
 	return (var_len);
 }
@@ -34,16 +35,16 @@ char	*get_variable(const char *token, size_t var_start, size_t var_len)
 	return (var);
 }
 
-char	*append_value(char *replaced_token, size_t replace, const char *value)
+char	*append_value(t_replace_vars *replace, char **token)
 {
 	char	*new_replaced_token;
 
-	new_replaced_token = malloc(replace + ft_strlen(value) + 2);
+	new_replaced_token = malloc(replace->replaced_len + ft_strlen(replace->value) + ft_strlen(*token + replace->j) + 2);
 	if (!new_replaced_token)
 		return (NULL);
-	ft_strncpy(new_replaced_token, replaced_token, replace);
-	ft_strncpy(new_replaced_token + replace, value, ft_strlen(value));
-	new_replaced_token[replace + ft_strlen(value)] = '\0';
-	free(replaced_token);
+	ft_strncpy(new_replaced_token, replace->replaced_token, replace->replaced_len);
+	ft_strncpy(new_replaced_token + replace->replaced_len, replace->value, ft_strlen(replace->value));
+	new_replaced_token[replace->replaced_len + ft_strlen(replace->value)] = '\0';
+	free(replace->replaced_token);
 	return (new_replaced_token);
 }

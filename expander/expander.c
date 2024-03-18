@@ -41,21 +41,21 @@ void	process_variables(t_cmd *cmd, char **token, t_replace_vars *replace)
 			replace->value = ft_getenv(replace->var, cmd->env);
 			if (replace->value != NULL)
 			{
-				replace->replaced_token = append_value(replace->replaced_token,
-						replace->replaced_len, replace->value);
+				replace->replaced_token = append_value(replace, token);
 				replace->replaced_len += ft_strlen(replace->value);
 				free(replace->value);
 			}
 			free(replace->var);
 			replace->j += replace->var_len;
+			ft_strcat(replace->replaced_token, *token + replace->j + 1);
 		}
 		else
-			replace->replaced_token[replace->replaced_len++]
-				= (*token)[replace->j];
+			replace->replaced_token[replace->replaced_len++] = (*token)[replace->j];
+			
 		replace->j++;
 	}
 }
-
+//cd $HOME/Documents
 void	process_token(t_cmd *cmd, char **token, t_replace_vars *replace_vars)
 {
 	replace_vars->token_len = ft_strlen(*token);

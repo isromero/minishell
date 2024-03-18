@@ -12,7 +12,6 @@
 
 #include "minishell.h"
 
-//cd $HOME/Bureau no lleva al directorio si hay una barra deps de home
 // echo -n -n -nnnn -nnnnm Empieza a escribir del argumento que existe, no lo interpretamos así nosotros
 // echo -n (Lo pone en la misma línea)
 // cd ./minishell exit code deberia dar 1, devuelve 0 porque lo reiniciamos

@@ -246,7 +246,7 @@ void	search_var_replace(t_cmd *cmd, char *buffer);
 /* expander/expander_utils.c */
 size_t	get_variable_length(const char *token, size_t var_start);
 char	*get_variable(const char *token, size_t var_start, size_t var_len);
-char	*append_value(char *replaced_token, size_t replace, const char *value);
+char	*append_value(t_replace_vars *replace, char **token);
 
 /* expander/expander.c */
 void	init_replace_vars(t_replace_vars **replace_vars);

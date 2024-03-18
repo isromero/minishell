@@ -63,3 +63,23 @@ char	*append_value(t_replace_vars *replace, char **token)
 	free(replace->replaced_token);
 	return (new_replaced_token);
 }
+
+void	get_replaced_token(t_cmd *cmd, char **token, t_replace_vars *replace)
+{
+	replace->var_start = replace->j + 1;
+	replace->var_len = get_variable_length(*token, replace->var_start);
+	replace->var = get_variable(*token, replace->var_start, replace->var_len);
+	if ((*token)[replace->j] == '~')
+		replace->value = ft_getenv("HOME", cmd->env);
+	else
+		replace->value = ft_getenv(replace->var, cmd->env);
+	if (replace->value != NULL)
+	{
+		replace->replaced_token = append_value(replace, token);
+		replace->replaced_len += ft_strlen(replace->value);
+		free(replace->value);
+	}
+	free(replace->var);
+	replace->j += replace->var_len;
+	ft_strcat(replace->replaced_token, *token + replace->j + 1);
+}

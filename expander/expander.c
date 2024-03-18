@@ -12,50 +12,17 @@
 
 #include "../minishell.h"
 
-void	process_home_directory_expansion(t_cmd *cmd, char **token,
-	t_replace_vars *rep)
+void	process_variables(t_cmd *cmd, char **token, t_replace_vars *replace)
 {
-	rep->var_start = rep->j + 1;
-	rep->var_len = get_variable_length(*token, rep->var_start);
-	rep->var = get_variable(*token, rep->var_start, rep->var_len);
-	rep->value = ft_getenv("HOME", cmd->env);
-	if (rep->value != NULL)
+	while (replace->j < replace->token_len)
 	{
-		rep->replaced_token = append_value(rep, token);
-		rep->replaced_len += ft_strlen(rep->value);
-		free(rep->value);
-	}
-	free(rep->var);
-	rep->j += rep->var_len;
-	ft_strcat(rep->replaced_token, *token + rep->j + 1);
-}
-
-void	process_variables(t_cmd *cmd, char **token, t_replace_vars *rep)
-{
-	while (rep->j < rep->token_len)
-	{
-		if ((*token)[rep->j] == VARIABLE
-			&& (*token)[rep->j + 1] != '\0')
-		{
-			rep->var_start = rep->j + 1;
-			rep->var_len = get_variable_length(*token, rep->var_start);
-			rep->var = get_variable(*token, rep->var_start, rep->var_len);
-			rep->value = ft_getenv(rep->var, cmd->env);
-			if (rep->value != NULL)
-			{
-				rep->replaced_token = append_value(rep, token);
-				rep->replaced_len += ft_strlen(rep->value);
-				free(rep->value);
-			}
-			free(rep->var);
-			rep->j += rep->var_len;
-			ft_strcat(rep->replaced_token, *token + rep->j + 1);
-		}
-		else if ((*token)[rep->j] == '~')
-			process_home_directory_expansion(cmd, token, rep);
+		if (((*token)[replace->j] == VARIABLE
+			&& (*token)[replace->j + 1] != '\0')
+			|| (*token)[replace->j] == '~')
+			get_replaced_token(cmd, token, replace);
 		else
-			rep->replaced_token[rep->replaced_len++] = (*token)[rep->j];
-		rep->j++;
+			replace->replaced_token[replace->replaced_len++] = (*token)[replace->j];
+		replace->j++;
 	}
 }
 
@@ -86,8 +53,7 @@ void	replace_before_execute(t_cmd *cmd)
 	i = 0;
 	while (i < cmd->n_tokens - 1)
 	{
-		if (cmd->no_expand_vars[i] == 0
-			&& ft_strcmp(cmd->token[i], "$?") != 0)
+		if (cmd->no_expand_vars[i] == 0)
 			replace_vars(cmd, &cmd->token[i]);
 		i++;
 	}

@@ -12,10 +12,10 @@
 
 #include "../minishell.h"
 
-void	execute_builtin(t_cmd *cmd, int n_token)
+int	execute_builtin(t_cmd *cmd, int n_token)
 {
 	if (ft_strcmp(cmd->token[n_token], "cd") == 0)
-		ft_cd(cmd, n_token++);
+		return (ft_cd(cmd, n_token++));
 	else if (ft_strcmp(cmd->token[n_token], "pwd") == 0)
 		ft_pwd(cmd);
 	else if (ft_strcmp(cmd->token[n_token], "env") == 0)
@@ -33,8 +33,7 @@ void	execute_builtin(t_cmd *cmd, int n_token)
 		n_token = ft_echo(cmd, n_token);
 	else if (ft_strcmp(cmd->token[n_token], "exit") == 0)
 		ft_exit(cmd, n_token);
-	else
-		return ;
+	return (0);
 }
 
 int	len_var_in_env(t_cmd *cmd, char *token)

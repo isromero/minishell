@@ -122,7 +122,7 @@ typedef struct replace_vars_heredoc
 	BUILTINS 
 */
 /* builtins/builtins_utils.c */
-void	execute_builtin(t_cmd *cmd, int n_token);
+int		execute_builtin(t_cmd *cmd, int n_token);
 int		len_var_in_env(t_cmd *cmd, char *token);
 int		var_exists(t_cmd *cmd, char *token);
 bool	compare_variable(const char *variable, const char *name);
@@ -132,7 +132,7 @@ char	**malloc_new_env_builtin(t_cmd *cmd, int len_of_env);
 int		print_echo(t_cmd *cmd, int echo_token, int first_iteration);
 int		ft_echo(t_cmd *cmd, int echo_token);
 void	set_pwd_env(t_cmd *cmd, char **new_env, char *cwd, char *oldpwd);
-void	ft_cd(t_cmd *cmd, int cd_token);
+int 	ft_cd(t_cmd *cmd, int cd_token);
 void	ft_pwd(t_cmd *cmd);
 
 /* builtins/builtins2.c */

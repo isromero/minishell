@@ -14,7 +14,6 @@
 
 // echo -n -n -nnnn -nnnnm Empieza a escribir del argumento que existe, no lo interpretamos así nosotros
 // echo -n (Lo pone en la misma línea)
-// cd ./minishell exit code deberia dar 1, devuelve 0 porque lo reiniciamos
 // Ejecutar un ./file_that_is_not_an_executable no devuelve el mismo error y el exit code es 2 en vez de 126
 // export $ew=a -> bash: export: `=a': not a valid identifier ->>>>> a nosotros nos imprime el env
 // export var=a ; export $var=test ; echo $var $a

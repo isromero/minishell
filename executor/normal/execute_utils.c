@@ -75,7 +75,8 @@ int	execute_builtin_no_child(t_cmd	*cmd, int i)
 	if (!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
 		&& !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
 	{
-		execute_builtin(cmd, i);
+		if (execute_builtin(cmd, i) == 1)
+			return (1);
 		g_status = 0;
 		return (1);
 	}

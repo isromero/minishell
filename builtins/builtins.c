@@ -83,7 +83,7 @@ void	set_pwd_env(t_cmd *cmd, char **new_env, char *cwd, char *oldpwd)
 	free(change_oldpwd);
 }
 
-void ft_cd(t_cmd *cmd, int cd_token)
+int ft_cd(t_cmd *cmd, int cd_token)
 {
 	char cwd[1024];
 	char *oldpwd;
@@ -97,7 +97,8 @@ void ft_cd(t_cmd *cmd, int cd_token)
 	{
 		printf("-minishell: cd: %s: Not a directory\n",
 				cmd->token[cd_token + 1]);
-		return;
+		g_status = 1;
+		return (1);
 	}
 	getcwd(cwd, sizeof(cwd));
 	while (cmd->env[len_of_env] != NULL)
@@ -115,6 +116,7 @@ void ft_cd(t_cmd *cmd, int cd_token)
 	free(cmd->env);
 	cmd->env = new_env;
 	free(oldpwd);
+	return (0);
 }
 
 void	ft_pwd(t_cmd *cmd)

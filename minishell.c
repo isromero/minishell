@@ -12,7 +12,6 @@
 
 #include "minishell.h"
 
-// $? tiene que imprimir el error y el not a directory, también en comandos como cd $?
 // echo -n -n -nnnn -nnnnm Empieza a escribir del argumento que existe, no lo interpretamos así nosotros
 // echo -n (Lo pone en la misma línea)
 // cd ./minishell exit code deberia dar 1, devuelve 0 porque lo reiniciamos

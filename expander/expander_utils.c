@@ -53,14 +53,17 @@ char	*get_variable(const char *token, size_t var_start, size_t var_len)
 char	*append_value(t_replace_vars *replace, char **token)
 {
 	char	*new_replaced_token;
+	
+	new_replaced_token = malloc(replace->replaced_len + ft_strlen(replace->value) + ft_strlen((*token) + replace->j) + 1);
 
-	new_replaced_token = malloc(replace->replaced_len + ft_strlen(replace->value) + ft_strlen(*token + replace->j) + 2);
 	if (!new_replaced_token)
-		return (NULL);
-	ft_strncpy(new_replaced_token + replace->replaced_len, replace->value, ft_strlen(replace->value));
-	new_replaced_token[replace->replaced_len + ft_strlen(replace->value)] = '\0';
-	free(replace->replaced_token);
-	return (new_replaced_token);
+			return (NULL);
+	if (replace->replaced_token)
+			ft_strncpy(new_replaced_token, replace->replaced_token, replace->replaced_len);
+	ft_strncpy(new_replaced_token + replace->replaced_len, replace->value, ft_strlen(replace->value) + 1);
+	if (replace->replaced_token)
+			free(replace->replaced_token);
+	return new_replaced_token;
 }
 
 void	get_replaced_token(t_cmd *cmd, char **token, t_replace_vars *replace)

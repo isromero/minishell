@@ -3,14 +3,30 @@
 /*                                                        :::      ::::::::   */
 /*   builtins_utils2.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adgutier <adgutier@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/02 15:47:28 by adgutier          #+#    #+#             */
-/*   Updated: 2023/10/02 15:47:28 by adgutier         ###   ########.fr       */
+/*   Updated: 2024/03/21 19:54:51 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
+
+int	starts_with_n(const char *str)
+{
+	int	i;
+
+	i = 1;
+	if (str[0] != '-')
+		return 0;
+	while (str[i] != '\0') 
+	{
+		if (str[i] != 'n')
+			return (0);
+		i++;
+	}
+	return (1);
+}
 
 void	ft_export2(t_cmd *cmd)
 {

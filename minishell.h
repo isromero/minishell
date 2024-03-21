@@ -128,6 +128,10 @@ int		var_exists(t_cmd *cmd, char *token);
 bool	compare_variable(const char *variable, const char *name);
 char	**malloc_new_env_builtin(t_cmd *cmd, int len_of_env);
 
+/* builtins/builtins_utils2.c */
+int		starts_with_n(const char *str);
+void	ft_export2(t_cmd *cmd);
+
 /* builtins/builtins.c */
 int		print_echo(t_cmd *cmd, int echo_token, int first_iteration);
 int		ft_echo(t_cmd *cmd, int echo_token);
@@ -141,7 +145,6 @@ void	ft_unset(t_cmd *cmd, int unset_token);
 void	ft_env(t_cmd *cmd);
 void	ft_exit(t_cmd *cmd, int exit_token);
 void	execute_builtin_exit(t_cmd *cmd, int exit_code);
-void	ft_export2(t_cmd *cmd);
 
 /* 
 	CHECKS 

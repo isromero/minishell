@@ -12,42 +12,42 @@
 
 #include "../minishell.h"
 
-int	print_echo(t_cmd *cmd, int echo_token, int first_iteration)
+int	print_echo(t_cmd *cmd, int echo_token, int print_newline) 
 {
+	int	first_iteration;
+
+	first_iteration = 1;
 	while (cmd->token[echo_token])
 	{
 		if (cmd->no_expand_vars[echo_token] == 0)
 			replace_vars(cmd, &cmd->token[echo_token]);
-		if (is_special(cmd->token[echo_token][0])
-			&& (cmd->in_single_quote == 0 || cmd->in_double_quote == 0))
-			break ;
-		if (first_iteration != 0)
+		if (!first_iteration)
 			printf(" %s", cmd->token[echo_token]);
-		else if (first_iteration == 0)
+		else
 		{
 			printf("%s", cmd->token[echo_token]);
-			first_iteration++;
+			first_iteration = 0;
 		}
 		echo_token++;
 	}
+	if (print_newline)
+			printf("\n");
 	return (echo_token);
 }
 
-int	ft_echo(t_cmd *cmd, int echo_token)
-{
-	int	first_echo_token;
-	int	first_iteration;
+	int ft_echo(t_cmd *cmd, int echo_token) {
+		int	print_newline;
 
-	first_echo_token = echo_token;
-	first_iteration = 0;
-	echo_token++;
-	if (ft_strcmp(cmd->token[first_echo_token + 1], "-n") == 0)
+		print_newline = 1;
 		echo_token++;
-	echo_token += print_echo(cmd, echo_token, first_iteration);
-	if (ft_strcmp(cmd->token[first_echo_token + 1], "-n") != 0)
-		printf("\n");
-	return (echo_token);
-}
+		while (cmd->token[echo_token] && starts_with_n(cmd->token[echo_token]))
+		{
+			print_newline = 0;
+			echo_token++;
+		}
+		echo_token = print_echo(cmd, echo_token, print_newline);
+		return (echo_token);
+	}
 
 void	set_pwd_env(t_cmd *cmd, char **new_env, char *cwd, char *oldpwd)
 {

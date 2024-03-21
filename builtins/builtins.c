@@ -41,13 +41,6 @@ int	ft_echo(t_cmd *cmd, int echo_token)
 	first_echo_token = echo_token;
 	first_iteration = 0;
 	echo_token++;
-	if (ft_strcmp(cmd->token[0], "echo") == 0
-		&& ft_strcmp(cmd->token[1], "$?") == 0)
-	{
-		ft_putnbr_fd(g_status, STDOUT_FILENO);
-		ft_putchar_fd('\n', STDOUT_FILENO);
-		return (0);
-	}
 	if (ft_strcmp(cmd->token[first_echo_token + 1], "-n") == 0)
 		echo_token++;
 	echo_token += print_echo(cmd, echo_token, first_iteration);

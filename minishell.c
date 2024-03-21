@@ -12,7 +12,6 @@
 
 #include "minishell.h"
 
-// export HOME= ; cd Y también unset HOME; cd da seg fault
 // export "" test=a
 // Tiene que exportarlo: export var=te"st 
 

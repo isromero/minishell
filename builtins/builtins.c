@@ -86,6 +86,8 @@ int ft_cd(t_cmd *cmd, int cd_token)
 	oldpwd = ft_getenv("PWD", cmd->env);
 	len_of_env = 0;
 	new_env = NULL;
+	if (cmd->token[cd_token + 1] == NULL)
+		return (0);
 	if (chdir(cmd->token[cd_token + 1]) != 0 && cmd->token[cd_token + 1][0] != '-')
 	{
 		printf("-minishell: cd: %s: Not a directory\n",

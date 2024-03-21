@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/02 15:47:28 by adgutier          #+#    #+#             */
-/*   Updated: 2024/03/21 19:54:51 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/21 20:45:45 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,14 @@ int	starts_with_n(const char *str)
 		i++;
 	}
 	return (1);
+}
+
+int export_no_var_error(t_cmd *cmd, int export_token)
+{
+	printf("-minishell: export: `%s': not a valid identifier\n",
+		cmd->token[export_token + 1]);
+	g_status = 1;
+	return (g_status);
 }
 
 void	ft_export2(t_cmd *cmd)

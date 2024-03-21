@@ -12,13 +12,14 @@
 
 #include "../minishell.h"
 
-void	ft_export(t_cmd *cmd, int export_token)
+int	ft_export(t_cmd *cmd, int export_token)
 {
 	int		len_of_env;
 	int		pos_var;
 	char	**new_env;
 
-	printf("%s\n", cmd->token[export_token]);
+	if (cmd->token[export_token + 1][0] == '=')
+		return (export_no_var_error(cmd, export_token));
 	pos_var = len_var_in_env(cmd, cmd->token[export_token + 1]);
 	new_env = NULL;
 	len_of_env = 0;
@@ -37,6 +38,7 @@ void	ft_export(t_cmd *cmd, int export_token)
 	new_env[len_of_env + 1] = NULL;
 	free(cmd->env);
 	cmd->env = new_env;
+	return (0);
 }
 
 void	ft_unset(t_cmd *cmd, int unset_token)

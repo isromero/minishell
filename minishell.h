@@ -130,6 +130,7 @@ char	**malloc_new_env_builtin(t_cmd *cmd, int len_of_env);
 
 /* builtins/builtins_utils2.c */
 int		starts_with_n(const char *str);
+int		export_no_var_error(t_cmd *cmd, int export_token);
 void	ft_export2(t_cmd *cmd);
 
 /* builtins/builtins.c */
@@ -140,7 +141,7 @@ int 	ft_cd(t_cmd *cmd, int cd_token);
 void	ft_pwd(t_cmd *cmd);
 
 /* builtins/builtins2.c */
-void	ft_export(t_cmd *cmd, int export_token);
+int	ft_export(t_cmd *cmd, int export_token);
 void	ft_unset(t_cmd *cmd, int unset_token);
 void	ft_env(t_cmd *cmd);
 void	ft_exit(t_cmd *cmd, int exit_token);

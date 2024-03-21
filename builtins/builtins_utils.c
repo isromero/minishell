@@ -23,7 +23,7 @@ int	execute_builtin(t_cmd *cmd, int n_token)
 	else if (ft_strcmp(cmd->token[n_token], "export") == 0
 		&& cmd->token[n_token + 1] != NULL
 		&& ft_strchr(cmd->token[n_token + 1], '='))
-		ft_export(cmd, n_token++);
+		return(ft_export(cmd, n_token++));
 	else if (ft_strcmp(cmd->token[n_token], "export") == 0 && !cmd->token[n_token + 1])
 		ft_export2(cmd);
 	else if (ft_strcmp(cmd->token[n_token], "unset") == 0

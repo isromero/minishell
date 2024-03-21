@@ -35,19 +35,19 @@ int	print_echo(t_cmd *cmd, int echo_token, int print_newline)
 	return (echo_token);
 }
 
-	int ft_echo(t_cmd *cmd, int echo_token) {
-		int	print_newline;
+int ft_echo(t_cmd *cmd, int echo_token) {
+	int	print_newline;
 
-		print_newline = 1;
+	print_newline = 1;
+	echo_token++;
+	while (cmd->token[echo_token] && starts_with_n(cmd->token[echo_token]))
+	{
+		print_newline = 0;
 		echo_token++;
-		while (cmd->token[echo_token] && starts_with_n(cmd->token[echo_token]))
-		{
-			print_newline = 0;
-			echo_token++;
-		}
-		echo_token = print_echo(cmd, echo_token, print_newline);
-		return (echo_token);
 	}
+	echo_token = print_echo(cmd, echo_token, print_newline);
+	return (echo_token);
+}
 
 void	set_pwd_env(t_cmd *cmd, char **new_env, char *cwd, char *oldpwd)
 {

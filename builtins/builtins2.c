@@ -18,6 +18,7 @@ void	ft_export(t_cmd *cmd, int export_token)
 	int		pos_var;
 	char	**new_env;
 
+	printf("%s\n", cmd->token[export_token]);
 	pos_var = len_var_in_env(cmd, cmd->token[export_token + 1]);
 	new_env = NULL;
 	len_of_env = 0;

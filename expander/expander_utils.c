@@ -35,7 +35,8 @@ size_t	get_variable_length(const char *token, size_t var_start)
 	while (token[var_start + var_len] != VARIABLE
 		&& token[var_start + var_len] != '\0'
 		&& token[var_start + var_len] != SINGLE_QUOTE
-		&& token[var_start + var_len] != '/')
+		&& token[var_start + var_len] != '/'
+		&& ft_isalpha(token[var_start + var_len]))
 		var_len++;
 	return (var_len);
 }

@@ -12,10 +12,7 @@
 
 #include "minishell.h"
 
-// echo -n -n -nnnn -nnnnm Empieza a escribir del argumento que existe, no lo interpretamos así nosotros
-// echo -n (Lo pone en la misma línea)
 // export $ew=a -> bash: export: `=a': not a valid identifier ->>>>> a nosotros nos imprime el env
-// export var=a ; export $var=test ; echo $var $a
 // export HOME= ; cd Y también unset HOME; cd da seg fault
 // export "" test=a
 // Tiene que exportarlo: export var=te"st 

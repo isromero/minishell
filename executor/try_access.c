@@ -35,19 +35,25 @@ void	execute_executable(t_cmd *cmd, char *command)
 
 void	try_execute(t_cmd *cmd, char *path, char *command)
 {
-	if (access(path, F_OK) == 0)
-	{
-		if (execve(path, cmd->token, cmd->env) == -1)
-		{
-			printf("-minishell: %s: Is a directory\n", command);
-			g_status = 2;
-			exit(g_status);
-		}
-	}
-	else if (access(path, F_OK) == -1)
+	if (access(path, F_OK) == -1)
 	{
 		printf("-minishell: %s: No such file or directory\n", command);
 		g_status = 127;
 		exit(g_status);
+	}
+	else if (access(path, X_OK) == -1)
+	{
+		printf("-minishell: %s: Permission denied\n", command);
+		g_status = 126;
+		exit(g_status);
+	}
+	else if (access(path, F_OK) == 0)
+	{
+		if (execve(path, cmd->token, cmd->env) == -1)
+		{
+			printf("-minishell: %s: Is a directory\n", command);
+			g_status = 126;
+			exit(g_status);
+		}
 	}
 }

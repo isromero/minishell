@@ -12,6 +12,17 @@
 
 #include "../minishell.h"
 
+int	count_left_single_quotes(char *token)
+{
+	int	i;
+
+	i = 0;
+	while (token[i] != DOUBLE_QUOTE && token[i] == SINGLE_QUOTE
+		&& token[i] != '\0')
+		i++;
+	return (i);
+}
+
 static int	check_for_orphan_quotes(char *token)
 {
 	int	in_single_quote;

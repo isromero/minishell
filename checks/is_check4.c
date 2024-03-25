@@ -19,7 +19,8 @@ int	is_input_redirect(t_cmd *cmd, int len)
 	n_redirects = 0;
 	while (cmd->token[len] != NULL)
 	{
-		if (cmd->token[len][0] == INPUT_REDIRECT)
+		if (cmd->token[len][0] == INPUT_REDIRECT
+			/* && cmd->token[len][1] != INPUT_REDIRECT */) // No entra aquí con un heredoc? Checkear una vez fixeado el echo hola << EOF
 			n_redirects++;
 		len++;
 	}

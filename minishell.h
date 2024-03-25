@@ -270,6 +270,7 @@ int		parse_args(t_cmd *cmd);
 void	save_token(t_cmd *cmd, char *token);
 
 /* parser/quote_manage.c */
+int		count_left_single_quotes(char *token);
 int		remove_quotes(t_cmd *cmd);
 
 /* parser/token_utils.c */

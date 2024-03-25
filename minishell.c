@@ -13,7 +13,7 @@
 #include "minishell.h"
 
 // echo hola << a -> Tiene que parar en el hola
-// export "" test=a
+// echo hola <> a -> Tiene que parar en el hola
 // Tiene que exportarlo: export var=te"st
 // bool quitar de todo el código
 

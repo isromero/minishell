@@ -269,19 +269,7 @@ int		parser_save_token(t_cmd *cmd);
 int		parse_args(t_cmd *cmd);
 void	save_token(t_cmd *cmd, char *token);
 
-/* parser/quote_manage_utils.c */
-int		count_quotes(char *line);
-int		count_double_quotes(char *token);
-int		count_single_quotes(char *token);
-int		count_left_single_quotes(char *token);
-int		count_left_double_quotes(char *token);
-
 /* parser/quote_manage.c */
-void	remove_double_quotes(char **token);
-void	remove_single_quotes(char **token);
-void	remove_quotes2(t_cmd *cmd, int i);
-void	even_quotes(char *token, int left_double_quotes,
-			int left_single_quotes, size_t len_token);
 int		remove_quotes(t_cmd *cmd);
 
 /* parser/token_utils.c */

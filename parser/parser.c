@@ -54,11 +54,11 @@ int	parse_args(t_cmd *cmd)
 	cmd->token = NULL;
 	cmd->in_single_quote = false;
 	cmd->in_double_quote = false;
-	if (count_quotes(cmd->line) % 2 != 0)
+	/* if (count_quotes(cmd->line) % 2 != 0)
 	{
 		printf("-minishell: no closing quote\n");
 		return (-1);
-	}
+	} */
 	if (parser_save_token(cmd) == -1)
 		return (-1);
 	save_token(cmd, NULL);

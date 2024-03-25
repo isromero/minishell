@@ -1,117 +1,79 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   quote_manage2.c                                    :+:      :+:    :+:   */
+/*   quote_manage.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/23 18:53:00 by isromero          #+#    #+#             */
-/*   Updated: 2023/07/23 18:53:00 by isromero         ###   ########.fr       */
+/*   Created: 2024/03/25 19:10:12 by isromero          #+#    #+#             */
+/*   Updated: 2024/03/25 19:10:12 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-void	remove_double_quotes(char **token)
+static int	check_for_orphan_quotes(char *token)
 {
-	int	len;
+	int	in_single_quote;
+	int	in_double_quote;
 	int	i;
-	int	j;
 
-	len = ft_strlen(*token);
+	in_double_quote = 0;
+	in_single_quote = 0;
 	i = 0;
-	j = 0;
-	while (i < len)
+	while (token[i] != '\0')
 	{
-		if ((*token)[i] != DOUBLE_QUOTE)
-		{
-			(*token)[j] = (*token)[i];
-			j++;
-		}
+		if (token[i] == SINGLE_QUOTE && !in_double_quote)
+			in_single_quote = !in_single_quote;
+		else if (token[i] == DOUBLE_QUOTE && !in_single_quote)
+			in_double_quote = !in_double_quote;
 		i++;
 	}
-	(*token)[j] = '\0';
+	return (in_single_quote || in_double_quote);
 }
 
-void	remove_single_quotes(char **token)
-{
-	int	len;
-	int	i;
-	int	j;
-
-	len = ft_strlen(*token);
-	i = 0;
-	j = 0;
-	while (i < len)
-	{
-		if ((*token)[i] != SINGLE_QUOTE)
-		{
-			(*token)[j] = (*token)[i];
-			j++;
-		}
-		i++;
-	}
-	(*token)[j] = '\0';
-}
-
-void	remove_quotes2(t_cmd *cmd, int i)
+static void	remove_quotes2(t_cmd *cmd, int i)
 {
 	int	j;
+	int	k;
+	int	in_double_quote;
+	int	in_single_quote;
 
 	j = 0;
+	k = 0;
+	in_double_quote = 0;
+	in_single_quote = 0;
 	if (i >= 1 && cmd->token[i - 1] != NULL
-		&& ft_strcmp(cmd->token[i - 1], HEREDOC_REDIRECT) == 0)
+		&& ft_strcmp(cmd->token[i - 1], HEREDOC_REDIRECT) == 0
+		&& (cmd->token[i][0] == '"' || cmd->token[i][0] == '\''))
 		cmd->in_quote_delim_heredoc = 1;
 	while (cmd->token[i][j] != '\0')
 	{
-		if (cmd->token[i][j] == DOUBLE_QUOTE)
-		{
-			remove_double_quotes(&cmd->token[i]);
-			break ;
-		}
-		if (cmd->token[i][j] == SINGLE_QUOTE)
-		{
-			remove_single_quotes(&cmd->token[i]);
-			break ;
-		}
+		if (cmd->token[i][j] == '"' && !in_single_quote)
+			in_double_quote = !in_double_quote;
+		else if (cmd->token[i][j] == '\'' && !in_double_quote)
+			in_single_quote = !in_single_quote;
+		else
+			cmd->token[i][k++] = cmd->token[i][j];
 		j++;
 	}
-}
-
-void	even_quotes(char *token, int left_double_quotes,
-	int left_single_quotes, size_t len_token)
-{
-	if (left_double_quotes % 2 == 0
-		&& (size_t)(count_single_quotes(token)
-		+ count_double_quotes(token)) != len_token)
-		remove_single_quotes(&token);
-	if (left_single_quotes % 2 == 0
-		&& (size_t)(count_single_quotes(token)
-		+ count_double_quotes(token)) != len_token)
-		remove_double_quotes(&token);
+	cmd->token[i][k] = '\0';
 }
 
 int	remove_quotes(t_cmd *cmd)
 {
-	int		left_double_quotes;
-	int		left_single_quotes;
-	size_t	len_token;
-	int		i;
+	int	i;
 
-	cmd->in_quote_delim_heredoc = 0;
 	i = 0;
+	cmd->in_quote_delim_heredoc = 0;
 	while (cmd->token[i])
 	{
-		len_token = ft_strlen(cmd->token[i]);
-		left_double_quotes = count_left_double_quotes(cmd->token[i]);
-		left_single_quotes = count_left_single_quotes(cmd->token[i]);
-		if (count_double_quotes(cmd->token[i]) >= 2
-			|| count_single_quotes(cmd->token[i]) >= 2)
+		if (check_for_orphan_quotes(cmd->token[i]))
 		{
-			remove_quotes2(cmd, i);
-			even_quotes(cmd->token[i], left_double_quotes,
-				left_single_quotes, len_token);
+			printf("-minishell: no closing quote\n");
+			return (-1);
 		}
+		remove_quotes2(cmd, i);
 		if (cmd->token[0] != NULL && ft_strlen(cmd->token[0]) == 0)
 			printf("-minishell: command not found\n");
 		i++;

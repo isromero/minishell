@@ -134,7 +134,7 @@ int		export_no_var_error(t_cmd *cmd, int export_token);
 void	ft_export2(t_cmd *cmd);
 
 /* builtins/builtins.c */
-int		print_echo(t_cmd *cmd, int echo_token, int first_iteration);
+int		print_echo(t_cmd *cmd, int echo_token, int print_newline);
 int		ft_echo(t_cmd *cmd, int echo_token);
 void	set_pwd_env(t_cmd *cmd, char **new_env, char *cwd, char *oldpwd);
 int 	ft_cd(t_cmd *cmd, int cd_token);

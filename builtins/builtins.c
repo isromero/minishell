@@ -21,6 +21,9 @@ int	print_echo(t_cmd *cmd, int echo_token, int print_newline)
 	{
 		if (cmd->no_expand_vars[echo_token] == 0)
 			replace_vars(cmd, &cmd->token[echo_token]);
+		if (is_special(cmd->token[echo_token][0])
+			&& (cmd->in_single_quote == 0 || cmd->in_double_quote == 0))
+			break ;
 		if (!first_iteration)
 			printf(" %s", cmd->token[echo_token]);
 		else

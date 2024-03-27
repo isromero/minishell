@@ -65,7 +65,7 @@ void	heredoc_write_replaced(t_cmd *cmd, int fd, int new_fd)
 void	heredoc_child_process(t_cmd *cmd, int fd)
 {
 	int	new_fd;
-
+	
 	signal(SIGINT, SIG_IGN);
 	signal(SIGINT, &handle_ctrlc_heredoc);
 	while (1)

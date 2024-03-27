@@ -81,7 +81,9 @@ void	execute_input_redirects(t_cmd *cmd, char *com, char **exec_args, int i)
 void	execute_heredoc_redirects(t_cmd *cmd, char *com, char **args, int i)
 {
 	int	fd;
+	int	stdin_copy;
 
+	stdin_copy = dup(STDIN_FILENO);
 	unlink("/tmp/heredoc");
 	unlink("/tmp/heredoc_expanded");
 	if (is_heredoc_redirect(cmd, i) == 1)
@@ -100,6 +102,8 @@ void	execute_heredoc_redirects(t_cmd *cmd, char *com, char **args, int i)
 			execve(com, args, cmd->env);
 		else if (is_builtin(cmd, i))
 			execute_builtin(cmd, i);
+		dup2(stdin_copy, STDIN_FILENO);
+		close(stdin_copy);
 		close_input_redirect(cmd);
 	}
 }

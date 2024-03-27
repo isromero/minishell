@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/06/13 19:37:01 by adgutier          #+#    #+#             */
-/*   Updated: 2024/03/25 21:16:30 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/27 20:28:24 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,7 @@ void	input_redirect(t_cmd *cmd)
 	len = find_first_input_redirect(cmd);
 	fd = open(cmd->token[len + 1], O_RDONLY | S_IRUSR | S_IWUSR);
 	if (fd == -1)
-	{
-		perror("open");
-		exit(1);
-	}
+		printf("-minishell: %s: No such file or directory\n", cmd->token[len + 1]);
 	cmd->stdin = dup(STDIN_FILENO);
 	dup2(fd, STDIN_FILENO);
 	close(fd);

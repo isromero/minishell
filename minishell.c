@@ -12,9 +12,6 @@
 
 #include "minishell.h"
 
-// echo hola << a -> Tiene que parar en el hola
-// echo hola <> a -> Tiene que parar en el hola
-// Tiene que exportarlo: export var=te"st
 // bool quitar de todo el código
 
 int	g_status;

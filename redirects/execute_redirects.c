@@ -81,9 +81,7 @@ void	execute_input_redirects(t_cmd *cmd, char *com, char **exec_args, int i)
 void	execute_heredoc_redirects(t_cmd *cmd, char *com, char **args, int i)
 {
 	int	fd;
-	int	stdin_copy;
 
-	stdin_copy = dup(STDIN_FILENO);
 	unlink("/tmp/heredoc");
 	unlink("/tmp/heredoc_expanded");
 	if (is_heredoc_redirect(cmd, i) == 1)
@@ -93,17 +91,16 @@ void	execute_heredoc_redirects(t_cmd *cmd, char *com, char **args, int i)
 			printf("minishell: syntax error near unexpected token `newline'\n");
 			exit(0);
 		}
+		cmd->stdin = dup(STDIN_FILENO);
 		heredoc_redirect(cmd);
 		fd = open("/tmp/heredoc_expanded", O_RDONLY);
-		if (dup2(fd, STDIN_FILENO) == -1)
-			exit(0);
+		if (fd == -1 || dup2(fd, STDIN_FILENO) == -1)
+			exit(1);
 		close(fd);
 		if (!is_builtin(cmd, i))
 			execve(com, args, cmd->env);
-		else if (is_builtin(cmd, i))
+		else
 			execute_builtin(cmd, i);
-		dup2(stdin_copy, STDIN_FILENO);
-		close(stdin_copy);
 		close_input_redirect(cmd);
 	}
 }

@@ -40,8 +40,12 @@ int	find_last_input_redirect(t_cmd *cmd)
 	return (0);
 }
 
-void	close_input_redirect(t_cmd *cmd)
+void close_input_redirect(t_cmd *cmd)
 {
-	dup2(cmd->stdin, STDIN_FILENO);
+	if (dup2(cmd->stdin, STDIN_FILENO) == -1)
+	{
+		perror("Failed to restore stdin");
+		exit(1);
+	}
 	close(cmd->stdin);
 }

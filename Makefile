@@ -24,7 +24,7 @@ SRCS		=	builtins/builtins.c builtins/builtins2.c builtins/builtins_utils.c built
 
 LIBFT		=	libft/libft.a
 
-CFLAGS		=	-Wall -Werror -Wextra -g -fsanitize=address,undefined
+CFLAGS		=	-Wall -Werror -Wextra #-g -fsanitize=address,undefined
 LDFLAGS		=	-lreadline
 INCFLAGS	=	-I /usr/local/include
 RM			=	rm -f

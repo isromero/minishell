@@ -72,7 +72,6 @@ void	execute_command_no_exists(t_cmd *cmd, int i)
 
 int	execute_builtin_no_child(t_cmd	*cmd, int i)
 {
-	printf("MMMMMMMMMMMMMMMMMMMMMMMMMMMMM\n");
 	if (!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
 		&& !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
 	{
@@ -88,7 +87,6 @@ int	execute_builtin_no_child(t_cmd	*cmd, int i)
 
 void	execute_builtin_in_child(t_cmd *cmd, int i)
 {
-	printf("HOLADSIOADSIOFOIASNOFASOIDF\n");
 	if (!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
 	&& !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
 	{
@@ -96,10 +94,7 @@ void	execute_builtin_in_child(t_cmd *cmd, int i)
 		g_status = 0;
 		exit(g_status);
 	}
-	execute_appends(cmd, NULL, NULL, i);
-	execute_output_redirects(cmd, NULL, NULL, i);
-	execute_heredoc_redirects(cmd, NULL, NULL, i);
-	execute_input_redirects(cmd, NULL, NULL, i);
+	execute_redirects(cmd, NULL, NULL, i);
 	g_status = 0;
 	exit(g_status);
 }

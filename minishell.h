@@ -345,6 +345,9 @@ void	handle_ctrlc(int sig);
 void	handle_ctrlc2(int sig);
 void	handle_ctrld(int sig);
 
+/* signals2.c */
+void	handle_ctrl4(int sig);
+
 /* utils.c */
 char	*ft_strtok(char *str, const char *delim);
 char	**ft_strstrdup(char **strstr);

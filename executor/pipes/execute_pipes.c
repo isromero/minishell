@@ -24,6 +24,7 @@ void	redirecting_pipes(t_cmd *cmd)
 	first_time = 0;
 	init_pipes(cmd);
 	signal(SIGINT, &handle_ctrlc2);
+	signal(SIGQUIT, &handle_ctrl4);
 	replace_before_execute(cmd);
 	while (i < cmd->n_tokens - 1)
 	{

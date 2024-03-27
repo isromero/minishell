@@ -14,7 +14,7 @@ NAME		=	minishell
 CC			=	gcc
 SRCS		=	builtins/builtins.c builtins/builtins2.c builtins/builtins_utils.c builtins/builtins_utils2.c environment/env.c executor/normal/execute.c expander/expander.c \
 				minishell.c parser/parser.c prompt/prompt.c parser/token_utils.c executor/pipes/pipes_utils.c \
-				utils.c redirects/output_redirects.c redirects/output_redirects_utils.c redirects/append_redirects.c redirects/input_redirects.c signals.c executor/try_access.c \
+				utils.c redirects/output_redirects.c redirects/output_redirects_utils.c redirects/append_redirects.c redirects/input_redirects.c signals.c signals2.c executor/try_access.c \
 				get_next_line/get_next_line.c get_next_line/get_next_line_utils.c redirects/execute_redirects.c \
 				executor/normal/execute_utils.c executor/normal/fork_processes.c executor/pipes/redirecting_pipes.c \
 				checks/is_check.c checks/is_check2.c checks/is_check3.c executor/pipes/fork_pipes_processes.c \

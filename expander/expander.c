@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   expand_vars_normal.c                               :+:      :+:    :+:   */
+/*   expander.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adgutier <adgutier@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/26 18:24:56 by adgutier          #+#    #+#             */
-/*   Updated: 2023/07/26 18:24:56 by adgutier         ###   ########.fr       */
+/*   Created: 2024/03/29 20:03:07 by isromero          #+#    #+#             */
+/*   Updated: 2024/03/29 20:03:08 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,20 +16,19 @@ void	process_variables(t_cmd *cmd, char **token, t_replace_vars *replace)
 {
 	while (replace->j < replace->token_len)
 	{
-		if ((*token)[replace->j] == VARIABLE
-			&& (*token)[replace->j + 1] == '?')
+		if ((*token)[replace->j] == VARIABLE && (*token)[replace->j + 1] == '?')
 		{
 			replace->value = ft_itoa(g_status);
 			replace->replaced_token = append_value(replace, token);
 			replace->replaced_len += ft_strlen(replace->value);
 			free(replace->value);
 		}
-		else if (((*token)[replace->j] == VARIABLE
-			&& (*token)[replace->j + 1] != '\0')
-			|| (*token)[replace->j] == '~')
-				get_replaced_token(cmd, token, replace);
+		else if (((*token)[replace->j] == VARIABLE && (*token)[replace->j
+			+ 1] != '\0') || (*token)[replace->j] == '~')
+			get_replaced_token(cmd, token, replace);
 		else if ((*token)[replace->j] != '?')
-			replace->replaced_token[replace->replaced_len++] = (*token)[replace->j];
+			replace->replaced_token[replace->replaced_len++]
+				= (*token)[replace->j];
 		replace->j++;
 	}
 }

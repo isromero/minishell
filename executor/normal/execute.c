@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 17:45:54 by isromero          #+#    #+#             */
-/*   Updated: 2023/05/26 17:45:54 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/29 20:03:56 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,10 @@ void	executor(t_cmd *cmd)
 				printf("minishell: syntax error near unexpected token `%s'\n",
 					cmd->token[i]);
 			else
+			{
+				init_pipes(cmd);
 				redirecting_pipes(cmd);
+			}
 			return ;
 		}
 		i++;
@@ -46,8 +49,7 @@ void	execute(t_cmd *cmd)
 	replace_before_execute(cmd);
 	while (i < cmd->n_tokens - 1)
 	{
-		if (!is_argument_extension(cmd, i)
-			&& !is_special(cmd->token[i][0])
+		if (!is_argument_extension(cmd, i) && !is_special(cmd->token[i][0])
 			&& !is_redirects(cmd->token[i][0])
 			&& !is_redirects_double_char(cmd->token[i]))
 		{

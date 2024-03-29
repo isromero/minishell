@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 17:11:14 by isromero          #+#    #+#             */
-/*   Updated: 2023/07/23 17:11:14 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/29 20:04:12 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,10 @@ int	is_argument_extension(t_cmd *cmd, int i)
 	else if (cmd->token[i][0] == '-')
 		return (1);
 	else if (i != 0 && ((cmd->token[i][0] >= 'A' && cmd->token[i][0] <= 'Z')
-		|| (cmd->token[i][0] >= 'a' && cmd->token[i][0] <= 'z'))
+			|| (cmd->token[i][0] >= 'a' && cmd->token[i][0] <= 'z'))
 		&& (is_command_exists(cmd, cmd->token[i - 1])
-		|| is_redirects(cmd->token[i - 1][0])
-		|| is_redirects_double_char(cmd->token[i - 1])))
+			|| is_redirects(cmd->token[i - 1][0])
+			|| is_redirects_double_char(cmd->token[i - 1])))
 		return (1);
 	return (0);
 }

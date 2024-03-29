@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 17:48:36 by isromero          #+#    #+#             */
-/*   Updated: 2023/05/26 17:48:36 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/29 20:04:02 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,8 @@ char	*ft_getenv(const char *name, char **env)
 			value_end = ft_strchr(value_start, '|');
 			if (value_end == NULL)
 				value_end = ft_strchr(value_start, '\0');
-			value = (char *)malloc
-				(((value_end - value_start + 1) + 1) * sizeof(char));
+			value = (char *)malloc(((value_end - value_start + 1) + 1)
+					* sizeof(char));
 			ft_strncpy(value, value_start, value_end - value_start + 1);
 			value[value_end - value_start + 1] = '\0';
 			return (value);

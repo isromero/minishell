@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/24 18:50:01 by isromero          #+#    #+#             */
-/*   Updated: 2023/07/24 18:50:01 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/29 20:01:37 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void	heredoc_write_replaced(t_cmd *cmd, int fd, int new_fd)
 void	heredoc_child_process(t_cmd *cmd, int fd)
 {
 	int	new_fd;
-	
+
 	signal(SIGINT, SIG_IGN);
 	signal(SIGINT, &handle_ctrlc_heredoc);
 	while (1)
@@ -74,8 +74,8 @@ void	heredoc_child_process(t_cmd *cmd, int fd)
 			break ;
 	}
 	close(fd);
-	new_fd = open("/tmp/heredoc_expanded",
-			O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+	new_fd = open("/tmp/heredoc_expanded", O_RDWR | O_CREAT | O_EXCL,
+			S_IRUSR | S_IWUSR);
 	if (new_fd == -1)
 	{
 		perror("open");

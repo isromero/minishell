@@ -6,13 +6,13 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/09 18:16:30 by isromero          #+#    #+#             */
-/*   Updated: 2023/07/09 18:16:30 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/29 20:02:55 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*save_next(char	*stash)
+char	*save_next(char *stash)
 {
 	char	*next;
 	int		i;
@@ -40,7 +40,7 @@ char	*save_next(char	*stash)
 	return (next);
 }
 
-char	*get_the_line(char	*stash)
+char	*get_the_line(char *stash)
 {
 	char	*line;
 	int		i;

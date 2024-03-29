@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/10/02 15:47:28 by adgutier          #+#    #+#             */
-/*   Updated: 2024/03/21 20:45:45 by isromero         ###   ########.fr       */
+/*   Created: 2024/03/29 20:04:35 by isromero          #+#    #+#             */
+/*   Updated: 2024/03/29 20:04:36 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,8 @@ int	starts_with_n(const char *str)
 
 	i = 1;
 	if (str[0] != '-')
-		return 0;
-	while (str[i] != '\0') 
+		return (0);
+	while (str[i] != '\0')
 	{
 		if (str[i] != 'n')
 			return (0);
@@ -28,33 +28,10 @@ int	starts_with_n(const char *str)
 	return (1);
 }
 
-int export_no_var_error(t_cmd *cmd, int export_token)
+int	export_no_var_error(t_cmd *cmd, int export_token)
 {
 	printf("-minishell: export: `%s': not a valid identifier\n",
 		cmd->token[export_token + 1]);
 	g_status = 1;
 	return (g_status);
-}
-
-void	ft_export2(t_cmd *cmd)
-{
-	int	pos_var;
-	int	i;
-	int	size;
-
-	i = 0;
-	size = 0;
-	pos_var = len_var_in_env(cmd, "_=./minishell");
-	if (!cmd->env || !cmd->env[0])
-		return ;
-	free(cmd->env[pos_var]);
-	cmd->env[pos_var] = ft_strreplace
-		(cmd->env[pos_var], cmd->env[pos_var], "_=/usr/bin/env");
-	while (cmd->env[i] != NULL)
-	{
-		size = ft_strlen(cmd->env[i]);
-		if (ft_strcmp(cmd->env[i] + size - 2, "''") != 0)
-			printf("declare -x %s\n", cmd->env[i]);
-		i++;
-	}
 }

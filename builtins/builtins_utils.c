@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/23 21:58:11 by isromero          #+#    #+#             */
-/*   Updated: 2023/07/23 21:58:11 by isromero         ###   ########.fr       */
+/*   Created: 2024/03/29 20:04:44 by isromero          #+#    #+#             */
+/*   Updated: 2024/03/29 20:04:49 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,14 +20,14 @@ int	execute_builtin(t_cmd *cmd, int n_token)
 		ft_pwd(cmd);
 	else if (ft_strcmp(cmd->token[n_token], "env") == 0)
 		ft_env(cmd);
+	else if (ft_strcmp(cmd->token[n_token], "export") == 0 && cmd->token[n_token
+			+ 1] != NULL && ft_strchr(cmd->token[n_token + 1], '='))
+		return (ft_export(cmd, n_token++));
 	else if (ft_strcmp(cmd->token[n_token], "export") == 0
-		&& cmd->token[n_token + 1] != NULL
-		&& ft_strchr(cmd->token[n_token + 1], '='))
-		return(ft_export(cmd, n_token++));
-	else if (ft_strcmp(cmd->token[n_token], "export") == 0 && !cmd->token[n_token + 1])
+		&& !cmd->token[n_token + 1])
 		ft_export2(cmd);
-	else if (ft_strcmp(cmd->token[n_token], "unset") == 0
-		&& cmd->token[n_token + 1] != NULL)
+	else if (ft_strcmp(cmd->token[n_token], "unset") == 0 && cmd->token[n_token
+			+ 1] != NULL)
 		ft_unset(cmd, n_token++);
 	else if (ft_strcmp(cmd->token[n_token], "echo") == 0)
 		n_token = ft_echo(cmd, n_token);

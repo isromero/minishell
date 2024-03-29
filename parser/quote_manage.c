@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/03/25 19:10:12 by isromero          #+#    #+#             */
-/*   Updated: 2024/03/25 19:10:12 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/29 20:01:59 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,8 @@ static void	remove_quotes2(t_cmd *cmd, int i)
 	in_single_quote = 0;
 	if (i >= 1 && cmd->token[i - 1] != NULL
 		&& ft_strcmp(cmd->token[i - 1], HEREDOC_REDIRECT) == 0
-		&& (cmd->token[i][0] == '"' || cmd->token[i][0] == '\''))
+		&& (cmd->token[i][0] == '"'
+		|| cmd->token[i][0] == '\''))
 		cmd->in_quote_delim_heredoc = 1;
 	while (cmd->token[i][j] != '\0')
 	{

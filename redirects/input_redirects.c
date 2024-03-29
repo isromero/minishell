@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/06/13 19:37:01 by adgutier          #+#    #+#             */
-/*   Updated: 2024/03/27 20:52:16 by isromero         ###   ########.fr       */
+/*   Created: 2024/03/29 20:01:30 by isromero          #+#    #+#             */
+/*   Updated: 2024/03/29 20:01:30 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@ void	input_redirect(t_cmd *cmd)
 	len = find_first_input_redirect(cmd);
 	fd = open(cmd->token[len + 1], O_RDONLY | S_IRUSR | S_IWUSR);
 	if (fd == -1)
-		printf("-minishell: %s: No such file or directory\n", cmd->token[len + 1]);
+		printf("-minishell: %s: No such file or directory\n", cmd->token[len
+			+ 1]);
 	cmd->stdin = dup(STDIN_FILENO);
 	dup2(fd, STDIN_FILENO);
 	close(fd);

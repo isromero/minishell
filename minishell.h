@@ -5,8 +5,8 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/18 17:50:52 by isromero          #+#    #+#             */
-/*   Updated: 2023/05/18 17:50:52 by isromero         ###   ########.fr       */
+/*   Created: 2024/03/29 20:00:32 by isromero          #+#    #+#             */
+/*   Updated: 2024/03/29 20:00:32 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,19 +131,22 @@ char	**malloc_new_env_builtin(t_cmd *cmd, int len_of_env);
 /* builtins/builtins_utils2.c */
 int		starts_with_n(const char *str);
 int		export_no_var_error(t_cmd *cmd, int export_token);
-void	ft_export2(t_cmd *cmd);
 
 /* builtins/builtins.c */
 int		print_echo(t_cmd *cmd, int echo_token, int print_newline);
 int		ft_echo(t_cmd *cmd, int echo_token);
 void	set_pwd_env(t_cmd *cmd, char **new_env, char *cwd, char *oldpwd);
-int 	ft_cd(t_cmd *cmd, int cd_token);
-void	ft_pwd(t_cmd *cmd);
+int		ft_cd(t_cmd *cmd, int cd_token);
+int		ft_cd2(t_cmd *cmd, int cd_token, char *oldpwd);
 
 /* builtins/builtins2.c */
-int	ft_export(t_cmd *cmd, int export_token);
+void	ft_pwd(t_cmd *cmd);
+int		ft_export(t_cmd *cmd, int export_token);
+void	ft_export2(t_cmd *cmd);
 void	ft_unset(t_cmd *cmd, int unset_token);
 void	ft_env(t_cmd *cmd);
+
+/* builtins/builtins3.c */
 void	ft_exit(t_cmd *cmd, int exit_token);
 void	execute_builtin_exit(t_cmd *cmd, int exit_code);
 

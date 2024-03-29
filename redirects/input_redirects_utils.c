@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/26 10:10:11 by isromero          #+#    #+#             */
-/*   Updated: 2023/07/26 10:10:11 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/29 20:01:35 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ int	find_last_input_redirect(t_cmd *cmd)
 	return (0);
 }
 
-void close_input_redirect(t_cmd *cmd)
+void	close_input_redirect(t_cmd *cmd)
 {
 	if (dup2(cmd->stdin, STDIN_FILENO) == -1)
 	{

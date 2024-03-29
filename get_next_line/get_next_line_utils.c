@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/09 18:16:22 by isromero          #+#    #+#             */
-/*   Updated: 2023/07/09 18:16:22 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/29 20:02:57 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,8 +45,8 @@ char	*ft_strjoin2(char *stash, char *buffer)
 	}
 	while (buffer[i])
 		p[j++] = buffer[i++];
-	p [(ft_strlen2(stash) + ft_strlen2(buffer))] = '\0';
-	free (stash);
+	p[(ft_strlen2(stash) + ft_strlen2(buffer))] = '\0';
+	free(stash);
 	return (p);
 }
 
@@ -61,7 +61,7 @@ char	*ft_strchr2(char *s, int c)
 		return ((char *)&s[ft_strlen2(s)]);
 	while (s[i] != '\0')
 	{
-		if (s[i] == (char) c)
+		if (s[i] == (char)c)
 			return ((char *)&s[i]);
 		i++;
 	}

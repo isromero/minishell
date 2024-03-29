@@ -6,15 +6,13 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/18 17:20:04 by isromero          #+#    #+#             */
-/*   Updated: 2023/05/18 17:20:04 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/29 20:00:39 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-// bool quitar de todo el código
-
-int	g_status;
+int		g_status;
 
 void	init_minishell(t_cmd *cmd, int sig)
 {
@@ -53,7 +51,7 @@ int	main(int argc, char **argv, char **env)
 	(void)argv;
 	sig = 0;
 	cmd.env = NULL;
-	/* print_minishell(); */
+	print_minishell();
 	init_env(&cmd, env);
 	unlink("/tmp/heredoc");
 	unlink("/tmp/heredoc_expanded");

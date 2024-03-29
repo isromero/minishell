@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   expand_vars_utils.c                                :+:      :+:    :+:   */
+/*   expander_utils.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: adgutier <adgutier@student.42madrid.com    +#+  +:+       +#+        */
+/*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/07/26 18:22:28 by adgutier          #+#    #+#             */
-/*   Updated: 2023/07/26 18:22:28 by adgutier         ###   ########.fr       */
+/*   Created: 2024/03/29 20:03:14 by isromero          #+#    #+#             */
+/*   Updated: 2024/03/29 20:03:14 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,11 +32,10 @@ size_t	get_variable_length(const char *token, size_t var_start)
 	size_t	var_len;
 
 	var_len = 0;
-	while (token[var_start + var_len] != VARIABLE
-		&& token[var_start + var_len] != '\0'
-		&& token[var_start + var_len] != SINGLE_QUOTE
-		&& token[var_start + var_len] != '/'
-		&& ft_isalpha(token[var_start + var_len]))
+	while (token[var_start + var_len] != VARIABLE && token[var_start
+			+ var_len] != '\0' && token[var_start + var_len] != SINGLE_QUOTE
+		&& token[var_start + var_len] != '/' && ft_isalpha(token[var_start
+				+ var_len]))
 		var_len++;
 	return (var_len);
 }
@@ -54,17 +53,19 @@ char	*get_variable(const char *token, size_t var_start, size_t var_len)
 char	*append_value(t_replace_vars *replace, char **token)
 {
 	char	*new_replaced_token;
-	
-	new_replaced_token = malloc(replace->replaced_len + ft_strlen(replace->value) + ft_strlen((*token) + replace->j) + 1);
 
+	new_replaced_token = malloc(replace->replaced_len
+			+ ft_strlen(replace->value) + ft_strlen((*token) + replace->j) + 1);
 	if (!new_replaced_token)
-			return (NULL);
+		return (NULL);
 	if (replace->replaced_token)
-			ft_strncpy(new_replaced_token, replace->replaced_token, replace->replaced_len);
-	ft_strncpy(new_replaced_token + replace->replaced_len, replace->value, ft_strlen(replace->value) + 1);
+		ft_strncpy(new_replaced_token, replace->replaced_token,
+			replace->replaced_len);
+	ft_strncpy(new_replaced_token + replace->replaced_len, replace->value,
+		ft_strlen(replace->value) + 1);
 	if (replace->replaced_token)
-			free(replace->replaced_token);
-	return new_replaced_token;
+		free(replace->replaced_token);
+	return (new_replaced_token);
 }
 
 void	get_replaced_token(t_cmd *cmd, char **token, t_replace_vars *replace)

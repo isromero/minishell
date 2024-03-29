@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   expander.c                                         :+:      :+:    :+:   */
+/*   expander_heredoc.c                                 :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 17:51:23 by isromero          #+#    #+#             */
-/*   Updated: 2023/05/26 17:51:23 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/29 20:03:18 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,8 +52,8 @@ void	replace_vars_heredoc(t_cmd *cmd, char *buffer, int i)
 	init_replace_vars_heredoc(&replace_vars);
 	replace_vars->j = ++i;
 	while (buffer[replace_vars->j] != '\0' && buffer[replace_vars->j] != ' '
-		&& buffer[replace_vars->j] != '\n'
-		&& buffer[replace_vars->j] != '$' && buffer[replace_vars->j] != '\t'
+		&& buffer[replace_vars->j] != '\n' && buffer[replace_vars->j] != '$'
+		&& buffer[replace_vars->j] != '\t'
 		&& !is_special(buffer[replace_vars->j])
 		&& buffer[replace_vars->j] != SINGLE_QUOTE
 		&& buffer[replace_vars->j] != DOUBLE_QUOTE)
@@ -74,17 +74,14 @@ void	replace_vars_heredoc(t_cmd *cmd, char *buffer, int i)
 void	path_var_exists(t_replace_vars_heredoc *replace, char *buffer, int i)
 {
 	replace->replace_length = ft_strlen(replace->path);
-	replace->replacement
-		= malloc(sizeof(char) * (replace->replace_length + 1));
-	ft_strncpy(replace->replacement, replace->path,
-		replace->replace_length);
+	replace->replacement = malloc(sizeof(char) * (replace->replace_length + 1));
+	ft_strncpy(replace->replacement, replace->path, replace->replace_length);
 	replace->replacement[replace->replace_length] = '\0';
 	replace->start = &buffer[i - 1];
 	replace->end = &buffer[i - 1 + replace->var_length];
-	ft_memmove(replace->start + replace->replace_length,
-		replace->end + 1, ft_strlen(replace->end));
-	ft_memcpy(replace->start, replace->replacement,
-		replace->replace_length);
+	ft_memmove(replace->start + replace->replace_length, replace->end + 1,
+		ft_strlen(replace->end));
+	ft_memcpy(replace->start, replace->replacement, replace->replace_length);
 	free(replace->path);
 	free(replace->replacement);
 }

@@ -5,14 +5,14 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/05/26 17:47:35 by isromero          #+#    #+#             */
-/*   Updated: 2023/05/26 17:47:35 by isromero         ###   ########.fr       */
+/*   Created: 2024/03/29 20:04:28 by isromero          #+#    #+#             */
+/*   Updated: 2024/03/29 20:04:30 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int	print_echo(t_cmd *cmd, int echo_token, int print_newline) 
+int	print_echo(t_cmd *cmd, int echo_token, int print_newline)
 {
 	int	first_iteration;
 
@@ -21,8 +21,8 @@ int	print_echo(t_cmd *cmd, int echo_token, int print_newline)
 	{
 		if (cmd->no_expand_vars[echo_token] == 0)
 			replace_vars(cmd, &cmd->token[echo_token]);
-		if (is_special(cmd->token[echo_token][0])
-			&& (cmd->in_single_quote == 0 || cmd->in_double_quote == 0))
+		if (is_special(cmd->token[echo_token][0]) && (cmd->in_single_quote == 0
+				|| cmd->in_double_quote == 0))
 			break ;
 		if (!first_iteration)
 			printf(" %s", cmd->token[echo_token]);
@@ -34,11 +34,12 @@ int	print_echo(t_cmd *cmd, int echo_token, int print_newline)
 		echo_token++;
 	}
 	if (print_newline)
-			printf("\n");
+		printf("\n");
 	return (echo_token);
 }
 
-int ft_echo(t_cmd *cmd, int echo_token) {
+int	ft_echo(t_cmd *cmd, int echo_token)
+{
 	int	print_newline;
 
 	print_newline = 1;
@@ -61,12 +62,11 @@ void	set_pwd_env(t_cmd *cmd, char **new_env, char *cwd, char *oldpwd)
 
 	pwd_var = len_var_in_env(cmd, "PWD=");
 	oldpwd_var = len_var_in_env(cmd, "OLDPWD=");
-	actualpwd
-		= malloc(sizeof(char) * (ft_strlen("PWD=") + ft_strlen(cwd) + 2));
+	actualpwd = malloc(sizeof(char) * (ft_strlen("PWD=") + ft_strlen(cwd) + 2));
 	if (actualpwd == NULL)
 		return ;
-	change_oldpwd
-		= malloc(sizeof(char) * (ft_strlen("OLDPWD=") + ft_strlen(oldpwd) + 2));
+	change_oldpwd = malloc(sizeof(char) * (ft_strlen("OLDPWD=")
+				+ ft_strlen(oldpwd) + 2));
 	if (change_oldpwd == NULL)
 		return ;
 	ft_strcpy(actualpwd, "PWD=");
@@ -79,25 +79,36 @@ void	set_pwd_env(t_cmd *cmd, char **new_env, char *cwd, char *oldpwd)
 	free(change_oldpwd);
 }
 
-int ft_cd(t_cmd *cmd, int cd_token)
+int	ft_cd(t_cmd *cmd, int cd_token)
 {
-	char cwd[1024];
-	char *oldpwd;
-	char **new_env;
-	int len_of_env;
+	char	*oldpwd;
 
 	oldpwd = ft_getenv("PWD", cmd->env);
-	len_of_env = 0;
-	new_env = NULL;
 	if (cmd->token[cd_token + 1] == NULL)
-		return (0);
-	if (chdir(cmd->token[cd_token + 1]) != 0 && cmd->token[cd_token + 1][0] != '-')
 	{
-		printf("-minishell: cd: %s: Not a directory\n",
-				cmd->token[cd_token + 1]);
+		chdir(ft_getenv("HOME", cmd->env));
+		return (0);
+	}
+	if (chdir(cmd->token[cd_token + 1]) != 0 && cmd->token[cd_token
+			+ 1][0] != '-')
+	{
+		printf("-minishell: cd: %s: Not a directory\n", cmd->token[cd_token
+			+ 1]);
 		g_status = 1;
 		return (1);
 	}
+	ft_cd2(cmd, cd_token, oldpwd);
+	return (0);
+}
+
+int	ft_cd2(t_cmd *cmd, int cd_token, char *oldpwd)
+{
+	char	cwd[1024];
+	char	**new_env;
+	int		len_of_env;
+
+	len_of_env = 0;
+	new_env = NULL;
 	getcwd(cwd, sizeof(cwd));
 	while (cmd->env[len_of_env] != NULL)
 		len_of_env++;
@@ -115,19 +126,4 @@ int ft_cd(t_cmd *cmd, int cd_token)
 	cmd->env = new_env;
 	free(oldpwd);
 	return (0);
-}
-
-void	ft_pwd(t_cmd *cmd)
-{
-	char	dir[1024];
-	char	*pwd;
-
-	pwd = ft_getenv("$PWD", cmd->env);
-	if (getcwd(dir, sizeof(dir)) != NULL)
-		printf("%s\n", dir);
-	else if (pwd)
-		printf("%s\n", pwd);
-	else
-		perror("-minishell: ");
-	free (pwd);
 }

@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/22 10:55:55 by isromero          #+#    #+#             */
-/*   Updated: 2023/07/22 10:55:55 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/29 20:03:58 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ char	**get_exec_args(t_cmd *cmd, int i)
 
 void	execute_command_exists(t_cmd *cmd, char *com, char **exec_args, int i)
 {
-	if (!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
+	if (!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i)
 		&& !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i)
 		&& !is_executable(cmd, cmd->token[i][0]))
 	{
@@ -70,9 +70,9 @@ void	execute_command_no_exists(t_cmd *cmd, int i)
 	exit(g_status);
 }
 
-int	execute_builtin_no_child(t_cmd	*cmd, int i)
+int	execute_builtin_no_child(t_cmd *cmd, int i)
 {
-	if (!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
+	if (!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i)
 		&& !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
 	{
 		if (execute_builtin(cmd, i) == 1)
@@ -87,8 +87,8 @@ int	execute_builtin_no_child(t_cmd	*cmd, int i)
 
 void	execute_builtin_in_child(t_cmd *cmd, int i)
 {
-	if (!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i) \
-	&& !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
+	if (!is_output_redirect(cmd, i) && !is_input_redirect(cmd, i)
+		&& !is_append_redirect(cmd, i) && !is_heredoc_redirect(cmd, i))
 	{
 		execute_builtin(cmd, i);
 		g_status = 0;

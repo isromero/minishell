@@ -5,14 +5,14 @@
 #                                                     +:+ +:+         +:+      #
 #    By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2023/05/13 09:42:22 by isromero          #+#    #+#              #
-#    Updated: 2023/05/13 09:42:22 by isromero         ###   ########.fr        #
+#    Created: 2024/03/29 20:01:05 by isromero          #+#    #+#              #
+#    Updated: 2024/03/29 20:01:05 by isromero         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME		=	minishell
 CC			=	gcc
-SRCS		=	builtins/builtins.c builtins/builtins2.c builtins/builtins_utils.c builtins/builtins_utils2.c environment/env.c executor/normal/execute.c expander/expander.c \
+SRCS		=	builtins/builtins.c builtins/builtins2.c builtins/builtins3.c builtins/builtins_utils.c builtins/builtins_utils2.c environment/env.c executor/normal/execute.c expander/expander.c \
 				minishell.c parser/parser.c prompt/prompt.c parser/token_utils.c executor/pipes/pipes_utils.c \
 				utils.c redirects/output_redirects.c redirects/output_redirects_utils.c redirects/append_redirects.c redirects/input_redirects.c signals.c signals2.c executor/try_access.c \
 				get_next_line/get_next_line.c get_next_line/get_next_line_utils.c redirects/execute_redirects.c \

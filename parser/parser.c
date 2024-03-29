@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 17:53:11 by isromero          #+#    #+#             */
-/*   Updated: 2023/05/26 17:53:11 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/29 20:02:01 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,8 +26,8 @@ void	parser_aux_save_token(t_cmd *cmd, int i, int len)
 
 int	parser_save_token(t_cmd *cmd)
 {
-	int		i;
-	int		len;
+	int	i;
+	int	len;
 
 	i = 0;
 	len = 0;
@@ -54,11 +54,6 @@ int	parse_args(t_cmd *cmd)
 	cmd->token = NULL;
 	cmd->in_single_quote = false;
 	cmd->in_double_quote = false;
-	/* if (count_quotes(cmd->line) % 2 != 0)
-	{
-		printf("-minishell: no closing quote\n");
-		return (-1);
-	} */
 	if (parser_save_token(cmd) == -1)
 		return (-1);
 	save_token(cmd, NULL);

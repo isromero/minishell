@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 17:53:11 by isromero          #+#    #+#             */
-/*   Updated: 2024/03/29 21:00:15 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/29 21:01:54 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,7 +54,6 @@ int	parse_args(t_cmd *cmd)
 	cmd->token = NULL;
 	cmd->in_single_quote = false;
 	cmd->in_double_quote = false;
-
 	if (parser_save_token(cmd) == -1)
 		return (-1);
 	save_token(cmd, NULL);

@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/26 10:03:45 by isromero          #+#    #+#             */
-/*   Updated: 2024/03/29 20:33:00 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/29 21:02:47 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,7 @@ int	is_output_redirect(t_cmd *cmd, int len)
 	n_redirects = 0;
 	while (cmd->token[len] != NULL)
 	{
-		if (cmd->token[len][0] == OUTPUT_REDIRECT 
+		if (cmd->token[len][0] == OUTPUT_REDIRECT
 			&& cmd->token[len][1] != OUTPUT_REDIRECT)
 			n_redirects++;
 		len++;

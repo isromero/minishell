@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 17:53:11 by isromero          #+#    #+#             */
-/*   Updated: 2024/03/29 20:02:01 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/29 20:11:19 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,6 @@ int	parse_args(t_cmd *cmd)
 	init_expand_vars(cmd);
 	if (remove_quotes(cmd) == -1)
 		return (-1);
-	print_tokens(cmd);
 	return (0);
 }
 

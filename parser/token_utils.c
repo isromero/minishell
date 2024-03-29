@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/05/26 17:49:03 by isromero          #+#    #+#             */
-/*   Updated: 2024/03/29 20:11:02 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/29 21:00:14 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ int	check_len_token(t_cmd *cmd, int len)
 		else if (is_special(cmd->line[len]))
 			return (check_len_special(cmd, len));
 		else if (cmd->line[len] != '\0')
-			return (cmd_token_len(cmd, len));
+			return (cmd_token_len(cmd, len));	
 	}
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: isromero <isromero@student.42madrid.com    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/07/23 17:21:04 by isromero          #+#    #+#             */
-/*   Updated: 2024/03/29 20:04:10 by isromero         ###   ########.fr       */
+/*   Updated: 2024/03/29 20:58:30 by isromero         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,18 +17,15 @@ int	is_double_quote(t_cmd *cmd, int len)
 	int	i;
 
 	cmd->in_double_quote = true;
-	i = 0;
+	i = 1;
 	while (cmd->line[i + len] != '\0')
 	{
-		if (cmd->line[i + len] == DOUBLE_QUOTE && cmd->line[i + len + 1] == ' '
-			&& cmd->in_double_quote == true)
+		if (cmd->line[i + len] == DOUBLE_QUOTE)
 		{
 			cmd->in_double_quote = false;
 			i++;
-		}
-		if (cmd->line[i + len] == DOUBLE_QUOTE && cmd->line[i + len + 1] == ' '
-			&& cmd->in_double_quote == false)
 			break ;
+		}
 		i++;
 	}
 	return (i);
@@ -42,15 +39,12 @@ int	is_single_quote(t_cmd *cmd, int len)
 	i = 1;
 	while (cmd->line[i + len] != '\0')
 	{
-		if (cmd->line[i + len] == SINGLE_QUOTE && cmd->line[i + len + 1] == ' '
-			&& cmd->in_single_quote == true)
+		if (cmd->line[i + len] == SINGLE_QUOTE)
 		{
 			cmd->in_single_quote = false;
 			i++;
-		}
-		if (cmd->line[i + len] == SINGLE_QUOTE && cmd->line[i + len + 1] == ' '
-			&& cmd->in_single_quote == false)
 			break ;
+		}
 		i++;
 	}
 	return (i);
